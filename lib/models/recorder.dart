@@ -8,6 +8,7 @@ class Recorder extends ChangeNotifier{
   bool get recording => _recorder.isRecording;
 
   void startRecording() async {
+    // Starts the recording process
     _openAudioSession();
 
     if (!await _hasMicrophonePermission()) {
@@ -26,6 +27,7 @@ class Recorder extends ChangeNotifier{
   }
 
   void stopRecording() async {
+    // Stops the recording process
     await _recorder.stopRecorder();
     _closeAudioSession();
 
@@ -42,10 +44,12 @@ class Recorder extends ChangeNotifier{
   }
 
   void _askForMicrophonePermission() async {
+    // Asks the user for microphone permissions
     await Permission.microphone.request();
   }
 
   Future<bool> _hasMicrophonePermission() async {
+    // Returns True if microphone permissions have been granted
     var status = await Permission.microphone.status;
     return status == PermissionStatus.granted;
   }
