@@ -11,7 +11,7 @@ class RecorderWidget extends StatelessWidget {
         children: [
           Consumer<Recorder>(
             builder: (context, recorder, child) {
-              return !recorder.started
+              return !recorder.recording
                   ? IconButton(
                       icon: Icon(Icons.play_arrow),
                       onPressed: recorder.startRecording,
