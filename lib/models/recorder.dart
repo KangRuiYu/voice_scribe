@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 class Recorder extends ChangeNotifier{
   FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   bool get recording => _recorder.isRecording;
+  bool get paused => _recorder.isPaused;
 
   void startRecording() async {
     // Starts the recording process
@@ -31,6 +32,18 @@ class Recorder extends ChangeNotifier{
     await _recorder.stopRecorder();
     _closeAudioSession();
 
+    notifyListeners();
+  }
+
+  void pauseRecording() async {
+    // Pause recording process
+    await _recorder.pauseRecorder();
+    notifyListeners();
+  }
+
+  void resumeRecording() async {
+    // Resume recording process
+    await _recorder.resumeRecorder();
     notifyListeners();
   }
 
