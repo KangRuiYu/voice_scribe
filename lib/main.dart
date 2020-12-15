@@ -9,6 +9,7 @@ void main() {
 class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Voice Scribe',
       theme: ThemeData(
         primarySwatch: Colors.red,
         accentColor: Colors.amberAccent,
@@ -23,7 +24,6 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       home: Scaffold(
-        appBar: AppBar(),
         body: Center(
         ),
         bottomSheet: BottomSheetCard(RecorderWidget()),
