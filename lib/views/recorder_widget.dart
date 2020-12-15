@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:voice_scribe/models/recorder.dart';
 import 'package:voice_scribe/views/filled_icon_button.dart';
+import 'package:voice_scribe/views/duration_display.dart';
 
 class RecorderWidget extends StatelessWidget {
   // A widget for recording sound through the microphone
@@ -27,9 +28,16 @@ class RecorderWidget extends StatelessWidget {
               ],
             );
           } else if (recorder.recording) {
-            return FilledIconButton(
-              icon: const Icon(Icons.pause),
-              onPressed: recorder.pauseRecording,
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                DurationDisplay(recorder.progress),
+                SizedBox(height: 10),
+                FilledIconButton(
+                  icon: const Icon(Icons.pause),
+                  onPressed: recorder.pauseRecording,
+                ),
+              ],
             );
           } else {
             return FilledIconButton(

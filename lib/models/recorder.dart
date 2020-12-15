@@ -7,6 +7,7 @@ class Recorder extends ChangeNotifier{
   FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   bool get recording => _recorder.isRecording;
   bool get paused => _recorder.isPaused;
+  Stream<RecordingDisposition> get progress => _recorder.onProgress;
 
   void startRecording() async {
     // Starts the recording process
