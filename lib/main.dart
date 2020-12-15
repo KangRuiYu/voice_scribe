@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:voice_scribe/views/bottom_sheet_card.dart';
 import 'views/recorder_widget.dart';
 
 void main() {
@@ -12,9 +13,9 @@ class HomeScreen extends StatelessWidget {
         primarySwatch: Colors.red,
         accentColor: Colors.amberAccent,
         buttonTheme: ButtonThemeData(
-          buttonColor: Colors.amberAccent,
-          colorScheme: ColorScheme.fromSwatch(),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18.0),
+          ),
           textTheme: ButtonTextTheme.primary,
         ),
         iconTheme: IconThemeData(
@@ -24,8 +25,8 @@ class HomeScreen extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(),
         body: Center(
-          child: RecorderWidget(),
         ),
+        bottomSheet: BottomSheetCard(RecorderWidget()),
       ),
     );
   }

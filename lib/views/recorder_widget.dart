@@ -16,32 +16,32 @@ class RecorderWidget extends StatelessWidget {
             return Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FilledIconButton(
-                  icon: const Icon(Icons.stop),
+                CircularIconButton(
+                  iconData: Icons.stop,
                   onPressed: recorder.stopRecording,
                 ),
-                SizedBox(width: 10),
-                FilledIconButton(
-                  icon: const Icon(Icons.play_arrow),
+                const SizedBox(width: 10),
+                CircularIconButton(
+                  iconData: Icons.play_arrow,
                   onPressed: recorder.resumeRecording,
                 ),
               ],
             );
           } else if (recorder.recording) {
             return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 DurationDisplay(recorder.progress),
-                SizedBox(height: 10),
-                FilledIconButton(
-                  icon: const Icon(Icons.pause),
+                const SizedBox(height: 10),
+                CircularIconButton(
+                  iconData: Icons.pause,
                   onPressed: recorder.pauseRecording,
                 ),
               ],
             );
           } else {
-            return FilledIconButton(
-              icon: const Icon(Icons.fiber_manual_record_rounded),
+            return CircularIconButton(
+              iconData: Icons.fiber_manual_record_rounded,
               onPressed: recorder.startRecording,
             );
           }
