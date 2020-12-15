@@ -28,7 +28,10 @@ class _DurationDisplayState extends State<DurationDisplay> {
   }
 
   Widget build(BuildContext context) {
-    return Text(_currentDuration.toStringAsFixed(1));
+    return Text(
+      _currentDuration.toStringAsFixed(1),
+      style: Theme.of(context).textTheme.headline4,
+    );
   }
 
   @override

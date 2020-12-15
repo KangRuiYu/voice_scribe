@@ -20,7 +20,6 @@ class RecorderWidget extends StatelessWidget {
                   iconData: Icons.stop,
                   onPressed: recorder.stopRecording,
                 ),
-                const SizedBox(width: 10),
                 CircularIconButton(
                   iconData: Icons.play_arrow,
                   onPressed: recorder.resumeRecording,
@@ -32,7 +31,7 @@ class RecorderWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 DurationDisplay(recorder.progress),
-                const SizedBox(height: 10),
+                const SizedBox(height: 15),
                 CircularIconButton(
                   iconData: Icons.pause,
                   onPressed: recorder.pauseRecording,
