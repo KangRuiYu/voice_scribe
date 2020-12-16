@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:voice_scribe/views/bottom_sheet_card.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'views/recorder_widget.dart';
 
 void main() {
@@ -24,9 +24,15 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       home: Scaffold(
-        body: Center(
+        body: SlidingUpPanel(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+          ),
+          body: Center(),
+          collapsed: Center(child: RecorderWidget()),
+          panel: Center(child: Text('This is the sliding widget')),
         ),
-        bottomSheet: BottomSheetCard(RecorderWidget()),
       ),
     );
   }
