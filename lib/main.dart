@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'models/recorder.dart';
 import 'views/recorder_widget.dart';
 
 void main() {
@@ -25,12 +27,18 @@ class HomeScreen extends StatelessWidget {
       ),
       home: Scaffold(
         body: SlidingUpPanel(
+          minHeight: 80,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(16),
             topRight: Radius.circular(16),
           ),
           body: Center(),
-          collapsed: Center(child: RecorderWidget()),
+          collapsed: ChangeNotifierProvider(
+            create: (context) => Recorder(),
+            child: Center(
+              child: MiniRecorderDisplay(),
+            ),
+          ),
           panel: Center(child: Text('This is the sliding widget')),
         ),
       ),

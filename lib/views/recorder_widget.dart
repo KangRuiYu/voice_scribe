@@ -2,50 +2,52 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:voice_scribe/models/recorder.dart';
-import 'package:voice_scribe/views/filled_icon_button.dart';
+import 'package:voice_scribe/views/custom_buttons.dart';
 import 'package:voice_scribe/views/duration_display.dart';
 
-class RecorderWidget extends StatelessWidget {
-  // A widget for recording sound through the microphone
+class MiniRecorderDisplay extends StatelessWidget {
+  // A slim recorder display (Needs to be nested under a ChangeNotifierProvider to work)
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => Recorder(),
-      child: Consumer<Recorder>(
-        builder: (context, recorder, child) {
-          if (recorder.paused) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularIconButton(
-                  iconData: Icons.stop,
-                  onPressed: recorder.stopRecording,
+    return Consumer<Recorder>(
+      builder: (context, recorder, child) {
+        if (recorder.paused) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularIconButton(
+                iconData: Icons.stop,
+                onPressed: recorder.stopRecording,
+              ),
+              CircularIconButton(
+                iconData: Icons.play_arrow,
+                onPressed: recorder.resumeRecording,
+              ),
+            ],
+          );
+        } else if (recorder.recording) {
+          return Row(
+            // mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              RoundedButton(
+                child: Row(
+                  children: [
+                    DurationDisplay(recorder.progress),
+                    const SizedBox(width: 8),
+                    Icon(Icons.pause),
+                  ],
                 ),
-                CircularIconButton(
-                  iconData: Icons.play_arrow,
-                  onPressed: recorder.resumeRecording,
-                ),
-              ],
-            );
-          } else if (recorder.recording) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                DurationDisplay(recorder.progress),
-                const SizedBox(height: 15),
-                CircularIconButton(
-                  iconData: Icons.pause,
-                  onPressed: recorder.pauseRecording,
-                ),
-              ],
-            );
-          } else {
-            return CircularIconButton(
-              iconData: Icons.fiber_manual_record_rounded,
-              onPressed: recorder.startRecording,
-            );
-          }
-        },
-      ),
+                onPressed: recorder.pauseRecording,
+              ),
+            ],
+          );
+        } else {
+          return CircularIconButton(
+            iconData: Icons.fiber_manual_record_rounded,
+            onPressed: recorder.startRecording,
+          );
+        }
+      },
     );
   }
 }
