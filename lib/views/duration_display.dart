@@ -19,8 +19,8 @@ class _DurationDisplayState extends State<DurationDisplay> {
   StreamSubscription _subscription;
 
   void initState() {
+    // Starts listening on the stream
     _subscription = widget._stream.listen((data) {
-      // Starts listening on the stream
       var seconds = data.duration.inMilliseconds / 1000;
       setState(() => _currentDuration = seconds);
     });

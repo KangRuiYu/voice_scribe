@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
       title: 'Voice Scribe',
       theme: ThemeData(
         primarySwatch: Colors.red,
-        accentColor: Colors.amberAccent,
+        accentColor: Colors.black12,
         buttonTheme: ButtonThemeData(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),

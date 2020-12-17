@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:voice_scribe/models/recorder.dart';
 import 'package:voice_scribe/views/custom_buttons.dart';
 import 'package:voice_scribe/views/duration_display.dart';
+import 'package:voice_scribe/views/volume_display.dart';
 
 class MiniRecorderDisplay extends StatelessWidget {
   // A slim recorder display (Needs to be nested under a ChangeNotifierProvider to work)
@@ -26,9 +27,10 @@ class MiniRecorderDisplay extends StatelessWidget {
           );
         } else if (recorder.recording) {
           return Row(
-            // mainAxisAlignment: MainAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              VolumeDisplay(recorder.progress, true),
+              const SizedBox(width: 8),
               RoundedButton(
                 child: Row(
                   children: [
@@ -39,6 +41,8 @@ class MiniRecorderDisplay extends StatelessWidget {
                 ),
                 onPressed: recorder.pauseRecording,
               ),
+              const SizedBox(width: 8),
+              VolumeDisplay(recorder.progress, false),
             ],
           );
         } else {
