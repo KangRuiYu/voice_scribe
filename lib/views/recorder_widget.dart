@@ -7,23 +7,33 @@ import 'package:voice_scribe/views/custom_buttons.dart';
 import 'package:voice_scribe/views/duration_display.dart';
 import 'package:voice_scribe/views/volume_display.dart';
 
+class RecorderDisplay extends StatelessWidget {
+  // A recorder display
+  final _recorder;
+
+  RecorderDisplay(this._recorder);
+
+  Widget build(BuildContext context) {
+    if (_recorder.paused) {
+      return Text('Paused');
+    } else {
+      return Text('Playing');
+    }
+  }
+}
+
 class MiniRecorderDisplay extends StatelessWidget {
   // A slim recorder display (Needs to be nested under a ChangeNotifierProvider to work)
+  final _recorder;
+
+  MiniRecorderDisplay(this._recorder);
+
   Widget build(BuildContext context) {
-    return Consumer<Recorder>(
-      builder: (context, recorder, child) {
-        if (recorder.paused) {
-          return _MiniPausedControls(recorder);
-        } else if (recorder.recording) {
-          return _MiniRecordingControls(recorder);
-        } else {
-          return CircularIconButton(
-            iconData: Icons.fiber_manual_record_rounded,
-            onPressed: recorder.startRecording,
-          );
-        }
-      },
-    );
+    if (_recorder.paused) {
+      return _MiniPausedControls(_recorder);
+    } else {
+      return _MiniRecordingControls(_recorder);
+    }
   }
 }
 
