@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:voice_scribe/views/custom_buttons.dart';
-import 'package:voice_scribe/views/recording_screen.dart';
+import 'package:voice_scribe/views/widgets/custom_buttons.dart';
+import 'package:voice_scribe/views/screens/recording_screen.dart';
 
 class MainScreen extends StatelessWidget {
   @override

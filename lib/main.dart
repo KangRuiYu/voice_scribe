@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:voice_scribe/views/main_Screen.dart';
+import 'package:voice_scribe/views/screens/main_screen.dart';
 
 void main() {
   runApp(HomeScreen());

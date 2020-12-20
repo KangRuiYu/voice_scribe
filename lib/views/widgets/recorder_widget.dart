@@ -3,11 +3,11 @@ import 'package:provider/provider.dart';
 
 import 'package:voice_scribe/models/recorder.dart';
 
-import 'package:voice_scribe/views/custom_buttons.dart';
-import 'package:voice_scribe/views/duration_display.dart';
-import 'package:voice_scribe/views/volume_display.dart';
+import 'package:voice_scribe/views/widgets/custom_buttons.dart';
+import 'file:///C:/Users/karui/Projects/voice_scribe/lib/views/widgets/duration_display.dart';
+import 'file:///C:/Users/karui/Projects/voice_scribe/lib/views/widgets/volume_display.dart';
 
-class RecorderDisplay extends StatelessWidget {
+class RecorderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<Recorder>(builder: (context, recorder, child) {
