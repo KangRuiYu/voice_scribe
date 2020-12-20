@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'package:permission_handler/permission_handler.dart';
 
 class Recorder extends ChangeNotifier{
@@ -18,7 +19,7 @@ class Recorder extends ChangeNotifier{
     }
 
     var tempDir = await getExternalStorageDirectory();
-    String outputFile = tempDir.path + '/flutter_sound-tmp.aac';
+    String outputFile = path.join(tempDir.path, 'flutter_sound-tmp.aac');
     print(outputFile);
     await _recorder.startRecorder(
       codec: Codec.aacADTS,
