@@ -16,9 +16,7 @@ class RecordingScreen extends StatelessWidget {
     return ChangeNotifierProvider.value(
       value: _recorder,
       child: Scaffold(
-        body: Center(
-          child: RecorderWidget(),
-        ),
+        body: RecorderWidget(),
       ),
     );
   }

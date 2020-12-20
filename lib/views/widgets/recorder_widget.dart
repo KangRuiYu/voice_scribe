@@ -29,11 +29,37 @@ class _PausedControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          TextField(
+            decoration: InputDecoration(
+              labelText: 'Recording Name',
+            ),
+          ),
+          SizedBox(height: 20),
+          _PausedButtons(_recorder),
+        ],
+      ),
+    );
+  }
+}
+
+class _PausedButtons extends StatelessWidget {
+  // The buttons in the paused controls
+  final Recorder _recorder;
+
+  _PausedButtons(this._recorder);
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        CircularIconButton(
-          iconData: Icons.stop,
+        OutlineButton(
+          child: Text('Save'),
           onPressed: () {
             Navigator.pop(context);
             _recorder.stopRecording();
@@ -42,6 +68,10 @@ class _PausedControls extends StatelessWidget {
         CircularIconButton(
           iconData: Icons.play_arrow,
           onPressed: _recorder.resumeRecording,
+        ),
+        OutlineButton(
+          child: Text('Delete'),
+          onPressed: () => null,
         ),
       ],
     );
