@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 
 class VolumeDisplay extends StatefulWidget {
   // A widget that displays the volume
-  final Stream _stream;
-  final bool right; // Whether the display is aligned left or right
+  final Stream stream;
+  final int numberOfVolumeBars; // Must be a odd number
 
-  VolumeDisplay(this._stream, this.right);
+  const VolumeDisplay({@required this.stream, @required this.numberOfVolumeBars});
 
   State<VolumeDisplay> createState() {
     return _VolumeDisplayState();
@@ -17,31 +17,43 @@ class _VolumeDisplayState extends State<VolumeDisplay> {
   double _currentVolume = 0; // In decibels (1 - 120)
   StreamSubscription _subscription;
 
+  @override
   void initState() {
     // Starts listening on the stream
-    _subscription = widget._stream.listen((data) {
-      setState(() => _currentVolume = data.decibels);
+    _subscription = widget.stream.listen((data) {
+      double decibels = data.decibels;
+      if (decibels < 0) decibels = 0;
+      setState(() => _currentVolume = decibels);
     });
     super.initState();
   }
 
+  double _calculateBarSlope() { // Calculate the slope of the volume bars
+    num run = (widget.numberOfVolumeBars - 1) / 2;
+    num rise = 1 - 0.05;
+    double slope = rise / run;
+    return slope;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    double slope = _calculateBarSlope();
     return Expanded(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          return Align(
-            alignment:
-                widget.right ? Alignment.centerRight : Alignment.centerLeft,
-            child: AnimatedContainer(
-              width:
-                  (constraints.maxWidth * 0.8) * (_currentVolume / 40),
-              height: constraints.maxHeight * 0.05,
-              duration: Duration(seconds: 1),
-              decoration: BoxDecoration(
-                color: Theme.of(context).accentColor,
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ...List.generate(((widget.numberOfVolumeBars - 1) ~/ 2).toInt(), (index) {
+                double thisSlope = slope * (index + 1);
+                return _VolumeBar(volume: _currentVolume * thisSlope, constraints: constraints);
+              }),
+              _VolumeBar(volume: _currentVolume, constraints: constraints),
+              ...List.generate(((widget.numberOfVolumeBars - 1) ~/ 2), (index) {
+                double thisSlope = slope * (((widget.numberOfVolumeBars - 1) ~/ 2) - index);
+                return _VolumeBar(volume: _currentVolume * thisSlope, constraints: constraints);
+              }),
+            ],
           );
         },
       ),
@@ -52,5 +64,25 @@ class _VolumeDisplayState extends State<VolumeDisplay> {
   void dispose() {
     _subscription.cancel(); // Cancel subscription to the stream
     super.dispose();
+  }
+}
+
+class _VolumeBar extends StatelessWidget {
+  final double volume;
+  final constraints;
+
+  _VolumeBar({this.volume, this.constraints});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      width: constraints.maxWidth * 0.05,
+      height: constraints.maxHeight * ((volume + 5) / 125),
+      duration: Duration(seconds: 1),
+      decoration: BoxDecoration(
+        color: Theme.of(context).accentColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
   }
 }

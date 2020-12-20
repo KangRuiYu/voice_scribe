@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:voice_scribe/views/recorder_sliding_sheet.dart';
+import 'package:voice_scribe/views/main_Screen.dart';
 
 void main() {
   runApp(HomeScreen());
@@ -12,6 +12,17 @@ class HomeScreen extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.red,
         accentColor: Colors.black12,
+        textTheme: TextTheme(
+          bodyText1: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.normal,
+          ),
+          bodyText2: TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+            fontWeight: FontWeight.normal,
+          ),
+        ),
         buttonTheme: ButtonThemeData(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
@@ -22,9 +33,8 @@ class HomeScreen extends StatelessWidget {
           color: Colors.white,
         ),
       ),
-      home: Scaffold(
-        body: RecorderSlidingUpPanel(),
-      ),
+      home: MainScreen(),
     );
   }
 }
+

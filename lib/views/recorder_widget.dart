@@ -8,48 +8,36 @@ import 'package:voice_scribe/views/duration_display.dart';
 import 'package:voice_scribe/views/volume_display.dart';
 
 class RecorderDisplay extends StatelessWidget {
-  // A recorder display
-  final _recorder;
-
-  RecorderDisplay(this._recorder);
-
+  @override
   Widget build(BuildContext context) {
-    if (_recorder.paused) {
-      return Text('Paused');
-    } else {
-      return Text('Playing');
-    }
+    return Consumer<Recorder>(builder: (context, recorder, child) {
+      if (recorder.paused)
+        return _PausedControls(recorder);
+      else if (recorder.recording)
+        return _RecordingControls(recorder);
+      else
+        return Center();
+    });
   }
 }
 
-class MiniRecorderDisplay extends StatelessWidget {
-  // A slim recorder display (Needs to be nested under a ChangeNotifierProvider to work)
-  final _recorder;
-
-  MiniRecorderDisplay(this._recorder);
-
-  Widget build(BuildContext context) {
-    if (_recorder.paused) {
-      return _MiniPausedControls(_recorder);
-    } else {
-      return _MiniRecordingControls(_recorder);
-    }
-  }
-}
-
-class _MiniPausedControls extends StatelessWidget {
+class _PausedControls extends StatelessWidget {
   // Displayed when paused, showing resume and stop buttons
   final Recorder _recorder;
 
-  _MiniPausedControls(this._recorder);
+  _PausedControls(this._recorder);
 
+  @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         CircularIconButton(
           iconData: Icons.stop,
-          onPressed: _recorder.stopRecording,
+          onPressed: () {
+            Navigator.pop(context);
+            _recorder.stopRecording();
+          },
         ),
         CircularIconButton(
           iconData: Icons.play_arrow,
@@ -60,31 +48,32 @@ class _MiniPausedControls extends StatelessWidget {
   }
 }
 
-class _MiniRecordingControls extends StatelessWidget {
+class _RecordingControls extends StatelessWidget {
   // Displayed when recording, showing record time, volume, and a pause button
   final Recorder _recorder;
 
-  _MiniRecordingControls(this._recorder);
+  _RecordingControls(this._recorder);
 
+  @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        VolumeDisplay(_recorder.progress, true),
-        const SizedBox(width: 8),
-        RoundedButton(
-          child: Row(
-            children: [
-              DurationDisplay(_recorder.progress),
-              const SizedBox(width: 8),
-              Icon(Icons.pause),
-            ],
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          VolumeDisplay(stream: _recorder.progress, numberOfVolumeBars: 11),
+          const SizedBox(height: 20),
+          DurationDisplay(
+            stream: _recorder.progress,
+            textStyle: Theme.of(context).textTheme.headline2,
           ),
-          onPressed: _recorder.pauseRecording,
-        ),
-        const SizedBox(width: 8),
-        VolumeDisplay(_recorder.progress, false),
-      ],
+          const SizedBox(height: 20),
+          CircularIconButton(
+            iconData: Icons.pause,
+            onPressed: _recorder.pauseRecording,
+          ),
+        ],
+      ),
     );
   }
 }

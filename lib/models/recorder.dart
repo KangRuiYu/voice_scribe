@@ -18,8 +18,8 @@ class Recorder extends ChangeNotifier{
     }
 
     var tempDir = await getExternalStorageDirectory();
-    print(tempDir);
     String outputFile = tempDir.path + '/flutter_sound-tmp.aac';
+    print(outputFile);
     await _recorder.startRecorder(
       codec: Codec.aacADTS,
       toFile: outputFile,

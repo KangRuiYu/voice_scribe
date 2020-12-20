@@ -32,7 +32,6 @@ dependencies:
   path_provider: ^1.6.24
   flutter_sound: ^6.4.7+1
   permission_handler: ^5.0.1+1
-  sliding_up_panel: ^1.0.2
 
 dev_dependencies:
   flutter_test:
