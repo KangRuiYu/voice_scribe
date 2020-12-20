@@ -91,7 +91,7 @@ class _RecordingControls extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          VolumeDisplay(stream: _recorder.progress, numberOfVolumeBars: 11),
+          VolumeDisplay(stream: _recorder.progress, numberOfVolumeBars: 15),
           const SizedBox(height: 20),
           DurationDisplay(
             stream: _recorder.progress,
