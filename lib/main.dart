@@ -12,17 +12,6 @@ class HomeScreen extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.red,
         accentColor: Colors.black12,
-        textTheme: TextTheme(
-          bodyText1: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.normal,
-          ),
-          bodyText2: TextStyle(
-            fontSize: 16,
-            color: Colors.white,
-            fontWeight: FontWeight.normal,
-          ),
-        ),
         buttonTheme: ButtonThemeData(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
@@ -37,4 +26,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
