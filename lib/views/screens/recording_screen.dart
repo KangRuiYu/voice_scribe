@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:voice_scribe/models/recorder.dart';
-import 'file:///C:/Users/karui/Projects/voice_scribe/lib/views/widgets/recorder_widget.dart';
+import 'package:voice_scribe/views/widgets/recorder_widget.dart';
 
 class RecordingScreen extends StatelessWidget {
   final Recorder _recorder = Recorder();
