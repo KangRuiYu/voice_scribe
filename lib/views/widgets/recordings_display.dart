@@ -16,29 +16,16 @@ class RecordingsDisplay extends StatelessWidget {
     return ChangeNotifierProvider.value(
       value: _recordingsManager,
       child: Consumer<RecordingsManager>(
-          builder: (context, recordingsManager, child) {
-        // return Column(
-        //   children: recordingsManager.recordings.map((recording) {
-        //     return RecordingCard(recording);
-        //   }).toList(),
-        // );
-        return Column(
-          children: [
-            ...recordingsManager.recordings.map((recording) {
-              return _RecordingCard(recording);
-            }),
-            ...recordingsManager.recordings.map((recording) {
-              return _RecordingCard(recording);
-            }),
-            ...recordingsManager.recordings.map((recording) {
-              return _RecordingCard(recording);
-            }),
-            ...recordingsManager.recordings.map((recording) {
-              return _RecordingCard(recording);
-            }),
-          ],
-        );
-      }),
+        builder: (context, recordingsManager, child) {
+          return Column(
+            children: recordingsManager.recordings.map(
+              (recording) {
+                return _RecordingCard(recording);
+              },
+            ).toList(),
+          );
+        },
+      ),
     );
   }
 }

@@ -21,11 +21,25 @@ class RecorderWidget extends StatelessWidget {
   }
 }
 
-class _PausedControls extends StatelessWidget {
-  // Displayed when paused, showing resume and stop buttons
+class _PausedControls extends StatefulWidget {
+  // Displayed when paused (resume/save/delete buttons and recording name field)
   final Recorder _recorder;
 
   _PausedControls(this._recorder);
+
+  @override
+  State<_PausedControls> createState() {
+    return _PausedControlsState();
+  }
+}
+
+class _PausedControlsState extends State<_PausedControls> {
+  TextEditingController _textEditingController = TextEditingController();
+
+  void _saveRecording() {
+    widget._recorder.stopRecording(_textEditingController.text);
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,23 +49,34 @@ class _PausedControls extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           TextField(
+            controller: _textEditingController,
             decoration: InputDecoration(
               labelText: 'Recording Name',
             ),
           ),
           SizedBox(height: 20),
-          _PausedButtons(_recorder),
+          _PausedButtons(
+            recorder: widget._recorder,
+            onSavePressed: _saveRecording,
+          ),
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _textEditingController.dispose();
+    super.dispose();
   }
 }
 
 class _PausedButtons extends StatelessWidget {
   // The buttons in the paused controls
-  final Recorder _recorder;
+  final Recorder recorder;
+  final Function onSavePressed; // Called when save is pressed
 
-  _PausedButtons(this._recorder);
+  _PausedButtons({this.recorder, this.onSavePressed});
 
   @override
   Widget build(BuildContext context) {
@@ -60,14 +85,11 @@ class _PausedButtons extends StatelessWidget {
       children: [
         OutlineButton(
           child: Text('Save'),
-          onPressed: () {
-            Navigator.pop(context);
-            _recorder.stopRecording();
-          },
+          onPressed: onSavePressed,
         ),
         CircularIconButton(
           iconData: Icons.play_arrow,
-          onPressed: _recorder.resumeRecording,
+          onPressed: recorder.resumeRecording,
         ),
         OutlineButton(
           child: Text('Delete'),
