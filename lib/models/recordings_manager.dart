@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'dart:convert';
@@ -11,64 +10,48 @@ class RecordingsManager extends ChangeNotifier {
   List<RecordingInfo> get recordings => _recordings;
 
   void loadRecordings() async {
-    // Loads all recordings from the import json
-    File imports = await _getImportsFile();
-
-    String data = imports.readAsStringSync();
-    List<dynamic> jsonData = jsonDecode(data);
+    // Loads all recordings from the import files
+    Directory importsDirectory = await _getImportsDirectory();
 
     _recordings.clear();
 
-    for (var obj in jsonData) {
-      _recordings.add(RecordingInfo.fromJson(obj));
-    }
-
-    notifyListeners();
-  }
-
-  void reimportRecordings() async {
-    // Re-imports all recordings from the app's storage and also reloads them
-    File imports = await _getImportsFile();
-
-    _recordings.clear();
-
-    List<Map<String, dynamic>> dataList = [];
-
-    imports.parent.list().listen(
+    importsDirectory.list().listen(
       (FileSystemEntity entity) {
-        if (entity is File && extension(entity.path) == '.aac') {
-          RecordingInfo ri = RecordingInfo(entity);
+        if (entity is File && extension(entity.path) == '.import') {
+          String data = entity.readAsStringSync();
+          RecordingInfo ri = RecordingInfo.fromJson(jsonDecode(data));
           _recordings.add(ri);
-          dataList.add(ri.toJson());
         }
       },
-      onDone: () => imports.writeAsStringSync(jsonEncode(dataList)),
+      onDone: () => notifyListeners(),
     );
   }
 
-  void updateImportsFile() async {
-    // Updates the imports file with the current recordings list
-    File imports = await _getImportsFile();
-
-    List<Map<String, dynamic>> dataList = [];
-
-    for (RecordingInfo ri in _recordings) {
-      dataList.add(ri.toJson());
-    }
-
-    imports.writeAsStringSync(jsonEncode(dataList));
-  }
-
   void addRecording(RecordingInfo recording) {
-    // Adds the recording to the recordings list and updates the json file
+    // Adds the recording to the recordings list and imports it
     _recordings.add(recording);
-    updateImportsFile();
+    _createImportFile(recording);
     notifyListeners();
   }
 
-  Future<File> _getImportsFile() async {
-    Directory dir = await getExternalStorageDirectory();
-    return File(join(dir.path, 'imports.json'));
+  Future<Directory> _getImportsDirectory() async {
+    // Returns the imports directory and creates one if one doesn't already exist
+    Directory externalStorageDirectory = await getExternalStorageDirectory();
+    Directory importsDirectory =
+        Directory(join(externalStorageDirectory.path, '.imports'));
+
+    importsDirectory
+        .createSync(); // Creates the imports directory if it doesn't already exist
+
+    return importsDirectory;
+  }
+
+  void _createImportFile(RecordingInfo recording) async {
+    // Creates an import file for the given recording
+    Directory importsDirectory = await _getImportsDirectory();
+    File importFile =
+        File(join(importsDirectory.path, '${recording.name}.import'));
+    importFile.writeAsStringSync(jsonEncode(recording.toJson()));
   }
 }
 
