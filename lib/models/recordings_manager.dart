@@ -34,6 +34,21 @@ class RecordingsManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  void deleteRecording(RecordingInfo recording) async {
+    // Deletes the given recording and its import file
+    _recordings.remove(recording);
+
+    File recordingFile = File(recording.path);
+    Directory importsDirectory = await _getImportsDirectory();
+    File importFile =
+        File(join(importsDirectory.path, '${recording.name}.import'));
+
+    recordingFile.delete();
+    importFile.delete();
+
+    notifyListeners();
+  }
+
   Future<Directory> _getImportsDirectory() async {
     // Returns the imports directory and creates one if one doesn't already exist
     Directory externalStorageDirectory = await getExternalStorageDirectory();

@@ -26,6 +26,44 @@ class _RecordingCard extends StatelessWidget {
 
   _RecordingCard(this._recording);
 
+  void _askUserToDeleteRecording(BuildContext context) {
+    // Asks the user for confirmation to delete the recording
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete?'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: [
+                Text(
+                    'This action is irreversible and the deleted recording will be lost forever.'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+                child: Text('Cancel'),
+                onPressed: () => Navigator.of(context).pop()),
+            TextButton(
+              child: Text('Delete'),
+              onPressed: () {
+                _deleteRecording(context);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteRecording(BuildContext context) {
+    // Deletes the recording that this card displays
+    Provider.of<RecordingsManager>(context, listen: false)
+        .deleteRecording(_recording);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -34,20 +72,21 @@ class _RecordingCard extends StatelessWidget {
         horizontal: 16,
         vertical: 3,
       ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
+        title: Text(
+          _recording.name,
+          style: Theme.of(context).textTheme.headline6,
+        ),
+        subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              _recording.name,
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            SizedBox(height: 6),
-            Text(
               _recording.date,
-              style: Theme.of(context).textTheme.subtitle1,
+              style: Theme.of(context).textTheme.subtitle2,
             ),
             SizedBox(height: 6),
             Text(
@@ -55,6 +94,10 @@ class _RecordingCard extends StatelessWidget {
               style: Theme.of(context).textTheme.caption,
             ),
           ],
+        ),
+        trailing: IconButton(
+          icon: Icon(Icons.delete),
+          onPressed: () => _askUserToDeleteRecording(context),
         ),
       ),
     );
