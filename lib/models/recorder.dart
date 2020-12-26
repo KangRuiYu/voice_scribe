@@ -9,12 +9,12 @@ import 'package:permission_handler/permission_handler.dart';
 
 class Recorder extends ChangeNotifier {
   FlutterSoundRecorder _recorder = FlutterSoundRecorder();
+  File _outputFile;
 
   bool get recording => _recorder.isRecording;
   bool get paused => _recorder.isPaused;
   Stream<RecordingDisposition> get progress => _recorder.onProgress;
-
-  File _outputFile;
+  File get outputFile => _outputFile;
 
   void startRecording() async {
     // Starts the recording process
@@ -38,8 +38,8 @@ class Recorder extends ChangeNotifier {
     notifyListeners();
   }
 
-  void stopRecording([String recordingName]) async {
-    // Stops the recording process
+  Future<File> stopRecording([String recordingName]) async {
+    // Stops the recording process and returns the resulting file
     await _recorder.stopRecorder();
     _closeAudioSession();
 
@@ -47,12 +47,15 @@ class Recorder extends ChangeNotifier {
       recordingName += '.aac';
       Directory parentDir = _outputFile.parent;
       String newPath = path.join(parentDir.path, recordingName);
-      _outputFile.renameSync(newPath);
+      _outputFile = _outputFile.renameSync(newPath);
     }
 
+    File resultingFile = _outputFile;
     _outputFile = null;
 
     notifyListeners();
+
+    return resultingFile;
   }
 
   void pauseRecording() async {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:voice_scribe/views/widgets/custom_buttons.dart';
 import 'package:voice_scribe/views/screens/recording_screen.dart';
 import 'package:voice_scribe/views/widgets/recordings_display.dart';
+import 'package:voice_scribe/models/recordings_manager.dart';
 
 class MainScreen extends StatelessWidget {
   @override
@@ -14,7 +16,14 @@ class MainScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => RecordingScreen()),
+            MaterialPageRoute(
+              builder: (context) {
+                return ChangeNotifierProvider.value(
+                  value: Provider.of<RecordingsManager>(context, listen: false),
+                  child: RecordingScreen(),
+                );
+              },
+            ),
           );
         },
       ),

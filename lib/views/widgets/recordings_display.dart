@@ -1,31 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:voice_scribe/models/recordings_manager.dart';
 
 class RecordingsDisplay extends StatelessWidget {
   // Widget that displays a list of recordings
-  final RecordingsManager _recordingsManager = RecordingsManager();
-
-  RecordingsDisplay() {
-    _recordingsManager.refreshRecordings();
-  }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _recordingsManager,
-      child: Consumer<RecordingsManager>(
-        builder: (context, recordingsManager, child) {
-          return Column(
-            children: recordingsManager.recordings.map(
-              (recording) {
-                return _RecordingCard(recording);
-              },
-            ).toList(),
-          );
-        },
-      ),
+    return Consumer<RecordingsManager>(
+      builder: (context, recordingsManager, child) {
+        return ListView.builder(
+          itemCount: recordingsManager.recordings.length,
+          itemBuilder: (context, index) {
+            return _RecordingCard(recordingsManager.recordings[index]);
+          },
+        );
+      },
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:voice_scribe/models/recordings_manager.dart';
 import 'package:voice_scribe/models/recorder.dart';
 
 import 'package:voice_scribe/views/widgets/custom_buttons.dart';
@@ -36,8 +37,12 @@ class _PausedControls extends StatefulWidget {
 class _PausedControlsState extends State<_PausedControls> {
   TextEditingController _textEditingController = TextEditingController();
 
-  void _saveRecording() {
-    widget._recorder.stopRecording(_textEditingController.text);
+  void _saveRecording(BuildContext context) async {
+    var recording =
+        await widget._recorder.stopRecording(_textEditingController.text);
+    Provider.of<RecordingsManager>(context, listen: false).addRecording(
+      RecordingInfo(recording),
+    );
     Navigator.pop(context);
   }
 
@@ -57,7 +62,7 @@ class _PausedControlsState extends State<_PausedControls> {
           SizedBox(height: 20),
           _PausedButtons(
             recorder: widget._recorder,
-            onSavePressed: _saveRecording,
+            onSavePressed: () => _saveRecording(context),
           ),
         ],
       ),
