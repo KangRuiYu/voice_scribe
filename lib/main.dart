@@ -25,6 +25,7 @@ class VoiceScribe extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.red,
           accentColor: Colors.black12,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
           buttonTheme: ButtonThemeData(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18.0),
