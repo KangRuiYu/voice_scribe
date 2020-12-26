@@ -18,7 +18,7 @@ class Recorder extends ChangeNotifier {
 
   void startRecording() async {
     // Starts the recording process
-    _openAudioSession();
+    await _openAudioSession();
 
     if (!await _hasMicrophonePermission()) {
       _askForMicrophonePermission();

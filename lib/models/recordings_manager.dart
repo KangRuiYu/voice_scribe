@@ -56,7 +56,7 @@ class RecordingsManager extends ChangeNotifier {
         Directory(join(externalStorageDirectory.path, '.imports'));
 
     importsDirectory
-        .createSync(); // Creates the imports directory if it doesn't already exist
+        .create(); // Creates the imports directory if it doesn't already exist
 
     return importsDirectory;
   }
@@ -66,7 +66,7 @@ class RecordingsManager extends ChangeNotifier {
     Directory importsDirectory = await _getImportsDirectory();
     File importFile =
         File(join(importsDirectory.path, '${recording.name}.import'));
-    importFile.writeAsStringSync(jsonEncode(recording.toJson()));
+    importFile.writeAsString(jsonEncode(recording.toJson()));
   }
 }
 
