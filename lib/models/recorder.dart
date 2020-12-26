@@ -58,6 +58,14 @@ class Recorder extends ChangeNotifier {
     return resultingFile;
   }
 
+  void terminate() async {
+    // Stops any ongoing recording and clean up any files left over
+    await _recorder.stopRecorder();
+    _closeAudioSession();
+    _outputFile.delete();
+    _outputFile = null;
+  }
+
   void pauseRecording() async {
     // Pause recording process
     await _recorder.pauseRecorder();
