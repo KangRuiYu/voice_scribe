@@ -43,13 +43,14 @@ class _RecordingCard extends StatelessWidget {
           ),
           actions: [
             TextButton(
-                child: Text('Cancel'),
-                onPressed: () => Navigator.of(context).pop()),
+              child: Text('Cancel'),
+              onPressed: () => Navigator.pop(context),
+            ),
             TextButton(
               child: Text('Delete'),
               onPressed: () {
                 _deleteRecording(context);
-                Navigator.of(context).pop();
+                Navigator.pop(context);
               },
             ),
           ],

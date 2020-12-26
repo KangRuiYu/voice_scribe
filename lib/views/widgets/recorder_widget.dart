@@ -38,11 +38,18 @@ class _PausedControlsState extends State<_PausedControls> {
   TextEditingController _textEditingController = TextEditingController();
 
   void _saveRecording(BuildContext context) async {
+    // Save recording and return to previous screen
     var recording =
         await widget._recorder.stopRecording(_textEditingController.text);
     Provider.of<RecordingsManager>(context, listen: false).addRecording(
       RecordingInfo(recording),
     );
+    Navigator.pop(context);
+  }
+
+  void _deleteRecording(BuildContext context) async {
+    // Delete recording and return to previous screen
+    widget._recorder.terminate();
     Navigator.pop(context);
   }
 
@@ -61,8 +68,9 @@ class _PausedControlsState extends State<_PausedControls> {
           ),
           SizedBox(height: 20),
           _PausedButtons(
-            recorder: widget._recorder,
+            onResumePressed: widget._recorder.resumeRecording,
             onSavePressed: () => _saveRecording(context),
+            onDeletePressed: () => _deleteRecording(context),
           ),
         ],
       ),
@@ -78,10 +86,15 @@ class _PausedControlsState extends State<_PausedControls> {
 
 class _PausedButtons extends StatelessWidget {
   // The buttons in the paused controls
-  final Recorder recorder;
+  final Function onResumePressed; // Called when resume is pressed
   final Function onSavePressed; // Called when save is pressed
+  final Function onDeletePressed; // Called when delete is pressed
 
-  _PausedButtons({this.recorder, this.onSavePressed});
+  _PausedButtons({
+    @required this.onResumePressed,
+    @required this.onSavePressed,
+    @required this.onDeletePressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -94,11 +107,11 @@ class _PausedButtons extends StatelessWidget {
         ),
         CircularIconButton(
           iconData: Icons.play_arrow,
-          onPressed: recorder.resumeRecording,
+          onPressed: onResumePressed,
         ),
         OutlineButton(
           child: Text('Delete'),
-          onPressed: () => null,
+          onPressed: onDeletePressed,
         ),
       ],
     );
