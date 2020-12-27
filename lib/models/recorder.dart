@@ -33,6 +33,8 @@ class Recorder extends ChangeNotifier {
     await _recorder.startRecorder(
       codec: Codec.aacADTS,
       toFile: _outputFile.path,
+      sampleRate: 44100,
+      bitRate: 64000,
     );
 
     notifyListeners();
