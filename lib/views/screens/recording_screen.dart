@@ -16,8 +16,10 @@ class RecordingScreen extends StatelessWidget {
     return ChangeNotifierProvider.value(
       value: _recorder,
       child: WillPopScope(
-        child: Scaffold(
-          body: RecorderWidget(),
+        child: SafeArea(
+          child: Scaffold(
+            body: RecorderWidget(),
+          ),
         ),
         onWillPop: () async {
           _recorder.terminate();
