@@ -41,9 +41,6 @@ class VoiceScribe extends StatelessWidget {
             ),
             textTheme: ButtonTextTheme.primary,
           ),
-          iconTheme: IconThemeData(
-            color: Colors.white,
-          ),
         ),
         home: MainScreen(),
       ),

@@ -18,6 +18,7 @@ class _DurationDisplayState extends State<DurationDisplay> {
   double _currentDuration = 0;
   StreamSubscription _subscription;
 
+  @override
   void initState() {
     // Starts listening on the stream
     _subscription = widget.stream.listen((data) {

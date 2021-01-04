@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:io';
+
 import 'package:voice_scribe/models/recordings_manager.dart';
+import 'package:voice_scribe/views/screens/playing_screen.dart';
 
 class RecordingsDisplay extends StatelessWidget {
   // Widget that displays a list of recordings
@@ -65,6 +68,12 @@ class _RecordingCard extends StatelessWidget {
         .deleteRecording(_recording);
   }
 
+  void _playRecording(BuildContext context) {
+    // Plays the recording that this card displays
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => PlayingScreen(_recording)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -96,9 +105,27 @@ class _RecordingCard extends StatelessWidget {
             ),
           ],
         ),
-        trailing: IconButton(
-          icon: Icon(Icons.delete),
-          onPressed: () => _askUserToDeleteRecording(context),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.play_arrow),
+              onPressed: () => _playRecording(context),
+            ),
+            PopupMenuButton(
+              icon: Icon(Icons.more_vert),
+              itemBuilder: (context) {
+                return [
+                  PopupMenuItem(
+                    child: Text('Edit'),
+                  ),
+                  PopupMenuItem(
+                    child: Text('Delete'),
+                  ),
+                ];
+              },
+            ),
+          ],
         ),
       ),
     );
