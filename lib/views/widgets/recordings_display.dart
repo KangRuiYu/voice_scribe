@@ -78,6 +78,9 @@ class _RecordingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+      ),
       margin: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 3,

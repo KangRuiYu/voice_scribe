@@ -22,6 +22,7 @@ class PlayingScreen extends StatelessWidget {
       child: WillPopScope(
         child: SafeArea(
           child: Scaffold(
+            appBar: AppBar(),
             body: Padding(
               padding: const EdgeInsets.all(16.0),
               child: PlayerWidget(),

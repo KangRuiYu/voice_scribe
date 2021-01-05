@@ -63,18 +63,9 @@ class _PausedButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        CircularIconButton(
-          iconData: Icons.play_arrow,
-          onPressed: _onResume,
-        ),
-        CircularIconButton(
-          iconData: Icons.stop,
-          onPressed: _onStop,
-        ),
-      ],
+    return CircularIconButton(
+      iconData: Icons.play_arrow,
+      onPressed: _onResume,
     );
   }
 }
