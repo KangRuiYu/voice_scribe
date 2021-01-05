@@ -23,15 +23,30 @@ class PlayerWidget extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 20),
-              player.playing
-                  ? _PlayingButtons(player.pausePlayer)
-                  : _PausedButtons(
-                      player.resumePlayer,
-                      () {
-                        player.stopPlayer();
-                        Navigator.of(context).pop();
-                      },
-                    ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.replay_5),
+                    onPressed: () =>
+                        player.changePositionRelative(Duration(seconds: -5)),
+                  ),
+                  player.playing
+                      ? _PlayingButtons(player.pausePlayer)
+                      : _PausedButtons(
+                          player.resumePlayer,
+                          () {
+                            player.stopPlayer();
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                  IconButton(
+                    icon: Icon(Icons.forward_10),
+                    onPressed: () =>
+                        player.changePositionRelative(Duration(seconds: 10)),
+                  ),
+                ],
+              ),
             ],
           );
         else
