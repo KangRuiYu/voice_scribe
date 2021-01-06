@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:voice_scribe/views/widgets/themed_bottom_appbar.dart';
 import 'package:voice_scribe/views/widgets/custom_buttons.dart';
 import 'package:voice_scribe/views/screens/recording_screen.dart';
 import 'package:voice_scribe/views/widgets/recordings_display.dart';
@@ -11,20 +12,22 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: Text('Voice Scribe'),
-          leading: IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () => null,
+        bottomNavigationBar: ThemedBottomAppBar(
+          child: Row(
+            children: [
+              IconButton(
+                icon: Icon(Icons.more_vert),
+                onPressed: () => null,
+              ),
+              Spacer(),
+              IconButton(
+                icon: Icon(Icons.search),
+                onPressed: () => null,
+              ),
+            ],
           ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.more_vert),
-              onPressed: () => null,
-            ),
-          ],
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: CircularIconButton(
           iconData: Icons.fiber_manual_record_rounded,
           onPressed: () {

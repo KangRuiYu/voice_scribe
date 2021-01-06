@@ -23,15 +23,6 @@ class VoiceScribe extends StatelessWidget {
       child: MaterialApp(
         title: 'Voice Scribe',
         theme: ThemeData(
-          appBarTheme: AppBarTheme(
-            color: Colors.white,
-            textTheme: Theme.of(context).textTheme,
-            elevation: 1,
-            centerTitle: true,
-            iconTheme: IconThemeData(
-              color: Colors.black54,
-            ),
-          ),
           primarySwatch: Colors.red,
           accentColor: Colors.black12,
           visualDensity: VisualDensity.adaptivePlatformDensity,
