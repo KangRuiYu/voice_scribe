@@ -117,12 +117,15 @@ class _RecordingCard extends StatelessWidget {
             ),
             PopupMenuButton(
               icon: Icon(Icons.more_vert),
+              onSelected: (Function itemFunc) => itemFunc(),
               itemBuilder: (context) {
                 return [
                   PopupMenuItem(
+                    value: () => _askUserToDeleteRecording(context),
                     child: Text('Edit'),
                   ),
                   PopupMenuItem(
+                    value: () => _askUserToDeleteRecording(context),
                     child: Text('Delete'),
                   ),
                 ];
