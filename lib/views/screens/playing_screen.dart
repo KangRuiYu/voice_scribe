@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:io';
 
-import 'package:voice_scribe/models/recordings_manager.dart';
+import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/models/player.dart';
 import 'package:voice_scribe/views/widgets/player_widget.dart';
-
-import 'package:flutter_sound/flutter_sound.dart';
 
 class PlayingScreen extends StatelessWidget {
   final Player _player = Player();
 
-  PlayingScreen(RecordingInfo recording) {
+  PlayingScreen(Recording recording) {
     _player.startPlayer(recording, () => print('DONE'));
   }
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:io';
 
 import 'package:voice_scribe/models/recordings_manager.dart';
+import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/views/screens/playing_screen.dart';
 
 class RecordingsDisplay extends StatelessWidget {
@@ -25,7 +25,7 @@ class RecordingsDisplay extends StatelessWidget {
 
 class _RecordingCard extends StatelessWidget {
   // A card that displays the information of a single recording
-  final RecordingInfo _recording;
+  final Recording _recording;
 
   _RecordingCard(this._recording);
 

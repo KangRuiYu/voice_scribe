@@ -4,10 +4,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'dart:convert';
 
+import 'package:voice_scribe/models/recording.dart';
+
 class RecordingsManager extends ChangeNotifier {
   // Manages all the saved recordings
-  final List<RecordingInfo> _recordings = [];
-  List<RecordingInfo> get recordings => _recordings;
+  final List<Recording> _recordings = [];
+  List<Recording> get recordings => _recordings;
 
   void loadRecordings() async {
     // Loads all recordings from the import files
@@ -19,7 +21,7 @@ class RecordingsManager extends ChangeNotifier {
       (FileSystemEntity entity) {
         if (entity is File && extension(entity.path) == '.import') {
           String data = entity.readAsStringSync();
-          RecordingInfo ri = RecordingInfo.fromJson(jsonDecode(data));
+          Recording ri = Recording.fromJson(jsonDecode(data));
           _recordings.add(ri);
         }
       },
@@ -27,14 +29,14 @@ class RecordingsManager extends ChangeNotifier {
     );
   }
 
-  void addRecording(RecordingInfo recording) {
+  void addRecording(Recording recording) {
     // Adds the recording to the recordings list and imports it
     _recordings.add(recording);
     _createImportFile(recording);
     notifyListeners();
   }
 
-  void deleteRecording(RecordingInfo recording) async {
+  void deleteRecording(Recording recording) async {
     // Deletes the given recording and its import file
     _recordings.remove(recording);
 
@@ -61,38 +63,11 @@ class RecordingsManager extends ChangeNotifier {
     return importsDirectory;
   }
 
-  void _createImportFile(RecordingInfo recording) async {
+  void _createImportFile(Recording recording) async {
     // Creates an import file for the given recording
     Directory importsDirectory = await _getImportsDirectory();
     File importFile =
         File(join(importsDirectory.path, '${recording.name}.import'));
     importFile.writeAsString(jsonEncode(recording.toJson()));
   }
-}
-
-class RecordingInfo {
-  // Holds information on a single recording
-  final String path;
-  final String name;
-  final double length;
-  final String date;
-
-  RecordingInfo(File file)
-      : path = file.path,
-        name = basenameWithoutExtension(file.path),
-        length = 10,
-        date = 'Saturday';
-
-  RecordingInfo.fromJson(Map<String, dynamic> json)
-      : path = json['path'],
-        name = json['name'],
-        length = json['length'],
-        date = json['date'];
-
-  Map<String, dynamic> toJson() => {
-        'path': path,
-        'name': name,
-        'length': length,
-        'date': date,
-      };
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:voice_scribe/models/recordings_manager.dart';
+import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/models/recorder.dart';
 
 import 'package:voice_scribe/views/widgets/custom_buttons.dart';
@@ -42,7 +43,7 @@ class _PausedControlsState extends State<_PausedControls> {
     var recording =
         await widget._recorder.stopRecording(_textEditingController.text);
     Provider.of<RecordingsManager>(context, listen: false).addRecording(
-      RecordingInfo(recording),
+      Recording(recording),
     );
     Navigator.pop(context);
   }

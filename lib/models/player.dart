@@ -3,20 +3,20 @@ import 'package:flutter_sound/flutter_sound.dart';
 
 import 'dart:async';
 
-import 'package:voice_scribe/models/recordings_manager.dart';
+import 'package:voice_scribe/models/recording.dart';
 
 class Player extends ChangeNotifier {
   final FlutterSoundPlayer _player = FlutterSoundPlayer();
-  RecordingInfo _recording; // The recording being played
+  Recording _recording; // The recording being played
   StreamSubscription _progressSubscription;
 
   bool get playing => _player.isPlaying;
   bool get paused => _player.isPaused;
-  RecordingInfo get recording => _recording;
+  Recording get recording => _recording;
   Stream<PlaybackDisposition> get progress => _player.onProgress;
   PlaybackDisposition currentProgress; // To be able to get the current position
 
-  void startPlayer(RecordingInfo recording, Function onFinished) async {
+  void startPlayer(Recording recording, Function onFinished) async {
     // Starts playing the given recording file
     _recording = recording;
     await _openAudioSession();
