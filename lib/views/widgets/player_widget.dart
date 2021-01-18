@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:intl/intl.dart';
+
 import 'package:voice_scribe/models/player.dart';
 import 'package:voice_scribe/views/widgets/playback_duration.dart';
 import 'package:voice_scribe/views/widgets/custom_buttons.dart';
@@ -112,7 +114,7 @@ class _DetailsCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                _player.recording.date,
+                DateFormat.yMMMd().format(_player.recording.date),
                 style: Theme.of(context).textTheme.bodyText2,
               ),
             ],

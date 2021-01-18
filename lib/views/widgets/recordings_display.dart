@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:intl/intl.dart';
+
 import 'package:voice_scribe/models/recordings_manager.dart';
 import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/views/screens/playing_screen.dart';
@@ -98,12 +100,12 @@ class _RecordingCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              _recording.date,
+              DateFormat.yMMMd().format(_recording.date),
               style: Theme.of(context).textTheme.subtitle2,
             ),
             SizedBox(height: 6),
             Text(
-              _recording.length.toString(),
+              (_recording.duration.inMilliseconds / 1000).toStringAsFixed(1),
               style: Theme.of(context).textTheme.caption,
             ),
           ],

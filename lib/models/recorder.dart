@@ -2,18 +2,24 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 
 import 'dart:io';
+import 'dart:async';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
 import 'package:permission_handler/permission_handler.dart';
 
+import 'package:voice_scribe/models/recording.dart';
+
 class Recorder extends ChangeNotifier {
   FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   File _outputFile;
+  StreamSubscription _progressSubscription;
 
   bool get recording => _recorder.isRecording;
   bool get paused => _recorder.isPaused;
   Stream<RecordingDisposition> get progress => _recorder.onProgress;
+  RecordingDisposition
+      currentProgress; // To be able to get the current duration
   File get outputFile => _outputFile;
 
   void startRecording() async {
@@ -37,11 +43,14 @@ class Recorder extends ChangeNotifier {
       bitRate: 64000,
     );
 
+    _listenToStream();
+
     notifyListeners();
   }
 
-  Future<File> stopRecording([String recordingName]) async {
-    // Stops the recording process and returns the resulting file
+  Future<Recording> stopRecording([String recordingName]) async {
+    // Stops the recording process and returns the resulting file as a Recording
+    await _closeStream();
     await _recorder.stopRecorder();
     _closeAudioSession();
 
@@ -52,12 +61,15 @@ class Recorder extends ChangeNotifier {
       _outputFile = _outputFile.renameSync(newPath);
     }
 
-    File resultingFile = _outputFile;
+    Recording recording = Recording(
+      file: _outputFile,
+      duration: currentProgress.duration,
+    );
     _outputFile = null;
 
     notifyListeners();
 
-    return resultingFile;
+    return recording;
   }
 
   void terminate() async {
@@ -87,6 +99,19 @@ class Recorder extends ChangeNotifier {
 
   void _closeAudioSession() async {
     await _recorder.closeAudioSession();
+  }
+
+  void _listenToStream() {
+    // Begins listening to progress stream
+    _progressSubscription =
+        _recorder.onProgress.listen((RecordingDisposition newProgress) {
+      currentProgress = newProgress;
+    });
+  }
+
+  void _closeStream() async {
+    // Stops listening to the stream
+    await _progressSubscription.cancel();
   }
 
   void _askForMicrophonePermission() async {

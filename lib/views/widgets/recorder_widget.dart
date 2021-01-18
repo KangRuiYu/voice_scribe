@@ -40,10 +40,10 @@ class _PausedControlsState extends State<_PausedControls> {
 
   void _saveRecording(BuildContext context) async {
     // Save recording and return to previous screen
-    var recording =
+    Recording recording =
         await widget._recorder.stopRecording(_textEditingController.text);
     Provider.of<RecordingsManager>(context, listen: false).addRecording(
-      Recording(recording),
+      recording,
     );
     Navigator.pop(context);
   }

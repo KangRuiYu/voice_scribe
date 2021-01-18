@@ -1,34 +1,42 @@
 import 'dart:io';
 import 'package:path/path.dart';
-import 'package:intl/intl.dart';
 
 class Recording {
   // Holds information on a single recording
   final String path;
   final String name;
-  final double length;
-  final String date;
+  final Duration duration;
+  final DateTime date;
   final String version; // The version of the model
 
-  Recording(File file)
+  Recording({
+    File file,
+    this.duration,
+  })  : path = file.path,
+        name = basenameWithoutExtension(file.path),
+        date = file.lastModifiedSync(),
+        version = '0.1';
+
+  Recording.inferFromFile(File file) // Infers duration of recording from file
       : path = file.path,
         name = basenameWithoutExtension(file.path),
-        length = 10,
-        date = DateFormat.yMMMd().format(file.lastModifiedSync()),
+        duration = Duration(seconds: 0),
+        date = file.lastModifiedSync(),
         version = '0.1';
 
   Recording.fromJson(Map<String, dynamic> json)
       : path = json['path'],
         name = json['name'],
-        length = json['length'],
-        date = json['date'],
+        duration = Duration(milliseconds: json['duration_in_milliseconds']),
+        date = DateTime(json['year'], json['month'], json['day']),
         version = json['version'];
 
   Map<String, dynamic> toJson() => {
         'path': path,
         'name': name,
-        'length': length,
-        'date': date,
+        'day': date.day,
+        'month': date.month,
+        'year': date.year,
         'version': version,
       };
 }
