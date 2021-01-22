@@ -34,6 +34,7 @@ class Recording {
   Map<String, dynamic> toJson() => {
         'path': path,
         'name': name,
+        'duration_in_milliseconds': duration.inMilliseconds,
         'day': date.day,
         'month': date.month,
         'year': date.year,
