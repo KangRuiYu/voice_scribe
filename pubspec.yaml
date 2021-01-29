@@ -33,6 +33,7 @@ dependencies:
   flutter_sound: ^6.4.7+1
   permission_handler: ^5.0.1+1
   intl: ^0.16.1
+  google_fonts: ^1.1.2
 
 dev_dependencies:
   flutter_test:

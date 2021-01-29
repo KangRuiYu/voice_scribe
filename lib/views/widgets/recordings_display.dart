@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:intl/intl.dart';
+import 'package:voice_scribe/utils/formatter.dart';
 
 import 'package:voice_scribe/models/recordings_manager.dart';
 import 'package:voice_scribe/models/recording.dart';
@@ -94,18 +94,18 @@ class _RecordingCard extends StatelessWidget {
         ),
         title: Text(
           _recording.name,
-          style: Theme.of(context).textTheme.headline6,
+          style: Theme.of(context).textTheme.bodyText1,
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              DateFormat.yMMMd().format(_recording.date),
-              style: Theme.of(context).textTheme.subtitle2,
+              formatDate(_recording.date),
+              style: Theme.of(context).textTheme.caption,
             ),
             SizedBox(height: 6),
             Text(
-              (_recording.duration.inMilliseconds / 1000).toStringAsFixed(1),
+              formatDuration(_recording.duration),
               style: Theme.of(context).textTheme.caption,
             ),
           ],

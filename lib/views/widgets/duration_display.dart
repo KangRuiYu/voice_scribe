@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
+import 'package:voice_scribe/utils/formatter.dart';
+
 class DurationDisplay extends StatefulWidget {
   // A widget that displays a duration from the given stream
   final Stream stream;
@@ -15,22 +17,21 @@ class DurationDisplay extends StatefulWidget {
 
 class _DurationDisplayState extends State<DurationDisplay> {
   // The state of the Duration Display widget
-  double _currentDuration = 0;
+  Duration _currentDuration = Duration();
   StreamSubscription _subscription;
 
   @override
   void initState() {
     // Starts listening on the stream
     _subscription = widget.stream.listen((data) {
-      var seconds = data.duration.inMilliseconds / 1000;
-      setState(() => _currentDuration = seconds);
+      setState(() => _currentDuration = data.duration);
     });
     super.initState();
   }
 
   Widget build(BuildContext context) {
     return Text(
-      _currentDuration.toStringAsFixed(1),
+      formatDuration(_currentDuration),
       style: widget.textStyle,
     );
   }

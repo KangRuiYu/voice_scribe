@@ -8,42 +8,35 @@ import 'package:voice_scribe/views/widgets/recordings_display.dart';
 import 'package:voice_scribe/models/recordings_manager.dart';
 
 class MainScreen extends StatelessWidget {
+  void startRecording(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return ChangeNotifierProvider.value(
+            value: Provider.of<RecordingsManager>(context, listen: false),
+            child: RecordingScreen(),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(title: Text('Recordings')),
         bottomNavigationBar: ThemedBottomAppBar(
-          child: Row(
-            children: [
-              IconButton(
-                icon: Icon(Icons.more_vert),
-                onPressed: () => null,
-              ),
-              Spacer(),
-              IconButton(
-                icon: Icon(Icons.search),
-                onPressed: () => null,
-              ),
-            ],
-          ),
+          child: DefaultBottomButtons(),
+          notched: false,
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: CircularIconButton(
-          iconData: Icons.fiber_manual_record_rounded,
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return ChangeNotifierProvider.value(
-                    value:
-                        Provider.of<RecordingsManager>(context, listen: false),
-                    child: RecordingScreen(),
-                  );
-                },
-              ),
-            );
-          },
+        floatingActionButton: RoundedButton(
+          leading: Icon(Icons.fiber_manual_record_rounded),
+          child: Text('Record'),
+          onPressed: () => startRecording(context),
         ),
         body: RecordingsDisplay(),
       ),
