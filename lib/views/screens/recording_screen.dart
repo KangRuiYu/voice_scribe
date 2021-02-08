@@ -60,20 +60,18 @@ class RecordingScreen extends StatelessWidget {
                 left: 32.0,
                 right: 32.0,
               ),
-              child: Consumer<Recorder>(builder: (context, recorder, child) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _DynamicView(),
-                    const SizedBox(height: 10),
-                    const Divider(),
-                    const SizedBox(height: 40),
-                    _DynamicDuration(),
-                    const SizedBox(height: 20),
-                    _DynamicButtons(),
-                  ],
-                );
-              }),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _DynamicView(),
+                  const SizedBox(height: 10),
+                  const Divider(),
+                  const SizedBox(height: 40),
+                  _DynamicDuration(),
+                  const SizedBox(height: 20),
+                  _DynamicButtons(),
+                ],
+              ),
             ),
           ),
         ),
