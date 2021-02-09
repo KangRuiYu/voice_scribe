@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 
 import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/models/player.dart';
-import 'package:voice_scribe/views/widgets/playback_duration.dart';
+import 'package:voice_scribe/views/widgets/playback_slider.dart';
+import 'package:voice_scribe/views/widgets/duration_display.dart';
 import 'package:voice_scribe/views/widgets/custom_buttons.dart';
 import 'package:voice_scribe/utils/formatter.dart' as formatter;
 
@@ -32,8 +33,11 @@ class PlayingScreen extends StatelessWidget {
               child: Column(
                 children: [
                   _DynamicView(),
+                  const SizedBox(height: 10),
+                  const Divider(),
                   const SizedBox(height: 20),
                   _DynamicPlaybackSlider(),
+                  _DynamicDurationDisplay(),
                   const SizedBox(height: 20),
                   _DynamicButtons(),
                 ],
@@ -78,6 +82,35 @@ class _DynamicPlaybackSlider extends StatelessWidget {
       else
         return Center();
     });
+  }
+}
+
+class _DynamicDurationDisplay extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<Player>(
+      builder: (BuildContext context, Player player, Widget child) {
+        if (player.playing || player.paused)
+          return Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              DurationDisplay(
+                stream: player.progress,
+                textStyle: Theme.of(context).textTheme.subtitle1,
+                useDuration: false,
+              ),
+              Text('  |  ', style: Theme.of(context).textTheme.subtitle1),
+              DurationDisplay(
+                stream: player.progress,
+                textStyle: Theme.of(context).textTheme.subtitle1,
+              ),
+            ],
+          );
+        else
+          return Center();
+      },
+    );
   }
 }
 
@@ -155,9 +188,10 @@ class _DetailsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Container(
+          width: double.infinity,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -167,14 +201,15 @@ class _DetailsCard extends StatelessWidget {
                   child: Icon(Icons.music_note),
                 ),
               ),
+              const SizedBox(height: 20),
               Text(
                 _player.recording.name,
-                style: Theme.of(context).textTheme.headline5,
+                style: Theme.of(context).textTheme.headline6,
               ),
               const SizedBox(height: 10),
               Text(
                 formatter.formatDate(_player.recording.date),
-                style: Theme.of(context).textTheme.bodyText2,
+                style: Theme.of(context).textTheme.caption,
               ),
             ],
           ),

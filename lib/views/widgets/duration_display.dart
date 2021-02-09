@@ -7,8 +7,13 @@ class DurationDisplay extends StatefulWidget {
   // A widget that displays a duration from the given stream
   final Stream stream;
   final TextStyle textStyle;
+  final bool useDuration;
 
-  DurationDisplay({this.stream, this.textStyle});
+  DurationDisplay({
+    this.stream,
+    this.textStyle,
+    this.useDuration = true,
+  });
 
   State<DurationDisplay> createState() {
     return _DurationDisplayState();
@@ -24,7 +29,10 @@ class _DurationDisplayState extends State<DurationDisplay> {
   void initState() {
     // Starts listening on the stream
     _subscription = widget.stream.listen((data) {
-      setState(() => _currentDuration = data.duration);
+      if (widget.useDuration)
+        setState(() => _currentDuration = data.duration);
+      else
+        setState(() => _currentDuration = data.position);
     });
     super.initState();
   }
