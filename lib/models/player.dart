@@ -127,8 +127,8 @@ class Player extends ChangeNotifier {
 
   void _listenToStream() {
     // Begins listening to progress stream
-    _playback = playbackInfo();
-    _playbackSubscription = _playback.listen((PlaybackDisposition newProgress) {
+    _playbackSubscription =
+        playbackInfo().listen((PlaybackDisposition newProgress) {
       currentPlayback = newProgress;
     });
   }

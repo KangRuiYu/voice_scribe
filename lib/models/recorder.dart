@@ -98,6 +98,25 @@ class Recorder extends ChangeNotifier {
     await _recorder.openAudioSession();
   }
 
+  Stream<RecordingDisposition> progressInfo() async* {
+    // Returns a safe progress stream, one that will produce values even when
+    // the recorder is not ready.
+    RecordingDisposition latestProgress = RecordingDisposition.zero();
+    StreamSubscription<RecordingDisposition> internalSub =
+        _recorder.onProgress.listen((RecordingDisposition newProgress) {
+      latestProgress = newProgress;
+    });
+
+    try {
+      while (true) {
+        await Future.delayed(Duration(milliseconds: 100));
+        yield latestProgress;
+      }
+    } finally {
+      internalSub.cancel();
+    }
+  }
+
   void _closeAudioSession() async {
     await _recorder.closeAudioSession();
   }
@@ -105,7 +124,7 @@ class Recorder extends ChangeNotifier {
   void _listenToStream() {
     // Begins listening to progress stream
     _progressSubscription =
-        _recorder.onProgress.listen((RecordingDisposition newProgress) {
+        progressInfo().listen((RecordingDisposition newProgress) {
       currentProgress = newProgress;
     });
   }
