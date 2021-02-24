@@ -8,22 +8,34 @@ import 'package:voice_scribe/models/recording.dart';
 class Player extends ChangeNotifier {
   final FlutterSoundPlayer _player = FlutterSoundPlayer();
   Recording _recording; // The recording being played
-  StreamSubscription _progressSubscription;
+  Stream<PlaybackDisposition> _playback;
+  StreamSubscription<PlaybackDisposition> _playbackSubscription;
+  bool _finished = false; // If the recording has finished playing
+  bool _mutePlayback =
+      false; // True if player is going to stop reporting the playback stream
 
+  // States
   bool get playing => _player.isPlaying;
   bool get paused => _player.isPaused;
-  Recording get recording => _recording;
-  Stream<PlaybackDisposition> get progress => _player.onProgress;
-  PlaybackDisposition currentProgress; // To be able to get the current position
+  bool get stopped => _player.isStopped;
+  bool get finished => _finished; // If the player just finished a recording
+  bool get active => playing || paused; // If the player is in a recording
 
-  void startPlayer(Recording recording, Function onFinished) async {
+  Recording get recording => _recording;
+  PlaybackDisposition currentPlayback; // To be able to get the current position
+
+  void startPlayer(Recording recording, [startSession = true]) async {
     // Starts playing the given recording file
+    _finished = false;
     _recording = recording;
-    await _openAudioSession();
+    if (startSession) await _openAudioSession();
     await _player.setSubscriptionDuration(Duration(milliseconds: 100));
     await _player.startPlayer(
       fromURI: _recording.path,
-      whenFinished: onFinished,
+      whenFinished: () {
+        _finished = true;
+        notifyListeners();
+      },
     );
 
     _listenToStream();
@@ -31,11 +43,11 @@ class Player extends ChangeNotifier {
     notifyListeners();
   }
 
-  void stopPlayer() async {
+  void stopPlayer([closeSession = true]) async {
     // Stops recording
     await _closeStream();
     await _player.stopPlayer();
-    await _closeAudioSession();
+    if (closeSession) await _closeAudioSession();
     notifyListeners();
   }
 
@@ -51,20 +63,58 @@ class Player extends ChangeNotifier {
     notifyListeners();
   }
 
+  void restartPlayer() async {
+    // Restarts the player to play the last recording
+    if (_recording == null) // End if no recording found
+      return;
+
+    if (active || finished) {
+      // Stop player without ending the session if active or finished
+      await stopPlayer(false);
+    }
+
+    await startPlayer(recording, false);
+  }
+
   void changePosition(Duration duration) async {
     // Changes the players position. Must be playing or paused.
-    if (duration.isNegative)
+    if (duration.isNegative) {
       await changePosition(Duration(seconds: 0));
-    else if (duration > currentProgress.duration)
-      await changePosition(currentProgress.duration);
-    else
+    } else if (duration > currentPlayback.duration) {
+      await changePosition(currentPlayback.duration);
+    } else {
+      if (finished) {
+        _mutePlayback = true;
+        await restartPlayer();
+      }
       await _player.seekToPlayer(duration);
+      _mutePlayback = false;
+    }
   }
 
   void changePositionRelative(Duration duration) async {
     // Change the players position relative to its current position. Positive is forward.
-    Duration newPosition = currentProgress.position + duration;
+    Duration newPosition = currentPlayback.position + duration;
     await changePosition(newPosition);
+  }
+
+  Stream<PlaybackDisposition> playbackInfo() async* {
+    // Returns a safe playback stream. One that will produce values even when the player is not ready
+    PlaybackDisposition latestPlayback = PlaybackDisposition.zero();
+    StreamSubscription<PlaybackDisposition> internalSub = _player.onProgress
+        .where((_) => !_mutePlayback)
+        .listen((PlaybackDisposition newPlayback) {
+      latestPlayback = newPlayback;
+    });
+
+    try {
+      while (true) {
+        await Future.delayed(Duration(milliseconds: 100));
+        yield latestPlayback;
+      }
+    } finally {
+      internalSub.cancel();
+    }
   }
 
   void _openAudioSession() async {
@@ -77,14 +127,14 @@ class Player extends ChangeNotifier {
 
   void _listenToStream() {
     // Begins listening to progress stream
-    _progressSubscription =
-        _player.onProgress.listen((PlaybackDisposition newProgress) {
-      currentProgress = newProgress;
+    _playback = playbackInfo();
+    _playbackSubscription = _playback.listen((PlaybackDisposition newProgress) {
+      currentPlayback = newProgress;
     });
   }
 
   void _closeStream() async {
     // Stops listening to the stream
-    await _progressSubscription.cancel();
+    await _playbackSubscription.cancel();
   }
 }

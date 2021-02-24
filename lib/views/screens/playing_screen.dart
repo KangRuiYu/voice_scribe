@@ -12,7 +12,7 @@ class PlayingScreen extends StatelessWidget {
   final Player _player = Player();
 
   PlayingScreen(Recording recording) {
-    _player.startPlayer(recording, () => print('DONE'));
+    _player.startPlayer(recording);
   }
 
   @override
@@ -21,29 +21,7 @@ class PlayingScreen extends StatelessWidget {
       value: _player,
       child: WillPopScope(
         child: SafeArea(
-          child: Scaffold(
-            appBar: AppBar(title: Text('Player')),
-            body: Padding(
-              padding: const EdgeInsets.only(
-                top: 0,
-                bottom: 32.0,
-                left: 32.0,
-                right: 32.0,
-              ),
-              child: Column(
-                children: [
-                  _DynamicView(),
-                  const SizedBox(height: 10),
-                  const Divider(),
-                  const SizedBox(height: 20),
-                  _DynamicPlaybackSlider(),
-                  _DynamicDurationDisplay(),
-                  const SizedBox(height: 20),
-                  _DynamicButtons(),
-                ],
-              ),
-            ),
-          ),
+          child: _PlayingScreenScaffold(),
         ),
         onWillPop: () async {
           _player.stopPlayer();
@@ -54,137 +32,145 @@ class PlayingScreen extends StatelessWidget {
   }
 }
 
-class _DynamicView extends StatelessWidget {
+class _PlayingScreenScaffold extends StatelessWidget {
+  // The scaffold of the playing screen
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Player')),
+      body: Padding(
+        padding: const EdgeInsets.only(
+          top: 0,
+          bottom: 32.0,
+          left: 32.0,
+          right: 32.0,
+        ),
+        child: Column(
+          children: [
+            _DetailsCard(),
+            const SizedBox(height: 10),
+            const Divider(),
+            const SizedBox(height: 20),
+            _PresuppliedPlaybackSlider(),
+            _CurrentAndTotalDurationDisplay(),
+            const SizedBox(height: 20),
+            _ButtonRow(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PresuppliedPlaybackSlider extends StatelessWidget {
+  // A playback slider with all its required values provided by default
   @override
   Widget build(BuildContext context) {
     return Consumer<Player>(
         builder: (BuildContext context, Player player, Widget child) {
-      if (player.playing || player.paused)
-        return _DetailsCard(player);
-      else
-        return Center();
+      return PlaybackSlider(
+        player.playbackInfo(),
+        (double value) {
+          player.changePosition(Duration(milliseconds: value.toInt()));
+        },
+      );
     });
   }
 }
 
-class _DynamicPlaybackSlider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<Player>(
-        builder: (BuildContext context, Player player, Widget child) {
-      if (player.playing || player.paused)
-        return PlaybackSlider(
-          player.progress,
-          (double value) {
-            player.changePosition(Duration(milliseconds: value.toInt()));
-          },
-        );
-      else
-        return Center();
-    });
-  }
-}
-
-class _DynamicDurationDisplay extends StatelessWidget {
+class _CurrentAndTotalDurationDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<Player>(
       builder: (BuildContext context, Player player, Widget child) {
-        if (player.playing || player.paused)
-          return Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              DurationDisplay(
-                stream: player.progress,
-                textStyle: Theme.of(context).textTheme.subtitle1,
-                useDuration: false,
-              ),
-              Text('  |  ', style: Theme.of(context).textTheme.subtitle1),
-              DurationDisplay(
-                stream: player.progress,
-                textStyle: Theme.of(context).textTheme.subtitle1,
-              ),
-            ],
-          );
-        else
-          return Center();
+        return Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            DurationDisplay(
+              stream: player.playbackInfo(),
+              textStyle: Theme.of(context).textTheme.subtitle1,
+              useDuration: false,
+            ),
+            Text('  |  ', style: Theme.of(context).textTheme.subtitle1),
+            DurationDisplay(
+              stream: player.playbackInfo(),
+              textStyle: Theme.of(context).textTheme.subtitle1,
+            ),
+          ],
+        );
       },
     );
   }
 }
 
-class _DynamicButtons extends StatelessWidget {
+class _ButtonRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<Player>(
         builder: (BuildContext context, Player player, Widget child) {
-      if (player.playing || player.paused)
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              icon: Icon(Icons.replay_5),
-              onPressed: () =>
-                  player.changePositionRelative(Duration(seconds: -5)),
-            ),
-            player.playing
-                ? _ActiveButtons(player.pausePlayer)
-                : _PausedButtons(
-                    player.resumePlayer,
-                    () {
-                      player.stopPlayer();
-                      Navigator.of(context).pop();
-                    },
-                  ),
-            IconButton(
-              icon: Icon(Icons.forward_10),
-              onPressed: () =>
-                  player.changePositionRelative(Duration(seconds: 10)),
-            ),
-          ],
-        );
-      else
-        return Center();
+      Function backFunc;
+      Function forwardFunc;
+
+      if (player.active || player.finished) {
+        backFunc = () => player.changePositionRelative(Duration(seconds: -5));
+        forwardFunc =
+            () => player.changePositionRelative(Duration(seconds: 10));
+      } else {
+        backFunc = () => null;
+        forwardFunc = () => null;
+      }
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: Icon(Icons.replay_5),
+            onPressed: backFunc,
+          ),
+          _MainButton(),
+          IconButton(
+            icon: Icon(Icons.forward_10),
+            onPressed: forwardFunc,
+          ),
+        ],
+      );
     });
   }
 }
 
-class _ActiveButtons extends StatelessWidget {
-  final Function _onPause;
-
-  _ActiveButtons(this._onPause);
-
+class _MainButton extends StatelessWidget {
+  // The main button in the player that changes based on the player state
   @override
   Widget build(BuildContext context) {
-    return CircularIconButton(
-      iconData: Icons.pause,
-      onPressed: _onPause,
-    );
-  }
-}
+    return Consumer<Player>(
+        builder: (BuildContext context, Player player, Widget child) {
+      if (player.playing) {
+        return CircularIconButton(
+          iconData: Icons.pause,
+          onPressed: player.pausePlayer,
+        );
+      } else {
+        Function pressedFunc;
 
-class _PausedButtons extends StatelessWidget {
-  final Function _onResume;
-  final Function _onStop;
+        if (player.paused) // Choose function based on the state of the player
+          pressedFunc = player.resumePlayer;
+        else if (player.finished)
+          pressedFunc = player.restartPlayer;
+        else
+          pressedFunc = () => null;
 
-  _PausedButtons(this._onResume, this._onStop);
-
-  @override
-  Widget build(BuildContext context) {
-    return CircularIconButton(
-      iconData: Icons.play_arrow,
-      onPressed: _onResume,
-    );
+        return CircularIconButton(
+          iconData: Icons.play_arrow,
+          onPressed: pressedFunc,
+        );
+      }
+    });
   }
 }
 
 class _DetailsCard extends StatelessWidget {
   // Shows the details of the player's recording
-  final Player _player;
-
-  _DetailsCard(this._player);
-
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -203,12 +189,13 @@ class _DetailsCard extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                _player.recording.name,
+                Provider.of<Player>(context, listen: false).recording.name,
                 style: Theme.of(context).textTheme.headline6,
               ),
               const SizedBox(height: 10),
               Text(
-                formatter.formatDate(_player.recording.date),
+                formatter.formatDate(
+                    Provider.of<Player>(context, listen: false).recording.date),
                 style: Theme.of(context).textTheme.caption,
               ),
             ],

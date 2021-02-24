@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:voice_scribe/views/screens/main_screen.dart';
 import 'package:voice_scribe/models/recordings_manager.dart';
 
+import 'package:voice_scribe/models/player.dart';
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(VoiceScribe());
@@ -52,6 +54,7 @@ class VoiceScribe extends StatelessWidget {
             ),
             textTheme: ButtonTextTheme.primary,
           ),
+          sliderTheme: SliderThemeData(),
         ),
         home: MainScreen(),
       ),
