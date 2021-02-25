@@ -50,30 +50,7 @@ class RecordingScreen extends StatelessWidget {
       ],
       child: WillPopScope(
         child: SafeArea(
-          child: Scaffold(
-            appBar: AppBar(title: Text('Recorder')),
-            resizeToAvoidBottomPadding: false,
-            body: Padding(
-              padding: const EdgeInsets.only(
-                top: 0,
-                bottom: 32.0,
-                left: 32.0,
-                right: 32.0,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _DynamicView(),
-                  const SizedBox(height: 10),
-                  const Divider(),
-                  const SizedBox(height: 40),
-                  _DynamicDuration(),
-                  const SizedBox(height: 20),
-                  _DynamicButtons(),
-                ],
-              ),
-            ),
-          ),
+          child: _RecordingScreenScaffold(),
         ),
         onWillPop: () async {
           _recorder.terminate();
@@ -84,76 +61,86 @@ class RecordingScreen extends StatelessWidget {
   }
 }
 
-class _DynamicView extends StatelessWidget {
+class _RecordingScreenScaffold extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Recorder')),
+      resizeToAvoidBottomPadding: false,
+      body: Padding(
+        padding: const EdgeInsets.only(
+          top: 0,
+          bottom: 32.0,
+          left: 32.0,
+          right: 32.0,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _RecordingView(),
+            const SizedBox(height: 10),
+            const Divider(),
+            const SizedBox(height: 40),
+            _PresuppliedDuration(),
+            const SizedBox(height: 20),
+            _Buttons(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RecordingView extends StatelessWidget {
   // Displays different views based on the state of the recorder
   @override
   Widget build(BuildContext context) {
     return Consumer<Recorder>(builder: (context, recorder, child) {
-      if (recorder.paused)
-        return _PausedView();
-      else if (recorder.recording)
-        return _ActiveView();
-      else
-        return Center();
+      if (recorder.recording) {
+        // While recording
+        return VolumeDisplay(
+          stream: Provider.of<Recorder>(context, listen: false).progressInfo(),
+          numberOfVolumeBars: 18,
+        );
+      } else {
+        // While paused
+        return Expanded(
+          child: TextField(
+            controller: Provider.of<_SaveState>(context, listen: false)
+                .textEditingController,
+            decoration: InputDecoration(
+              labelText: 'Recording Name',
+            ),
+          ),
+        );
+      }
     });
   }
 }
 
-class _DynamicDuration extends StatelessWidget {
+class _PresuppliedDuration extends StatelessWidget {
   // Displays duration when active and nothing when not
   @override
   Widget build(BuildContext context) {
     return Consumer<Recorder>(builder: (context, recorder, child) {
-      if (recorder.paused || recorder.recording)
-        return DurationDisplay(
-          stream: recorder.progress,
-          textStyle: Theme.of(context).textTheme.headline5,
-        );
-      else
-        return Center();
+      return DurationDisplay(
+        stream: recorder.progressInfo(),
+        textStyle: Theme.of(context).textTheme.headline5,
+      );
     });
   }
 }
 
-class _DynamicButtons extends StatelessWidget {
+class _Buttons extends StatelessWidget {
   // Displays different buttons based on the state of the recorder
   @override
   Widget build(BuildContext context) {
     return Consumer<Recorder>(builder: (context, recorder, child) {
-      if (recorder.paused)
-        return _PausedButtons();
-      else if (recorder.recording)
+      if (recorder.recording)
         return _ActiveButtons();
       else
-        return Center();
+        return _PausedButtons();
     });
-  }
-}
-
-class _ActiveView extends StatelessWidget {
-  // The view when active
-  @override
-  Widget build(BuildContext context) {
-    return VolumeDisplay(
-      stream: Provider.of<Recorder>(context, listen: false).progress,
-      numberOfVolumeBars: 18,
-    );
-  }
-}
-
-class _PausedView extends StatelessWidget {
-  // The view when paused
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: TextField(
-        controller: Provider.of<_SaveState>(context, listen: false)
-            .textEditingController,
-        decoration: InputDecoration(
-          labelText: 'Recording Name',
-        ),
-      ),
-    );
   }
 }
 

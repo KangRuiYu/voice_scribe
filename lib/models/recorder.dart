@@ -17,7 +17,6 @@ class Recorder extends ChangeNotifier {
 
   bool get recording => _recorder.isRecording;
   bool get paused => _recorder.isPaused;
-  Stream<RecordingDisposition> get progress => _recorder.onProgress;
   RecordingDisposition
       currentProgress; // To be able to get the current duration
   File get outputFile => _outputFile;
