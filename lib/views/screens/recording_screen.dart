@@ -20,7 +20,7 @@ class _SaveState extends ChangeNotifier {
     // Save recording and return to previous screen
     Recording recording = await Provider.of<Recorder>(context, listen: false)
         .stopRecording(_textEditingController.text);
-    Provider.of<RecordingsManager>(context, listen: false).addRecording(
+    Provider.of<RecordingsManager>(context, listen: false).addNewRecording(
       recording,
     );
     Navigator.pop(context);

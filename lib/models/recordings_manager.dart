@@ -12,7 +12,7 @@ class RecordingsManager extends ChangeNotifier {
   List<Recording> get recordings => _recordings;
 
   void loadRecordings() async {
-    // Loads all recordings from the import files
+    // Create/load recordings from stored import files
     Directory importsDirectory = await _getImportsDirectory();
 
     _recordings.clear();
@@ -29,8 +29,8 @@ class RecordingsManager extends ChangeNotifier {
     );
   }
 
-  void addRecording(Recording recording) {
-    // Adds the recording to the recordings list and imports it
+  void addNewRecording(Recording recording) {
+    // Adds a new recording to the recordings list and create a import file for it
     _recordings.add(recording);
     _createImportFile(recording);
     notifyListeners();
