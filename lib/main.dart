@@ -30,10 +30,9 @@ class VoiceScribe extends StatelessWidget {
           accentColor: Colors.black54,
           visualDensity: VisualDensity.adaptivePlatformDensity,
           textTheme: GoogleFonts.openSansTextTheme(),
-          scaffoldBackgroundColor: Colors.white,
           appBarTheme: AppBarTheme(
             elevation: 0,
-            color: Colors.white70,
+            color: Colors.transparent,
             iconTheme: IconThemeData(
               color: Colors.black,
             ),

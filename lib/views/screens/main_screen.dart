@@ -26,7 +26,6 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        extendBodyBehindAppBar: true,
         appBar: AppBar(title: Text('Recordings')),
         bottomNavigationBar: ThemedBottomAppBar(
           child: DefaultBottomButtons(),
