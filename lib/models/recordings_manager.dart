@@ -17,16 +17,15 @@ class RecordingsManager extends ChangeNotifier {
 
     _recordings.clear();
 
-    importsDirectory.list().listen(
-      (FileSystemEntity entity) {
-        if (entity is File && extension(entity.path) == '.import') {
-          String data = entity.readAsStringSync();
-          Recording ri = Recording.fromJson(jsonDecode(data));
-          _recordings.add(ri);
-        }
-      },
-      onDone: () => notifyListeners(),
-    );
+    await for (FileSystemEntity entity in importsDirectory.list()) {
+      if (entity is File && extension(entity.path) == '.import') {
+        String data = entity.readAsStringSync();
+        Recording ri = Recording.fromJson(jsonDecode(data));
+        _recordings.add(ri);
+      }
+    }
+
+    notifyListeners();
   }
 
   void addNewRecording(Recording recording) {
@@ -36,17 +35,24 @@ class RecordingsManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void deleteRecording(Recording recording) async {
-    // Deletes the given recording and its import file
+  void removeRecording(Recording recording, {bool deleteSource = false}) async {
+    // Removes the given recording and its import file. Optionally delete the
+    // actual file itself as well.
+
+    // Remove recording
     _recordings.remove(recording);
 
-    File recordingFile = File(recording.path);
+    // Remove import file
     Directory importsDirectory = await _getImportsDirectory();
     File importFile =
         File(join(importsDirectory.path, '${recording.name}.import'));
-
-    recordingFile.delete();
     importFile.delete();
+
+    // Remove source file
+    if (deleteSource) {
+      File recordingFile = File(recording.path);
+      recordingFile.delete();
+    }
 
     notifyListeners();
   }
