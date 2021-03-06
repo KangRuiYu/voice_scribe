@@ -57,6 +57,34 @@ class RecordingsManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  void importRecordingFile(File recordingFile) {
+    // Creates a recording object and import file for the given file
+    Recording recording = Recording.inferFromFile(recordingFile);
+    addNewRecording(recording);
+  }
+
+  Stream<File> scanForUnimportedFiles() async* {
+    // Scans the primary directory for non-imported recording files
+    Directory externalStorageDirectory = await getExternalStorageDirectory();
+
+    await for (FileSystemEntity entity in externalStorageDirectory.list()) {
+      if (entity is File) {
+        String name = basenameWithoutExtension(entity.path);
+        bool unique = true;
+
+        for (Recording recording in _recordings) {
+          // Search for any matching recording names
+          if (name == recording.name) {
+            unique = false;
+            break;
+          }
+        }
+
+        if (unique) yield entity;
+      }
+    }
+  }
+
   Future<Directory> _getImportsDirectory() async {
     // Returns the imports directory and creates one if one doesn't already exist
     Directory externalStorageDirectory = await getExternalStorageDirectory();

@@ -27,7 +27,7 @@ class VoiceScribe extends StatelessWidget {
         title: 'Voice Scribe',
         theme: ThemeData(
           primarySwatch: Colors.red,
-          accentColor: Colors.black54,
+          accentColor: Colors.black87,
           visualDensity: VisualDensity.adaptivePlatformDensity,
           textTheme: GoogleFonts.openSansTextTheme(),
           appBarTheme: AppBarTheme(
@@ -54,6 +54,11 @@ class VoiceScribe extends StatelessWidget {
             textTheme: ButtonTextTheme.primary,
           ),
           sliderTheme: SliderThemeData(),
+          bottomSheetTheme: BottomSheetThemeData(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+            ),
+          ),
         ),
         home: MainScreen(),
       ),
