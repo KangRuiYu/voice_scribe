@@ -17,13 +17,6 @@ class Recording {
         date = file.lastModifiedSync(),
         version = '0.1';
 
-  Recording.inferFromFile(File file) // Infers duration of recording from file
-      : path = file.path,
-        name = basenameWithoutExtension(file.path),
-        duration = Duration(seconds: 0),
-        date = file.lastModifiedSync(),
-        version = '0.1';
-
   Recording.fromJson(Map<String, dynamic> json)
       : path = json['path'],
         name = json['name'],

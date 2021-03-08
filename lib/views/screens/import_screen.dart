@@ -33,13 +33,15 @@ class _ImportState extends ChangeNotifier {
     }
   }
 
-  void importFiles() {
+  Future<void> importFiles() async {
     // Imports all currently checked files
-    _files.forEach(
-      (File file, bool checked) {
-        if (checked) _recordingsManager.importRecordingFile(file);
-      },
-    );
+    for (MapEntry entry in _files.entries) {
+      File file = entry.key;
+      bool checked = entry.value;
+      if (checked) {
+        await _recordingsManager.importRecordingFile(file);
+      }
+    }
   }
 }
 
@@ -75,8 +77,8 @@ class _ImportButton extends StatelessWidget {
     return RoundedButton(
       leading: Icon(Icons.download_outlined),
       child: Text('Import'),
-      onPressed: () {
-        Provider.of<_ImportState>(context, listen: false).importFiles();
+      onPressed: () async {
+        await Provider.of<_ImportState>(context, listen: false).importFiles();
         Navigator.pop(context);
       },
     );

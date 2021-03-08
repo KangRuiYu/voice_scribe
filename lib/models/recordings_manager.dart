@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'dart:convert';
@@ -57,9 +58,10 @@ class RecordingsManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void importRecordingFile(File recordingFile) {
+  Future<void> importRecordingFile(File recordingFile) async {
     // Creates a recording object and import file for the given file
-    Recording recording = Recording.inferFromFile(recordingFile);
+    Duration duration = await flutterSoundHelper.duration(recordingFile.path);
+    Recording recording = Recording(duration: duration, file: recordingFile);
     addNewRecording(recording);
   }
 
