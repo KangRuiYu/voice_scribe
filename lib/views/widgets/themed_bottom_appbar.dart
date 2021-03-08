@@ -58,7 +58,47 @@ class BottomModalSheet extends StatelessWidget {
           _MenuButton(
             label: 'Sort by',
             iconData: Icons.sort,
-            onPressed: () => null,
+            onPressed: () {
+              Navigator.pop(context);
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => SimpleDialog(
+                  title: const Text('Sort by'),
+                  children: [
+                    SimpleDialogOption(
+                      child: const Text('Name'),
+                      onPressed: () {
+                        Provider.of<RecordingsManager>(context, listen: false)
+                            .sortRecordings(
+                          sortFunction: RecordingsManager.byName,
+                        );
+                        Navigator.pop(context);
+                      },
+                    ),
+                    SimpleDialogOption(
+                      child: const Text('Date'),
+                      onPressed: () {
+                        Provider.of<RecordingsManager>(context, listen: false)
+                            .sortRecordings(
+                          sortFunction: RecordingsManager.byDate,
+                        );
+                        Navigator.pop(context);
+                      },
+                    ),
+                    SimpleDialogOption(
+                      child: const Text('Duration'),
+                      onPressed: () {
+                        Provider.of<RecordingsManager>(context, listen: false)
+                            .sortRecordings(
+                          sortFunction: RecordingsManager.byDuration,
+                        );
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
           _MenuButton(
             label: 'Scan for recordings',

@@ -12,6 +12,14 @@ class RecordingsManager extends ChangeNotifier {
   final List<Recording> _recordings = [];
   List<Recording> get recordings => _recordings;
 
+  // Sorting functions
+  static Function byName =
+      (Recording a, Recording b) => a.name.compareTo(b.name);
+  static Function byDate =
+      (Recording a, Recording b) => a.date.compareTo(b.date);
+  static Function byDuration =
+      (Recording a, Recording b) => a.duration.compareTo(b.duration);
+
   void loadRecordings() async {
     // Create/load recordings from stored import files
     Directory importsDirectory = await _getImportsDirectory();
@@ -85,6 +93,13 @@ class RecordingsManager extends ChangeNotifier {
         if (unique) yield entity;
       }
     }
+  }
+
+  void sortRecordings({Function sortFunction}) {
+    if (sortFunction == null)
+      sortFunction = byName; // Initialize to default if no function was given
+    _recordings.sort(sortFunction);
+    notifyListeners();
   }
 
   Future<Directory> _getImportsDirectory() async {
