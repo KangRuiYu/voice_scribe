@@ -8,7 +8,6 @@ import 'package:voice_scribe/models/recording.dart';
 class Player extends ChangeNotifier {
   final FlutterSoundPlayer _player = FlutterSoundPlayer();
   Recording _recording; // The recording being played
-  Stream<PlaybackDisposition> _playback;
   StreamSubscription<PlaybackDisposition> _playbackSubscription;
   bool _finished = false; // If the recording has finished playing
   bool _mutePlayback =
