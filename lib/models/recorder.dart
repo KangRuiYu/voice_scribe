@@ -21,7 +21,7 @@ class Recorder extends ChangeNotifier {
       currentProgress; // To be able to get the current duration
   File get outputFile => _outputFile;
 
-  void startRecording() async {
+  Future<void> startRecording() async {
     // Starts the recording process
     await _openAudioSession();
 
@@ -71,7 +71,7 @@ class Recorder extends ChangeNotifier {
     return recording;
   }
 
-  void terminate() async {
+  Future<void> terminate() async {
     // Stops any ongoing recording and clean up any files left over
     await _closeStream();
     await _recorder.stopRecorder();
@@ -80,19 +80,19 @@ class Recorder extends ChangeNotifier {
     _outputFile = null;
   }
 
-  void pauseRecording() async {
+  Future<void> pauseRecording() async {
     // Pause recording process
     await _recorder.pauseRecorder();
     notifyListeners();
   }
 
-  void resumeRecording() async {
+  Future<void> resumeRecording() async {
     // Resume recording process
     await _recorder.resumeRecorder();
     notifyListeners();
   }
 
-  void _openAudioSession() async {
+  Future<void> _openAudioSession() async {
     // Audio session must be opened before recording can start
     await _recorder.openAudioSession();
   }
@@ -116,7 +116,7 @@ class Recorder extends ChangeNotifier {
     }
   }
 
-  void _closeAudioSession() async {
+  Future<void> _closeAudioSession() async {
     await _recorder.closeAudioSession();
   }
 
@@ -128,12 +128,12 @@ class Recorder extends ChangeNotifier {
     });
   }
 
-  void _closeStream() async {
+  Future<void> _closeStream() async {
     // Stops listening to the stream
     await _progressSubscription.cancel();
   }
 
-  void _askForMicrophonePermission() async {
+  Future<void> _askForMicrophonePermission() async {
     // Asks the user for microphone permissions
     await Permission.microphone.request();
   }

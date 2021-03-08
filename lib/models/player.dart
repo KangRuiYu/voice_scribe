@@ -23,7 +23,7 @@ class Player extends ChangeNotifier {
   Recording get recording => _recording;
   PlaybackDisposition currentPlayback; // To be able to get the current position
 
-  void startPlayer(Recording recording, [startSession = true]) async {
+  Future<void> startPlayer(Recording recording, [startSession = true]) async {
     // Starts playing the given recording file
     _finished = false;
     _recording = recording;
@@ -42,7 +42,7 @@ class Player extends ChangeNotifier {
     notifyListeners();
   }
 
-  void stopPlayer([closeSession = true]) async {
+  Future<void> stopPlayer([closeSession = true]) async {
     // Stops recording
     await _closeStream();
     await _player.stopPlayer();
@@ -50,19 +50,19 @@ class Player extends ChangeNotifier {
     notifyListeners();
   }
 
-  void pausePlayer() async {
+  Future<void> pausePlayer() async {
     // Pause the player
     await _player.pausePlayer();
     notifyListeners();
   }
 
-  void resumePlayer() async {
+  Future<void> resumePlayer() async {
     // Resume the player
     await _player.resumePlayer();
     notifyListeners();
   }
 
-  void restartPlayer() async {
+  Future<void> restartPlayer() async {
     // Restarts the player to play the last recording
     if (_recording == null) // End if no recording found
       return;
@@ -75,7 +75,7 @@ class Player extends ChangeNotifier {
     await startPlayer(recording, false);
   }
 
-  void changePosition(Duration duration) async {
+  Future<void> changePosition(Duration duration) async {
     // Changes the players position. Must be playing or paused.
     if (duration.isNegative) {
       await changePosition(Duration(seconds: 0));
@@ -91,7 +91,7 @@ class Player extends ChangeNotifier {
     }
   }
 
-  void changePositionRelative(Duration duration) async {
+  Future<void> changePositionRelative(Duration duration) async {
     // Change the players position relative to its current position. Positive is forward.
     Duration newPosition = currentPlayback.position + duration;
     await changePosition(newPosition);
@@ -116,11 +116,11 @@ class Player extends ChangeNotifier {
     }
   }
 
-  void _openAudioSession() async {
+  Future<void> _openAudioSession() async {
     await _player.openAudioSession();
   }
 
-  void _closeAudioSession() async {
+  Future<void> _closeAudioSession() async {
     await _player.closeAudioSession();
   }
 
@@ -132,7 +132,7 @@ class Player extends ChangeNotifier {
     });
   }
 
-  void _closeStream() async {
+  Future<void> _closeStream() async {
     // Stops listening to the stream
     await _playbackSubscription.cancel();
   }
