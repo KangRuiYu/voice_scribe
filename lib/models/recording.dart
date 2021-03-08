@@ -33,4 +33,9 @@ class Recording {
         'year': date.year,
         'version': version,
       };
+
+  @override
+  String toString() {
+    return 'Recording(Name: $name, Duration: $duration, Date: $date)';
+  }
 }
