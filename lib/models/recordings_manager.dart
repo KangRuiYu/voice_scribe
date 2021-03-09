@@ -34,6 +34,8 @@ class RecordingsManager extends ChangeNotifier {
       }
     }
 
+    sortRecordings();
+
     notifyListeners();
   }
 
