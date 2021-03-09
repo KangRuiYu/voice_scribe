@@ -56,7 +56,7 @@ class ImportScreen extends StatelessWidget {
       child: ChangeNotifierProvider(
         create: (BuildContext context) => _ImportState(recordingsManager),
         child: Scaffold(
-          appBar: AppBar(title: Text('Import')),
+          appBar: AppBar(title: const Text('Import')),
           body: _FileList(),
           floatingActionButton: _ImportButton(),
           floatingActionButtonLocation:
@@ -76,7 +76,7 @@ class _ImportButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return RoundedButton(
       leading: Icon(Icons.download_outlined),
-      child: Text('Import'),
+      child: const Text('Import'),
       onPressed: () async {
         await Provider.of<_ImportState>(context, listen: false).importFiles();
         Navigator.pop(context);

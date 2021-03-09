@@ -37,7 +37,7 @@ class _PlayingScreenScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Player')),
+      appBar: AppBar(title: const Text('Player')),
       body: Padding(
         padding: const EdgeInsets.only(
           top: 0,

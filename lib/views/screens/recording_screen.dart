@@ -65,7 +65,7 @@ class _RecordingScreenScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Recorder')),
+      appBar: AppBar(title: const Text('Recorder')),
       resizeToAvoidBottomPadding: false,
       body: Padding(
         padding: const EdgeInsets.only(
@@ -150,7 +150,7 @@ class _ActiveButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return RoundedButton(
       leading: Icon(Icons.pause),
-      child: Text('Pause'),
+      child: const Text('Pause'),
       onPressed: Provider.of<Recorder>(context, listen: false).pauseRecording,
     );
   }
@@ -164,20 +164,20 @@ class _PausedButtons extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         TextButton(
-          child: Text('Save'),
+          child: const Text('Save'),
           onPressed: () => Provider.of<_SaveState>(context, listen: false)
               .saveRecording(context),
         ),
         SizedBox(width: 10),
         RoundedButton(
           leading: Icon(Icons.play_arrow),
-          child: Text('Resume'),
+          child: const Text('Resume'),
           onPressed:
               Provider.of<Recorder>(context, listen: false).resumeRecording,
         ),
         SizedBox(width: 10),
         TextButton(
-          child: Text('Delete'),
+          child: const Text('Delete'),
           onPressed: () => Provider.of<_SaveState>(context, listen: false)
               .deleteRecording(context),
         ),

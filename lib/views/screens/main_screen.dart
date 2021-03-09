@@ -26,7 +26,7 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: Text('Recordings')),
+        appBar: AppBar(title: const Text('Recordings')),
         bottomNavigationBar: ThemedBottomAppBar(
           child: DefaultBottomButtons(),
           notched: false,
@@ -34,7 +34,7 @@ class MainScreen extends StatelessWidget {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: RoundedButton(
           leading: Icon(Icons.fiber_manual_record_rounded),
-          child: Text('Record'),
+          child: const Text('Record'),
           onPressed: () => startRecording(context),
         ),
         body: RecordingsDisplay(),

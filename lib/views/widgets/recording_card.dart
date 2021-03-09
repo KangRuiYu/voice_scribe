@@ -80,17 +80,17 @@ class _RemoveConfirmationPopupState extends State<RemoveConfirmationPopup> {
 
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Remove?'),
+      title: const Text('Remove?'),
       content: SingleChildScrollView(
         child: ListBody(
           children: [
-            Text(
+            const Text(
               'This will remove the recording from the app, but the file will still be available on the device.',
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text('Delete file as well'),
+                const Text('Delete file as well'),
                 Checkbox(
                   value: _deleteFile,
                   onChanged: (bool value) {
@@ -104,11 +104,11 @@ class _RemoveConfirmationPopupState extends State<RemoveConfirmationPopup> {
       ),
       actions: [
         TextButton(
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
           onPressed: () => Navigator.pop(context),
         ),
         TextButton(
-          child: Text('Remove'),
+          child: const Text('Remove'),
           onPressed: () {
             widget.removeFunc(_deleteFile);
             Navigator.pop(context);
@@ -189,11 +189,11 @@ class _Buttons extends StatelessWidget {
             return [
               PopupMenuItem(
                 value: removeFunc,
-                child: Text('Edit'),
+                child: const Text('Edit'),
               ),
               PopupMenuItem(
                 value: removeFunc,
-                child: Text('Remove'),
+                child: const Text('Remove'),
               ),
             ];
           },
