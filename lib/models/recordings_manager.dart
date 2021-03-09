@@ -103,6 +103,9 @@ class RecordingsManager extends ChangeNotifier {
 
   void sortRecordings({Function sortFunction, bool reversed = false}) {
     // Setup
+    if (sortFunction == _currentSortOrder && reversed == _sortReversed)
+      return; // Return if the current recording list is already in the specified order.
+
     if (sortFunction == null)
       sortFunction = byName; // Initialize to default if no function was given
 
