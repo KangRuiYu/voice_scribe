@@ -26,7 +26,23 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: const Text('Recordings')),
+        appBar: AppBar(
+          title: const Text('Recordings'),
+          actions: [
+            IconButton(
+              icon: Icon(
+                Provider.of<RecordingsManager>(context, listen: true)
+                        .sortReversed
+                    ? Icons.arrow_upward_outlined
+                    : Icons.arrow_downward_outlined,
+              ),
+              onPressed: Provider.of<RecordingsManager>(
+                context,
+                listen: false,
+              ).reverseSort,
+            ),
+          ],
+        ),
         bottomNavigationBar: ThemedBottomAppBar(
           child: DefaultBottomButtons(),
           notched: false,

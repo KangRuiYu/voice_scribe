@@ -20,6 +20,10 @@ class RecordingsManager extends ChangeNotifier {
   static Function byDuration =
       (Recording a, Recording b) => a.duration.compareTo(b.duration);
 
+  Function _currentSortOrder = byName; // Currently applied sorting
+  bool _sortReversed = false; // If the sort is currently reversed
+  bool get sortReversed => _sortReversed;
+
   void loadRecordings() async {
     // Create/load recordings from stored import files
     Directory importsDirectory = await _getImportsDirectory();
@@ -97,11 +101,27 @@ class RecordingsManager extends ChangeNotifier {
     }
   }
 
-  void sortRecordings({Function sortFunction}) {
+  void sortRecordings({Function sortFunction, bool reversed = false}) {
+    // Setup
     if (sortFunction == null)
       sortFunction = byName; // Initialize to default if no function was given
-    _recordings.sort(sortFunction);
+
+    // Update state
+    _currentSortOrder = sortFunction;
+    _sortReversed = reversed;
+
+    // Apply
+    if (reversed)
+      _recordings.sort((Recording a, Recording b) => -sortFunction(a, b));
+    else
+      _recordings.sort(sortFunction);
+
     notifyListeners();
+  }
+
+  void reverseSort() {
+    // Reverses the currently applied sorting order
+    sortRecordings(sortFunction: _currentSortOrder, reversed: !_sortReversed);
   }
 
   Future<Directory> _getImportsDirectory() async {
