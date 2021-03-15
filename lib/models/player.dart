@@ -29,8 +29,19 @@ class Player extends ChangeNotifier {
     _recording = recording;
     if (startSession) await _openAudioSession();
     await _player.setSubscriptionDuration(Duration(milliseconds: 100));
-    await _player.startPlayer(
-      fromURI: _recording.path,
+
+    await _player.startPlayerFromTrack(
+      _recordingToTrack(recording),
+      onPaused: (bool pause) {
+        if (pause)
+          pausePlayer();
+        else
+          resumePlayer();
+      },
+      onSkipForward: () => null,
+      onSkipBackward: () => null,
+      defaultPauseResume: false,
+      removeUIWhenStopped: true,
       whenFinished: () {
         _finished = true;
         notifyListeners();
@@ -116,8 +127,17 @@ class Player extends ChangeNotifier {
     }
   }
 
+  Track _recordingToTrack(Recording recording) {
+    // Returns a track converted from a recording
+    return Track(
+      trackTitle: recording.name,
+      trackAuthor: 'Unknown author',
+      trackPath: recording.path,
+    );
+  }
+
   Future<void> _openAudioSession() async {
-    await _player.openAudioSession();
+    await _player.openAudioSession(withUI: true);
   }
 
   Future<void> _closeAudioSession() async {
