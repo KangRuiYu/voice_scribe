@@ -66,7 +66,7 @@ class _RecordingScreenScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Recorder')),
-      resizeToAvoidBottomPadding: false,
+      // resizeToAvoidBottomPadding: false,
       body: Padding(
         padding: const EdgeInsets.only(
           top: 0,
