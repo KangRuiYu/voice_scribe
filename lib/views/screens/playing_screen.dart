@@ -7,56 +7,62 @@ import 'package:voice_scribe/views/widgets/playback_slider.dart';
 import 'package:voice_scribe/views/widgets/duration_display.dart';
 import 'package:voice_scribe/views/widgets/custom_buttons.dart';
 import 'package:voice_scribe/utils/formatter.dart' as formatter;
+import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
 
 class PlayingScreen extends StatelessWidget {
-  final Player _player = Player();
+  final Recording recording;
 
-  PlayingScreen(Recording recording) {
-    _player.startPlayer(recording);
+  PlayingScreen({@required this.recording});
+
+  Future<Player> _initializePlayer() async {
+    Player player = Player();
+    await player.initialize();
+    await Future.delayed(Duration(seconds: 1));
+    player.startPlayer(recording);
+    return player;
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _player,
-      child: WillPopScope(
-        child: SafeArea(
-          child: _PlayingScreenScaffold(),
-        ),
-        onWillPop: () async {
-          _player.stopPlayer();
-          return true;
-        },
+    return Theme(
+      data: ThemeData(
+        primarySwatch: Colors.red,
       ),
-    );
-  }
-}
-
-class _PlayingScreenScaffold extends StatelessWidget {
-  // The scaffold of the playing screen
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Player')),
-      body: Padding(
-        padding: const EdgeInsets.only(
-          top: 0,
-          bottom: 32.0,
-          left: 32.0,
-          right: 32.0,
-        ),
-        child: Column(
-          children: [
-            _DetailsCard(),
-            const SizedBox(height: 10),
-            const Divider(),
-            const SizedBox(height: 20),
-            _PresuppliedPlaybackSlider(),
-            _CurrentAndTotalDurationDisplay(),
-            const SizedBox(height: 20),
-            _ButtonRow(),
-          ],
-        ),
+      child: FutureBuilder(
+        future: _initializePlayer(),
+        builder: (BuildContext context, AsyncSnapshot<Player> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return ChangeNotifierProvider.value(
+              value: snapshot.data,
+              child: WillPopScope(
+                child: AppbarScaffold(
+                  title: 'Player',
+                  body: Column(
+                    children: [
+                      _DetailsCard(),
+                      const SizedBox(height: 10),
+                      const Divider(),
+                      const SizedBox(height: 20),
+                      _PresuppliedPlaybackSlider(),
+                      _CurrentAndTotalDurationDisplay(),
+                      const SizedBox(height: 20),
+                      _ButtonRow(),
+                    ],
+                  ),
+                ),
+                onWillPop: () async {
+                  snapshot.data.stopPlayer();
+                  return true;
+                },
+              ),
+            );
+          } else {
+            return AppbarScaffold(
+              title: 'Player',
+              loadingBar: true,
+            );
+          }
+        },
       ),
     );
   }

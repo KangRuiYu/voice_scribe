@@ -26,8 +26,10 @@ class RecordingCard extends StatelessWidget {
 
   void playRecording(BuildContext context) {
     // Plays the recording that this card displays
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => PlayingScreen(_recording)));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => PlayingScreen(recording: _recording)));
   }
 
   void _removeRecording(BuildContext context, bool deleteFile) {
