@@ -69,10 +69,8 @@ class _PresuppliedPlaybackSlider extends StatelessWidget {
     return Consumer<Player>(
         builder: (BuildContext context, Player player, Widget child) {
       return PlaybackSlider(
-        player.playbackInfo(),
-        (double value) {
-          player.changePosition(Duration(milliseconds: value.toInt()));
-        },
+        stream: player.onProgress,
+        seekPlayerFunc: player.changePosition,
       );
     });
   }
@@ -88,13 +86,13 @@ class _CurrentAndTotalDurationDisplay extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             DurationDisplay(
-              stream: player.playbackInfo(),
+              stream: player.onProgress,
               textStyle: Theme.of(context).textTheme.subtitle1,
               useDuration: false,
             ),
             Text('  |  ', style: Theme.of(context).textTheme.subtitle1),
             DurationDisplay(
-              stream: player.playbackInfo(),
+              stream: player.onProgress,
               textStyle: Theme.of(context).textTheme.subtitle1,
             ),
           ],
