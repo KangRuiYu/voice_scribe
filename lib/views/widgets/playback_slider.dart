@@ -9,8 +9,10 @@ import 'package:voice_scribe/views/widgets/duration_label.dart';
 import 'package:voice_scribe/utils/mono_theme_constants.dart';
 
 class PlaybackSlider extends StatefulWidget {
-  // Expects to be able to access a Player from the given context
-  // and for it to be properly initialized before constructing.
+  // Used to view the current progress of the player playback and to control
+  // the positioning of the playback.
+  // Note: Expects to be able to access a Player from the given
+  // context and for it to be properly initialized before constructing.
   @override
   _PlaybackSliderState createState() => _PlaybackSliderState();
 }

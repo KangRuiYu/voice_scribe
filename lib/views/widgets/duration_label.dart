@@ -6,6 +6,9 @@ import 'package:voice_scribe/models/player.dart';
 import 'package:voice_scribe/utils/formatter.dart';
 
 class DurationLabel extends StatefulWidget {
+  // Displays duration of Player or Recorder.
+  // Note: Expects to be able to access a Player/Recorder from the given
+  // context and for it to be properly initialized before constructing.
   final bool displayProgress;
   final TextStyle textStyle;
 
