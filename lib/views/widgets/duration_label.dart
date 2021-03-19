@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:voice_scribe/models/player.dart';
+import 'package:voice_scribe/models/recorder.dart';
 
 import 'package:voice_scribe/utils/formatter.dart';
 
@@ -9,10 +10,12 @@ class DurationLabel extends StatefulWidget {
   // Displays duration of Player or Recorder.
   // Note: Expects to be able to access a Player/Recorder from the given
   // context and for it to be properly initialized before constructing.
+  final bool expectPlayer;
   final bool displayProgress;
   final TextStyle textStyle;
 
   DurationLabel({
+    this.expectPlayer = true,
     this.displayProgress = true,
     this.textStyle,
   });
@@ -27,7 +30,13 @@ class _DurationLabelState extends State<DurationLabel> {
 
   @override
   void initState() {
-    _listenToStream(Provider.of<Player>(context, listen: false).onProgress);
+    if (widget.expectPlayer) {
+      _listenToStream(Provider.of<Player>(context, listen: false).onProgress);
+    } else {
+      _listenToStream(
+        Provider.of<Recorder>(context, listen: false).progressInfo(),
+      );
+    }
     super.initState();
   }
 

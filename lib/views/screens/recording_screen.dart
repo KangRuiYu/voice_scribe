@@ -125,6 +125,7 @@ class _PresuppliedDuration extends StatelessWidget {
     return Consumer<Recorder>(builder: (context, recorder, child) {
       return DurationLabel(
         textStyle: Theme.of(context).textTheme.headline5,
+        expectPlayer: false,
       );
     });
   }
