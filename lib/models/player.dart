@@ -37,11 +37,17 @@ class PlayerNotInitializedException implements Exception {
 class Player extends ChangeNotifier {
   final FlutterSoundPlayer _player = FlutterSoundPlayer();
   Recording _recording; // The recording being played
-  StreamSubscription<PlaybackDisposition> _internalSub;
   bool _finished = false; // If the recording has finished playing
 
+  // Stream States
+  StreamController<PlaybackDisposition> _controller;
+  StreamSubscription<PlaybackDisposition>
+      _controllerInternalSub; // The stream used by the controller
+  StreamSubscription<PlaybackDisposition>
+      _internalSub; // The stream used by the player for seeking
+
   // States
-  Stream<PlaybackDisposition> get onProgress => _player.onProgress.where(
+  Stream<PlaybackDisposition> get onProgress => _controller.stream.where(
         (PlaybackDisposition playback) =>
             playback.position >= _startingPosition,
       );
@@ -60,13 +66,13 @@ class Player extends ChangeNotifier {
     // Must initialize the Player before using
     if (_player.isOpen()) throw PlayerAlreadyInitializedException();
     await _player.openAudioSession(withUI: true);
-    _listenToStream();
+    _initializeStreams();
   }
 
   Future<void> close() async {
     // Must close the Player when finished
     if (!_player.isOpen()) throw PlayerAlreadyClosedException();
-    await _closeStream();
+    await _closeStreams();
     await _player.closeAudioSession();
   }
 
@@ -96,6 +102,12 @@ class Player extends ChangeNotifier {
       defaultPauseResume: false,
       removeUIWhenStopped: true,
       whenFinished: () {
+        _controller.add(
+          PlaybackDisposition(
+            position: _currentProgress.duration,
+            duration: _currentProgress.duration,
+          ),
+        );
         _finished = true;
         playing = false;
         paused = false;
@@ -218,18 +230,30 @@ class Player extends ChangeNotifier {
     );
   }
 
-  void _listenToStream() {
-    // Begins listening to progress stream
-    _internalSub = _player.onProgress.listen(
-      // Player needs the raw stream to accurately change position
+  void _initializeStreams() {
+    // Initialize internal streams
+
+    // Setup safe stream
+    _controller = StreamController<PlaybackDisposition>.broadcast();
+    _controllerInternalSub =
+        _player.onProgress.where((_) => _controller.hasListener).listen(
+      (PlaybackDisposition newProgress) {
+        _controller.add(newProgress);
+      },
+    );
+
+    // Setup internal stream to keep up with the current playback (for seeking)
+    _internalSub = _controller.stream.listen(
       (PlaybackDisposition newProgress) {
         _currentProgress = newProgress;
       },
     );
   }
 
-  Future<void> _closeStream() async {
-    // Stops listening to the stream
+  Future<void> _closeStreams() async {
+    // Close streams
     await _internalSub.cancel();
+    await _controllerInternalSub.cancel();
+    await _controller.close();
   }
 }
