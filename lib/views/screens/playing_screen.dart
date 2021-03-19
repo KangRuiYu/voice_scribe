@@ -60,7 +60,8 @@ class PlayingScreen extends StatelessWidget {
                   ),
                 ),
                 onWillPop: () async {
-                  snapshot.data.stopPlayer();
+                  await snapshot.data.stopPlayer();
+                  await snapshot.data.close();
                   return true;
                 },
               ),
