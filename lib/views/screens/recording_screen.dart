@@ -53,7 +53,7 @@ class RecordingScreen extends StatelessWidget {
           child: _RecordingScreenScaffold(),
         ),
         onWillPop: () async {
-          _recorder.terminate();
+          await _recorder.terminate();
           return true;
         },
       ),
