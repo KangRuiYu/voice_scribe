@@ -5,6 +5,35 @@ import 'dart:async';
 
 import 'package:voice_scribe/models/recording.dart';
 
+class PlayerAlreadyInitializedException implements Exception {
+  static const String _message =
+      'Attempted to initialize an already initialized Player.';
+
+  @override
+  String toString() {
+    return '${super.toString()}: $_message';
+  }
+}
+
+class PlayerAlreadyClosedException implements Exception {
+  static const String _message = 'Attempted to close a non-open Player';
+
+  @override
+  String toString() {
+    return '${super.toString()}: $_message';
+  }
+}
+
+class PlayerNotInitializedException implements Exception {
+  final String _message;
+  PlayerNotInitializedException(this._message);
+
+  @override
+  String toString() {
+    return '${super.toString()}: $_message';
+  }
+}
+
 class Player extends ChangeNotifier {
   final FlutterSoundPlayer _player = FlutterSoundPlayer();
   Recording _recording; // The recording being played
@@ -27,16 +56,26 @@ class Player extends ChangeNotifier {
 
   Future<void> initialize() async {
     // Must initialize the Player before using
+    if (_player.isOpen()) throw PlayerAlreadyInitializedException();
     await _player.openAudioSession(withUI: true);
+    _listenToStream();
   }
 
   Future<void> close() async {
     // Must close the Player when finished
+    if (!_player.isOpen()) throw PlayerAlreadyClosedException();
+    await _closeStream();
     await _player.closeAudioSession();
   }
 
   Future<void> startPlayer(Recording recording) async {
     // Starts playing the given recording file
+    if (!_player.isOpen())
+      throw PlayerNotInitializedException(
+        'Attempted to start player without initializing it.',
+      );
+    if (active) await stopPlayer(); // Stop player if currently playing
+
     _finished = false;
     _recording = recording;
     await _player.setSubscriptionDuration(Duration(milliseconds: 100));
@@ -60,45 +99,65 @@ class Player extends ChangeNotifier {
     );
 
     currentProgress = PlaybackDisposition.zero();
-    _listenToStream();
 
     notifyListeners();
   }
 
   Future<void> stopPlayer() async {
     // Stops recording
-    await _closeStream();
+    if (!_player.isOpen())
+      throw PlayerNotInitializedException(
+        'Attempted to stop a player that is not initialized',
+      );
+    if (stopped) return; // Return if already stopped
     await _player.stopPlayer();
     notifyListeners();
   }
 
   Future<void> pausePlayer() async {
     // Pause the player
+    if (!_player.isOpen()) {
+      throw PlayerNotInitializedException(
+        'Attempted to pause a player that is not initialized',
+      );
+    }
+    if (paused || stopped) return;
     await _player.pausePlayer();
     notifyListeners();
   }
 
   Future<void> resumePlayer() async {
     // Resume the player
+    if (!_player.isOpen()) {
+      throw PlayerNotInitializedException(
+        'Attempted to resume a player that is not initialized',
+      );
+    }
+    if (playing || stopped) return;
     await _player.resumePlayer();
     notifyListeners();
   }
 
   Future<void> restartPlayer() async {
     // Restarts the player to play the last recording
-    if (_recording == null) // End if no recording found
-      return;
-
-    if (active || finished) {
-      // Stop player without ending the session if active or finished
-      await stopPlayer();
+    if (!_player.isOpen()) {
+      throw PlayerNotInitializedException(
+        'Attempted to restart a player that is not initialized',
+      );
     }
-
+    if (recording == null) return; // Terminate if no recording found
     await startPlayer(recording);
   }
 
   Future<void> changePosition(Duration duration) async {
     // Changes the players position. Must be playing or paused.
+    if (!_player.isOpen()) {
+      throw PlayerNotInitializedException(
+        'Attempted to change position of a player that is not initialized',
+      );
+    }
+    if (recording == null) return;
+
     _mutePlayback = true;
 
     // Clamp duration
@@ -107,7 +166,7 @@ class Player extends ChangeNotifier {
     else if (duration > currentProgress.duration)
       duration = currentProgress.duration;
 
-    if (finished) {
+    if (stopped) {
       // Restart player if it has finished
       await restartPlayer();
     }
