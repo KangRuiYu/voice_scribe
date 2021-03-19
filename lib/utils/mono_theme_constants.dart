@@ -9,3 +9,7 @@ const double PLAYBACK_SLIDER_THUMB_SIZE = 10;
 const double PLAYBACK_SLIDER_TRACK_HEIGHT = 8;
 
 const double LOADING_BAR_HEIGHT = 6;
+
+// Button
+const double BUTTON_RADIUS = 256.0;
+const double BUTTON_PADDING = 18.0;

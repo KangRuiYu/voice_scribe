@@ -45,9 +45,9 @@ class Player extends ChangeNotifier {
         (PlaybackDisposition playback) =>
             playback.position >= _startingPosition,
       );
-  bool get playing => _player.isPlaying;
-  bool get paused => _player.isPaused;
-  bool get stopped => _player.isStopped;
+  bool playing = false;
+  bool paused = false;
+  bool stopped = true;
   bool get finished => _finished; // If the player just finished a recording
   bool get active => playing || paused; // If the player is in a recording
 
@@ -97,11 +97,18 @@ class Player extends ChangeNotifier {
       removeUIWhenStopped: true,
       whenFinished: () {
         _finished = true;
+        playing = false;
+        paused = false;
+        stopped = true;
         notifyListeners();
       },
     );
 
     _currentProgress = PlaybackDisposition.zero();
+
+    playing = true;
+    paused = false;
+    stopped = false;
 
     notifyListeners();
   }
@@ -113,7 +120,13 @@ class Player extends ChangeNotifier {
         'Attempted to stop a player that is not initialized',
       );
     if (stopped) return; // Return if already stopped
+
     await _player.stopPlayer();
+
+    playing = false;
+    paused = false;
+    stopped = true;
+
     notifyListeners();
   }
 
@@ -125,7 +138,12 @@ class Player extends ChangeNotifier {
       );
     }
     if (paused || stopped) return;
+
     await _player.pausePlayer();
+
+    playing = false;
+    paused = true;
+
     notifyListeners();
   }
 
@@ -137,7 +155,12 @@ class Player extends ChangeNotifier {
       );
     }
     if (playing || stopped) return;
+
     await _player.resumePlayer();
+
+    playing = true;
+    paused = false;
+
     notifyListeners();
   }
 
@@ -167,21 +190,17 @@ class Player extends ChangeNotifier {
     else if (duration > _currentProgress.duration)
       duration = _currentProgress.duration;
 
-    if (stopped) {
-      // Restart player if it has finished
-      await restartPlayer();
-    }
-
-    bool wasPaused = paused;
+    if (stopped) await restartPlayer();
 
     await _player.seekToPlayer(duration);
 
     _startingPosition = duration;
 
-    if (wasPaused) {
-      // Notify listeners of state change (seekToPlayer resumes playback)
-      notifyListeners();
-    }
+    playing = true;
+    paused = false;
+    stopped = false;
+
+    notifyListeners();
   }
 
   Future<void> changePositionRelative(Duration duration) async {

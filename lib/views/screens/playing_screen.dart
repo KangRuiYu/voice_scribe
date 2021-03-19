@@ -4,9 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/models/player.dart';
 import 'package:voice_scribe/views/widgets/playback_slider.dart';
-import 'package:voice_scribe/views/widgets/custom_buttons.dart';
 import 'package:voice_scribe/utils/formatter.dart' as formatter;
 import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
+import 'package:voice_scribe/utils/mono_theme_constants.dart';
 
 class PlayingScreen extends StatelessWidget {
   final Recording recording;
@@ -25,6 +25,18 @@ class PlayingScreen extends StatelessWidget {
     return Theme(
       data: ThemeData(
         primarySwatch: Colors.red,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+              const EdgeInsets.all(BUTTON_PADDING),
+            ),
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(BUTTON_RADIUS),
+              ),
+            ),
+          ),
+        ),
       ),
       child: FutureBuilder(
         future: _initializePlayer(),
@@ -105,28 +117,25 @@ class _MainButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<Player>(
-        builder: (BuildContext context, Player player, Widget child) {
-      if (player.playing) {
-        return CircularIconButton(
-          iconData: Icons.pause,
-          onPressed: player.pausePlayer,
-        );
-      } else {
-        Function pressedFunc;
-
-        if (player.paused) // Choose function based on the state of the player
-          pressedFunc = player.resumePlayer;
-        else if (player.finished)
-          pressedFunc = player.restartPlayer;
-        else
-          pressedFunc = () => null;
-
-        return CircularIconButton(
-          iconData: Icons.play_arrow,
-          onPressed: pressedFunc,
-        );
-      }
-    });
+      builder: (BuildContext context, Player player, Widget child) {
+        if (player.playing) {
+          return CircularIconButton(
+            iconData: Icons.pause,
+            onPressed: player.pausePlayer,
+          );
+        } else if (player.paused) {
+          return CircularIconButton(
+            iconData: Icons.play_arrow,
+            onPressed: player.resumePlayer,
+          );
+        } else {
+          return CircularIconButton(
+            iconData: Icons.play_arrow,
+            onPressed: player.restartPlayer,
+          );
+        }
+      },
+    );
   }
 }
 

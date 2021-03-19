@@ -35,3 +35,27 @@ class AppbarScaffold extends StatelessWidget {
     );
   }
 }
+
+class CircularIconButton extends StatelessWidget {
+  // A filled icon button
+  final IconData iconData;
+  final Function onPressed;
+
+  CircularIconButton({
+    @required this.iconData,
+    @required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: Theme.of(context).elevatedButtonTheme.style.copyWith(
+            shape: MaterialStateProperty.all<CircleBorder>(
+              const CircleBorder(),
+            ),
+          ),
+      child: Icon(iconData),
+      onPressed: onPressed,
+    );
+  }
+}
