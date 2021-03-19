@@ -39,11 +39,12 @@ class Player extends ChangeNotifier {
   Recording _recording; // The recording being played
   StreamSubscription<PlaybackDisposition> _internalSub;
   bool _finished = false; // If the recording has finished playing
-  bool _mutePlayback =
-      false; // True if player is going to stop reporting the playback stream
 
   // States
-  Stream<PlaybackDisposition> get onProgress => _player.onProgress;
+  Stream<PlaybackDisposition> get onProgress => _player.onProgress.where(
+        (PlaybackDisposition playback) =>
+            playback.position >= _startingPosition,
+      );
   bool get playing => _player.isPlaying;
   bool get paused => _player.isPaused;
   bool get stopped => _player.isStopped;
@@ -51,8 +52,9 @@ class Player extends ChangeNotifier {
   bool get active => playing || paused; // If the player is in a recording
 
   Recording get recording => _recording;
-  PlaybackDisposition currentProgress =
+  PlaybackDisposition _currentProgress =
       PlaybackDisposition.zero(); // To be able to get the current progress
+  Duration _startingPosition = Duration();
 
   Future<void> initialize() async {
     // Must initialize the Player before using
@@ -78,6 +80,7 @@ class Player extends ChangeNotifier {
 
     _finished = false;
     _recording = recording;
+    _startingPosition = Duration();
     await _player.setSubscriptionDuration(Duration(milliseconds: 100));
 
     await _player.startPlayerFromTrack(
@@ -98,7 +101,7 @@ class Player extends ChangeNotifier {
       },
     );
 
-    currentProgress = PlaybackDisposition.zero();
+    _currentProgress = PlaybackDisposition.zero();
 
     notifyListeners();
   }
@@ -158,13 +161,11 @@ class Player extends ChangeNotifier {
     }
     if (recording == null) return;
 
-    _mutePlayback = true;
-
     // Clamp duration
     if (duration.isNegative)
       duration = Duration();
-    else if (duration > currentProgress.duration)
-      duration = currentProgress.duration;
+    else if (duration > _currentProgress.duration)
+      duration = _currentProgress.duration;
 
     if (stopped) {
       // Restart player if it has finished
@@ -175,17 +176,17 @@ class Player extends ChangeNotifier {
 
     await _player.seekToPlayer(duration);
 
+    _startingPosition = duration;
+
     if (wasPaused) {
       // Notify listeners of state change (seekToPlayer resumes playback)
       notifyListeners();
     }
-
-    _mutePlayback = false;
   }
 
   Future<void> changePositionRelative(Duration duration) async {
     // Change the players position relative to its current position. Positive is forward.
-    Duration newPosition = currentProgress.position + duration;
+    Duration newPosition = _currentProgress.position + duration;
     await changePosition(newPosition);
   }
 
@@ -201,8 +202,9 @@ class Player extends ChangeNotifier {
   void _listenToStream() {
     // Begins listening to progress stream
     _internalSub = _player.onProgress.listen(
+      // Player needs the raw stream to accurately change position
       (PlaybackDisposition newProgress) {
-        currentProgress = newProgress;
+        _currentProgress = newProgress;
       },
     );
   }
