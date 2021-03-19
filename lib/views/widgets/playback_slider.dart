@@ -94,12 +94,12 @@ class _PlaybackSliderState extends State<PlaybackSlider> {
             Row(
               children: [
                 const SizedBox(width: PLAYBACK_SLIDER_THUMB_SIZE),
-                DurationLabel(displayDuration: false),
+                DurationLabel.player(displayDuration: false),
               ],
             ),
             Row(
               children: [
-                DurationLabel(),
+                DurationLabel.player(),
                 const SizedBox(width: PLAYBACK_SLIDER_THUMB_SIZE),
               ],
             ),

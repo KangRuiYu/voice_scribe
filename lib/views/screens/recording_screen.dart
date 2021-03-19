@@ -123,9 +123,8 @@ class _PresuppliedDuration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<Recorder>(builder: (context, recorder, child) {
-      return DurationLabel(
+      return DurationLabel.recorder(
         textStyle: Theme.of(context).textTheme.headline5,
-        expectPlayer: false,
       );
     });
   }

@@ -10,15 +10,18 @@ class DurationLabel extends StatefulWidget {
   // Displays duration of Player or Recorder.
   // Note: Expects to be able to access a Player/Recorder from the given
   // context and for it to be properly initialized before constructing.
-  final bool expectPlayer;
+  final bool _player; // If showing duration for the player
   final bool displayDuration;
   final TextStyle textStyle;
 
-  DurationLabel({
-    this.expectPlayer = true,
+  DurationLabel.player({
     this.displayDuration = true,
     this.textStyle,
-  });
+  }) : _player = true;
+
+  DurationLabel.recorder({this.textStyle})
+      : _player = false,
+        displayDuration = true;
 
   @override
   _DurationLabelState createState() => _DurationLabelState();
@@ -30,7 +33,7 @@ class _DurationLabelState extends State<DurationLabel> {
 
   @override
   void initState() {
-    if (widget.expectPlayer) {
+    if (widget._player) {
       _listenToStream(Provider.of<Player>(context, listen: false).onProgress);
     } else {
       _listenToStream(
