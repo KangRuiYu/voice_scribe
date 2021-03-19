@@ -1,38 +1,40 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'package:flutter_sound/flutter_sound.dart';
+import 'package:voice_scribe/models/player.dart';
+import 'package:voice_scribe/utils/formatter.dart';
+
+import 'package:voice_scribe/views/widgets/duration_label.dart';
+import 'package:voice_scribe/utils/mono_theme_constants.dart';
 
 class PlaybackSlider extends StatefulWidget {
-  final Stream stream;
-  final Function seekPlayerFunc;
-
-  PlaybackSlider({
-    @required this.stream,
-    @required this.seekPlayerFunc,
-  });
-
+  // Expects to be able to access a Player from the given context
+  // and for it to be properly initialized before constructing.
   @override
   _PlaybackSliderState createState() => _PlaybackSliderState();
 }
 
 class _PlaybackSliderState extends State<PlaybackSlider> {
-  StreamSubscription<PlaybackDisposition> _subscription;
-  double _end;
-  double _currentValue;
+  StreamSubscription _subscription;
+  Function _seekFunc;
+  double _end = 1;
+  double _currentValue = 0;
   bool _sliding = false; // If the user is currently sliding the bar
 
   @override
   void initState() {
-    _subscription = _listenToStream(widget.stream);
+    _subscription = _listenToStream(
+      Provider.of<Player>(context, listen: false).onProgress,
+    );
+    _seekFunc = Provider.of<Player>(context, listen: false).changePosition;
     super.initState();
   }
 
-  StreamSubscription<PlaybackDisposition> _listenToStream(
-      Stream<PlaybackDisposition> stream) {
+  StreamSubscription _listenToStream(Stream stream) {
     // Creates a subscription out of the given stream
     return stream.where((_) => !_sliding).listen(
-      (PlaybackDisposition playback) {
+      (playback) {
         _end = playback.duration.inMilliseconds.toDouble();
         setState(
           () => _currentValue = playback.position.inMilliseconds.toDouble(),
@@ -42,23 +44,66 @@ class _PlaybackSliderState extends State<PlaybackSlider> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Slider(
-      min: 0,
-      max: _end != null ? _end : 1,
-      value: _currentValue != null ? _currentValue : 0,
-      onChanged: (double value) => setState(() => _currentValue = value),
-      onChangeStart: (_) => _sliding = true,
-      onChangeEnd: (double value) {
-        widget.seekPlayerFunc(Duration(milliseconds: value.toInt()));
-        _sliding = false;
-      },
-    );
-  }
-
-  @override
   void dispose() {
     _subscription.cancel(); // Cancel subscription to the stream
     super.dispose();
+  }
+
+  void onChanged(double value) {
+    setState(() => _currentValue = value);
+  }
+
+  void onChangeStart(double _) => _sliding = true;
+
+  void onChangeEnd(double value) {
+    _seekFunc(Duration(milliseconds: value.toInt()));
+    _sliding = false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Theme(
+          data: Theme.of(context).copyWith(
+            sliderTheme: SliderTheme.of(context).copyWith(
+              trackHeight: PLAYBACK_SLIDER_TRACK_HEIGHT,
+              overlayShape: const RoundSliderOverlayShape(
+                overlayRadius: PLAYBACK_SLIDER_THUMB_SIZE,
+              ),
+            ),
+          ),
+          child: Slider(
+            label:
+                formatDuration(Duration(milliseconds: _currentValue.toInt())),
+            divisions: 80,
+            min: 0,
+            max: _end,
+            value: _currentValue,
+            onChanged: onChanged,
+            onChangeStart: onChangeStart,
+            onChangeEnd: onChangeEnd,
+          ),
+        ),
+        const SizedBox(height: PADDING_SMALL),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const SizedBox(width: PLAYBACK_SLIDER_THUMB_SIZE),
+                DurationLabel(),
+              ],
+            ),
+            Row(
+              children: [
+                DurationLabel(displayProgress: false),
+                const SizedBox(width: PLAYBACK_SLIDER_THUMB_SIZE),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }

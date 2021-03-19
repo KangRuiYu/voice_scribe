@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/models/player.dart';
 import 'package:voice_scribe/views/widgets/playback_slider.dart';
-import 'package:voice_scribe/views/widgets/duration_display.dart';
 import 'package:voice_scribe/views/widgets/custom_buttons.dart';
 import 'package:voice_scribe/utils/formatter.dart' as formatter;
 import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
@@ -17,7 +16,6 @@ class PlayingScreen extends StatelessWidget {
   Future<Player> _initializePlayer() async {
     Player player = Player();
     await player.initialize();
-    await Future.delayed(Duration(seconds: 1));
     player.startPlayer(recording);
     return player;
   }
@@ -43,8 +41,7 @@ class PlayingScreen extends StatelessWidget {
                       const SizedBox(height: 10),
                       const Divider(),
                       const SizedBox(height: 20),
-                      _PresuppliedPlaybackSlider(),
-                      _CurrentAndTotalDurationDisplay(),
+                      PlaybackSlider(),
                       const SizedBox(height: 20),
                       _ButtonRow(),
                     ],
@@ -64,46 +61,6 @@ class PlayingScreen extends StatelessWidget {
           }
         },
       ),
-    );
-  }
-}
-
-class _PresuppliedPlaybackSlider extends StatelessWidget {
-  // A playback slider with all its required values provided by default
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<Player>(
-        builder: (BuildContext context, Player player, Widget child) {
-      return PlaybackSlider(
-        stream: player.onProgress,
-        seekPlayerFunc: player.changePosition,
-      );
-    });
-  }
-}
-
-class _CurrentAndTotalDurationDisplay extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<Player>(
-      builder: (BuildContext context, Player player, Widget child) {
-        return Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            DurationDisplay(
-              stream: player.onProgress,
-              textStyle: Theme.of(context).textTheme.subtitle1,
-              useDuration: false,
-            ),
-            Text('  |  ', style: Theme.of(context).textTheme.subtitle1),
-            DurationDisplay(
-              stream: player.onProgress,
-              textStyle: Theme.of(context).textTheme.subtitle1,
-            ),
-          ],
-        );
-      },
     );
   }
 }

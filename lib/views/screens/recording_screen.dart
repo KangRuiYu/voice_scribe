@@ -6,7 +6,7 @@ import 'package:voice_scribe/models/recorder.dart';
 import 'package:voice_scribe/models/recordings_manager.dart';
 import 'package:voice_scribe/models/recording.dart';
 
-import 'package:voice_scribe/views/widgets/duration_display.dart';
+import 'package:voice_scribe/views/widgets/duration_label.dart';
 import 'package:voice_scribe/views/widgets/volume_display.dart';
 
 import 'package:voice_scribe/views/widgets/custom_buttons.dart';
@@ -123,8 +123,7 @@ class _PresuppliedDuration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<Recorder>(builder: (context, recorder, child) {
-      return DurationDisplay(
-        stream: recorder.progressInfo(),
+      return DurationLabel(
         textStyle: Theme.of(context).textTheme.headline5,
       );
     });

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:voice_scribe/utils/mono_theme_constants.dart' as Constants;
+import 'package:voice_scribe/utils/mono_theme_constants.dart';
 
 class AppbarScaffold extends StatelessWidget {
   // A scaffold with an top appbar
@@ -21,13 +21,14 @@ class AppbarScaffold extends StatelessWidget {
           title: Text(title),
           bottom: loadingBar
               ? PreferredSize(
-                  child: LinearProgressIndicator(),
-                  preferredSize: Size(double.infinity, 6.0),
+                  child: const LinearProgressIndicator(),
+                  preferredSize:
+                      const Size(double.infinity, LOADING_BAR_HEIGHT),
                 )
               : null,
         ),
         body: Padding(
-          padding: const EdgeInsets.all(Constants.SCAFFOLD_PADDING),
+          padding: const EdgeInsets.all(SCAFFOLD_BODY_PADDING),
           child: body,
         ),
       ),
