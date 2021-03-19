@@ -11,12 +11,12 @@ class DurationLabel extends StatefulWidget {
   // Note: Expects to be able to access a Player/Recorder from the given
   // context and for it to be properly initialized before constructing.
   final bool expectPlayer;
-  final bool displayProgress;
+  final bool displayDuration;
   final TextStyle textStyle;
 
   DurationLabel({
     this.expectPlayer = true,
-    this.displayProgress = true,
+    this.displayDuration = true,
     this.textStyle,
   });
 
@@ -44,10 +44,10 @@ class _DurationLabelState extends State<DurationLabel> {
     // Starts listening on the stream
     _subscription = stream.listen(
       (data) {
-        if (widget.displayProgress)
-          setState(() => _currentDuration = data.position);
-        else
+        if (widget.displayDuration)
           setState(() => _currentDuration = data.duration);
+        else
+          setState(() => _currentDuration = data.position);
       },
     );
   }
