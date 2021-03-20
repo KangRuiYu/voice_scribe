@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/models/player.dart';
@@ -25,6 +26,13 @@ class PlayingScreen extends StatelessWidget {
     return Theme(
       data: ThemeData(
         primarySwatch: Colors.red,
+        brightness: Brightness.light,
+        textTheme: GoogleFonts.montserratTextTheme(),
+        primaryTextTheme: GoogleFonts.montserratTextTheme().apply(
+          bodyColor: Colors.white,
+          displayColor: Colors.white,
+        ),
+        iconTheme: IconThemeData(size: ICON_SIZE),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
             padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
@@ -37,6 +45,11 @@ class PlayingScreen extends StatelessWidget {
             ),
           ),
         ),
+        cardTheme: CardTheme(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(CARD_RADIUS),
+          ),
+        ),
       ),
       child: FutureBuilder(
         future: _initializePlayer(),
@@ -45,16 +58,13 @@ class PlayingScreen extends StatelessWidget {
             return ChangeNotifierProvider.value(
               value: snapshot.data,
               child: WillPopScope(
-                child: AppbarScaffold(
-                  title: 'Player',
+                child: FreeScaffold(
                   body: Column(
                     children: [
                       _DetailsCard(),
-                      const SizedBox(height: 10),
-                      const Divider(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: PADDING_LARGE),
                       PlaybackSlider(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: PADDING_MEDIUM),
                       _ButtonRow(),
                     ],
                   ),
@@ -67,9 +77,8 @@ class PlayingScreen extends StatelessWidget {
               ),
             );
           } else {
-            return AppbarScaffold(
-              title: 'Player',
-              loadingBar: true,
+            return FreeScaffold(
+              loading: true,
             );
           }
         },
@@ -81,35 +90,23 @@ class PlayingScreen extends StatelessWidget {
 class _ButtonRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<Player>(
-        builder: (BuildContext context, Player player, Widget child) {
-      Function backFunc;
-      Function forwardFunc;
-
-      if (player.active || player.finished) {
-        backFunc = () => player.changePositionRelative(Duration(seconds: -5));
-        forwardFunc =
-            () => player.changePositionRelative(Duration(seconds: 10));
-      } else {
-        backFunc = () => null;
-        forwardFunc = () => null;
-      }
-
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            icon: Icon(Icons.replay_5),
-            onPressed: backFunc,
-          ),
-          _MainButton(),
-          IconButton(
-            icon: Icon(Icons.forward_10),
-            onPressed: forwardFunc,
-          ),
-        ],
-      );
-    });
+    Player player = Provider.of<Player>(context, listen: false);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        MonoIconButton(
+          iconData: Icons.replay_5,
+          onPressed: () => player.changePositionRelative(Duration(seconds: -5)),
+        ),
+        SizedBox(width: PADDING_MEDIUM),
+        _MainButton(),
+        SizedBox(width: PADDING_MEDIUM),
+        MonoIconButton(
+          iconData: Icons.forward_10,
+          onPressed: () => player.changePositionRelative(Duration(seconds: 10)),
+        ),
+      ],
+    );
   }
 }
 
@@ -121,17 +118,17 @@ class _MainButton extends StatelessWidget {
       builder: (BuildContext context, Player player, Widget child) {
         if (player.playing) {
           return CircularIconButton(
-            iconData: Icons.pause,
+            iconData: Icons.pause_rounded,
             onPressed: player.pausePlayer,
           );
         } else if (player.paused) {
           return CircularIconButton(
-            iconData: Icons.play_arrow,
+            iconData: Icons.play_arrow_rounded,
             onPressed: player.resumePlayer,
           );
         } else {
           return CircularIconButton(
-            iconData: Icons.play_arrow,
+            iconData: Icons.play_arrow_rounded,
             onPressed: player.restartPlayer,
           );
         }
@@ -144,32 +141,40 @@ class _DetailsCard extends StatelessWidget {
   // Shows the details of the player's recording
   @override
   Widget build(BuildContext context) {
+    Recording recording = Provider.of<Player>(context, listen: false).recording;
     return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Container(
-          width: double.infinity,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  child: Icon(Icons.music_note),
-                ),
+      child: Container(
+        width: double.infinity,
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(PADDING_LARGE),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    recording.name,
+                    style: Theme.of(context).textTheme.headline5,
+                    // style: Theme.of(context).textTheme.headline5,
+                  ),
+                  const SizedBox(height: PADDING_SMALL),
+                  Text(
+                    formatter.formatDate(recording.date),
+                    style: Theme.of(context).textTheme.subtitle1,
+                  ),
+                  const SizedBox(height: PADDING_SMALL),
+                  Text(
+                    formatter.formatDuration(recording.duration),
+                    style: Theme.of(context).textTheme.subtitle2,
+                  ),
+                  const SizedBox(height: PADDING_SMALL),
+                  Text(
+                    recording.path,
+                    style: Theme.of(context).textTheme.caption,
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              Text(
-                Provider.of<Player>(context, listen: false).recording.name,
-                style: Theme.of(context).textTheme.headline6,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                formatter.formatDate(
-                    Provider.of<Player>(context, listen: false).recording.date),
-                style: Theme.of(context).textTheme.caption,
-              ),
-            ],
+            ),
           ),
         ),
       ),

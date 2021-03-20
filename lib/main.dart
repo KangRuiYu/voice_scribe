@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:voice_scribe/views/screens/main_screen.dart';
 import 'package:voice_scribe/models/recordings_manager.dart';
@@ -22,6 +22,7 @@ class VoiceScribe extends StatelessWidget {
     return ChangeNotifierProvider.value(
       value: _recordingsManager,
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Voice Scribe',
         theme: ThemeData(
           primarySwatch: Colors.red,
