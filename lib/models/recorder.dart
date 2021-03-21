@@ -30,7 +30,7 @@ class Recorder extends ChangeNotifier {
     }
 
     var dir = await getExternalStorageDirectory();
-    var recordingName = DateTime.now().toString();
+    var recordingName = _generateName();
     String outputFilePath = path.join(dir.path, '$recordingName.aac');
     _outputFile = File(outputFilePath);
     print(_outputFile.path);
@@ -142,5 +142,11 @@ class Recorder extends ChangeNotifier {
     // Returns True if microphone permissions have been granted
     var status = await Permission.microphone.status;
     return status == PermissionStatus.granted;
+  }
+
+  String _generateName() {
+    // Generates a unique name based on the current time (down to the second)
+    DateTime date = DateTime.now();
+    return '${date.month}-${date.day}-${date.year}-${date.hour}-${date.minute}-${date.second}';
   }
 }
