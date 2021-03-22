@@ -43,7 +43,7 @@ class VoiceScribe extends StatelessWidget {
               ),
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(BUTTON_RADIUS),
+                  borderRadius: BorderRadius.circular(RADIUS_LARGE),
                 ),
               ),
             ),
@@ -51,12 +51,23 @@ class VoiceScribe extends StatelessWidget {
           cardTheme: CardTheme(
             margin: EdgeInsets.zero,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(CARD_RADIUS),
+              borderRadius: BorderRadius.circular(RADIUS),
             ),
             elevation: ELEVATION,
           ),
-          bottomAppBarTheme: BottomAppBarTheme(
-            elevation: 16.0,
+          popupMenuTheme: PopupMenuThemeData(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(RADIUS),
+            ),
+          ),
+          dividerColor: Colors.black26,
+          dividerTheme: const DividerThemeData(thickness: DIVIDER_THICKNESS),
+          bottomSheetTheme: const BottomSheetThemeData(
+            shape: const RoundedRectangleBorder(
+              borderRadius: const BorderRadius.vertical(
+                top: const Radius.circular(RADIUS),
+              ),
+            ),
           ),
         ),
         home: MainScreen(),

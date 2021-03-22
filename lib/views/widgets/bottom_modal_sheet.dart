@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:voice_scribe/models/recordings_manager.dart';
 
 import 'package:voice_scribe/views/screens/import_screen.dart';
+import 'package:voice_scribe/utils/mono_theme_constants.dart';
 
 class BottomModalSheet extends StatelessWidget {
   // A bottom modal sheet that shows the apps common functions (settings, etc)
@@ -32,12 +33,12 @@ class BottomModalSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(24),
+      padding: const EdgeInsets.all(PADDING_LARGE),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           _SheetHandle(),
-          SizedBox(height: 16),
+          const SizedBox(height: PADDING_MEDIUM),
           _MenuButton(
             label: 'Sort by',
             iconData: Icons.sort,
@@ -111,11 +112,11 @@ class _SheetHandle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 36,
-      height: 6,
+      width: 36.0,
+      height: 6.0,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.black12,
+        borderRadius: BorderRadius.circular(RADIUS_LARGE),
+        color: Colors.black26,
       ),
     );
   }
@@ -135,9 +136,10 @@ class _MenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(Theme.of(context).dividerColor);
     return TextButton(
       style: TextButton.styleFrom(
-        primary: Theme.of(context).accentColor,
+        primary: Theme.of(context).textTheme.button.color,
         textStyle: Theme.of(context).textTheme.button.copyWith(
               fontWeight: FontWeight.w600,
             ),
