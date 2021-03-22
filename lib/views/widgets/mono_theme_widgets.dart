@@ -6,10 +6,16 @@ class FreeScaffold extends StatelessWidget {
   // A scaffold without any appbars
   final Widget body;
   final bool loading;
+  final Widget bottomAppbar;
+  final Widget floatingActionButton;
+  final FloatingActionButtonLocation floatingActionButtonLocation;
 
   FreeScaffold({
     @required this.body,
     this.loading = false,
+    this.bottomAppbar,
+    this.floatingActionButton,
+    this.floatingActionButtonLocation,
   });
 
   @override
@@ -25,13 +31,16 @@ class FreeScaffold extends StatelessWidget {
       child: SafeArea(
         child: Scaffold(
           body: Padding(
-            padding: const EdgeInsets.all(SCAFFOLD_BODY_PADDING),
+            padding: const EdgeInsets.all(PADDING_LARGE),
             child: loading
                 ? Center(
                     child: const CircularProgressIndicator(),
                   )
                 : body,
           ),
+          bottomNavigationBar: bottomAppbar,
+          floatingActionButton: floatingActionButton,
+          floatingActionButtonLocation: floatingActionButtonLocation,
         ),
       ),
     );
@@ -39,42 +48,76 @@ class FreeScaffold extends StatelessWidget {
 }
 
 class AppbarScaffold extends StatelessWidget {
-  // A scaffold with an top appbar
+  // A scaffold with a top appbar
   final String title;
   final Widget body;
   final bool loading;
+  final Widget bottomAppbar;
+  final List<Widget> actions;
+  final Widget floatingActionButton;
+  final FloatingActionButtonLocation floatingActionButtonLocation;
 
   AppbarScaffold({
     @required this.title,
     @required this.body,
     this.loading = false,
+    this.bottomAppbar,
+    this.actions,
+    this.floatingActionButton,
+    this.floatingActionButtonLocation,
   });
 
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          systemOverlayStyle: SystemUiOverlayStyle(
-            statusBarColor: theme.scaffoldBackgroundColor,
-            statusBarIconBrightness: theme.brightness == Brightness.light
-                ? Brightness.dark
-                : Brightness.light,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: theme.primaryColor,
+        statusBarIconBrightness: theme.brightness == Brightness.light
+            ? Brightness.dark
+            : Brightness.light,
+      ),
+      child: SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              title,
+              style: Theme.of(context).textTheme.headline6,
+            ),
+            actions: actions,
+            bottom: loading
+                ? PreferredSize(
+                    child: const LinearProgressIndicator(),
+                    preferredSize:
+                        const Size(double.infinity, LOADING_BAR_HEIGHT),
+                  )
+                : null,
           ),
-          title: Text(title),
-          bottom: loading
-              ? PreferredSize(
-                  child: const LinearProgressIndicator(),
-                  preferredSize:
-                      const Size(double.infinity, LOADING_BAR_HEIGHT),
-                )
-              : null,
+          body: body,
+          floatingActionButton: floatingActionButton,
+          floatingActionButtonLocation: floatingActionButtonLocation,
+          bottomNavigationBar: bottomAppbar,
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(SCAFFOLD_BODY_PADDING),
-          child: body,
-        ),
+      ),
+    );
+  }
+}
+
+class MonoBottomAppBar extends StatelessWidget {
+  // A properly themed bottom app bar
+  final Widget child;
+
+  MonoBottomAppBar({this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: BOTTOM_APPBAR_HEIGHT,
+      decoration: BoxDecoration(
+        boxShadow: kElevationToShadow[BOTTOM_APPBAR_ELEVATION],
+      ),
+      child: BottomAppBar(
+        child: child,
       ),
     );
   }
@@ -105,7 +148,7 @@ class CircularIconButton extends StatelessWidget {
 }
 
 class MonoIconButton extends StatelessWidget {
-  // A properly themed icon button
+  // Slightly bigger icon buttons
   final IconData iconData;
   final Function onPressed;
 

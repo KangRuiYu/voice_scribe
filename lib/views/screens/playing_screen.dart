@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/models/player.dart';
@@ -23,66 +22,37 @@ class PlayingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData(
-        primarySwatch: Colors.red,
-        brightness: Brightness.light,
-        textTheme: GoogleFonts.montserratTextTheme(),
-        primaryTextTheme: GoogleFonts.montserratTextTheme().apply(
-          bodyColor: Colors.white,
-          displayColor: Colors.white,
-        ),
-        iconTheme: IconThemeData(size: ICON_SIZE),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ButtonStyle(
-            padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-              const EdgeInsets.all(BUTTON_PADDING),
-            ),
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(BUTTON_RADIUS),
-              ),
-            ),
-          ),
-        ),
-        cardTheme: CardTheme(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(CARD_RADIUS),
-          ),
-        ),
-      ),
-      child: FutureBuilder(
-        future: _initializePlayer(),
-        builder: (BuildContext context, AsyncSnapshot<Player> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return ChangeNotifierProvider.value(
-              value: snapshot.data,
-              child: WillPopScope(
-                child: FreeScaffold(
-                  body: Column(
-                    children: [
-                      _DetailsCard(),
-                      const SizedBox(height: PADDING_LARGE),
-                      PlaybackSlider(),
-                      const SizedBox(height: PADDING_MEDIUM),
-                      _ButtonRow(),
-                    ],
-                  ),
+    return FutureBuilder(
+      future: _initializePlayer(),
+      builder: (BuildContext context, AsyncSnapshot<Player> snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return ChangeNotifierProvider.value(
+            value: snapshot.data,
+            child: WillPopScope(
+              child: FreeScaffold(
+                body: Column(
+                  children: [
+                    _DetailsCard(),
+                    const SizedBox(height: PADDING_LARGE),
+                    PlaybackSlider(),
+                    const SizedBox(height: PADDING_MEDIUM),
+                    _ButtonRow(),
+                  ],
                 ),
-                onWillPop: () async {
-                  await snapshot.data.stopPlayer();
-                  await snapshot.data.close();
-                  return true;
-                },
               ),
-            );
-          } else {
-            return FreeScaffold(
-              loading: true,
-            );
-          }
-        },
-      ),
+              onWillPop: () async {
+                await snapshot.data.stopPlayer();
+                await snapshot.data.close();
+                return true;
+              },
+            ),
+          );
+        } else {
+          return FreeScaffold(
+            loading: true,
+          );
+        }
+      },
     );
   }
 }

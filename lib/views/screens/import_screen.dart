@@ -7,7 +7,7 @@ import 'package:voice_scribe/models/recordings_manager.dart';
 import 'package:voice_scribe/utils/formatter.dart';
 
 import 'package:voice_scribe/views/widgets/custom_buttons.dart';
-import 'package:voice_scribe/views/widgets/themed_bottom_appbar.dart';
+import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
 
 class _ImportState extends ChangeNotifier {
   final RecordingsManager _recordingsManager;
@@ -61,10 +61,7 @@ class ImportScreen extends StatelessWidget {
           floatingActionButton: _ImportButton(),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerDocked,
-          bottomNavigationBar: ThemedBottomAppBar(
-            child: Center(),
-            notched: false,
-          ),
+          bottomNavigationBar: MonoBottomAppBar(),
         ),
       ),
     );

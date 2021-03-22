@@ -7,6 +7,8 @@ import 'package:voice_scribe/models/recordings_manager.dart';
 
 import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/views/screens/playing_screen.dart';
+import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
+import 'package:voice_scribe/utils/mono_theme_constants.dart';
 
 class RecordingCard extends StatelessWidget {
   // A card that displays the information of a single recording and common controls
@@ -41,22 +43,14 @@ class RecordingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(18)),
-      ),
-      margin: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 3,
-      ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
+          horizontal: PADDING_LARGE,
+          vertical: PADDING_MEDIUM,
         ),
-        title: _Title(_recording.name),
-        subtitle: _Details(
-          date: _recording.date,
-          duration: _recording.duration,
+        title: Text(_recording.name),
+        subtitle: Text(
+          '${formatDate(_recording.date)}\n${formatDuration(_recording.duration)}',
         ),
         trailing: _Buttons(
           playFunc: () => playRecording(context),
@@ -115,50 +109,6 @@ class _RemoveConfirmationPopupState extends State<RemoveConfirmationPopup> {
             widget.removeFunc(_deleteFile);
             Navigator.pop(context);
           },
-        ),
-      ],
-    );
-  }
-}
-
-class _Title extends StatelessWidget {
-  // The title of the card
-  final String _title;
-
-  _Title(this._title);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      _title,
-      style: Theme.of(context).textTheme.bodyText1,
-    );
-  }
-}
-
-class _Details extends StatelessWidget {
-  // The sub details like date and duration
-  final DateTime date;
-  final Duration duration;
-
-  _Details({
-    @required this.date,
-    @required this.duration,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          formatDate(date),
-          style: Theme.of(context).textTheme.caption,
-        ),
-        SizedBox(height: 6),
-        Text(
-          formatDuration(duration),
-          style: Theme.of(context).textTheme.caption,
         ),
       ],
     );
