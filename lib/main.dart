@@ -69,6 +69,10 @@ class VoiceScribe extends StatelessWidget {
               ),
             ),
           ),
+          dialogTheme: DialogTheme(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(RADIUS)),
+          ),
         ),
         home: MainScreen(),
       ),
