@@ -156,7 +156,7 @@ class _PausedButtons extends StatelessWidget {
         ),
         const SizedBox(width: PADDING_MEDIUM),
         CircularIconButton(
-          iconData: Icons.play_arrow,
+          iconData: Icons.play_arrow_rounded,
           onPressed: recorder.resumeRecording,
         ),
         const SizedBox(width: PADDING_MEDIUM),
