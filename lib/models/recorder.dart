@@ -10,24 +10,89 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:voice_scribe/models/recording.dart';
 
+class RecorderAlreadyInitializedException implements Exception {
+  static const String _message =
+      'Attempted to initialize an already initialized Recorder.';
+
+  @override
+  String toString() {
+    return '${super.toString()}: $_message';
+  }
+}
+
+class RecorderAlreadyClosedException implements Exception {
+  static const String _message = 'Attempted to close a non-open Recorder';
+
+  @override
+  String toString() {
+    return '${super.toString()}: $_message';
+  }
+}
+
+class RecorderNotInitializedException implements Exception {
+  final String _message;
+  RecorderNotInitializedException(this._message);
+
+  @override
+  String toString() {
+    return '${super.toString()}: $_message';
+  }
+}
+
+class RecorderAlreadyStopped implements Exception {
+  static const String _message =
+      'Attempted to stop an already stopped recorder';
+
+  @override
+  String toString() {
+    return '${super.toString()}: $_message';
+  }
+}
+
 class Recorder extends ChangeNotifier {
   FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   File _outputFile;
-  StreamSubscription _progressSubscription;
+  StreamSubscription<RecordingDisposition> _internalSub;
 
+  // States
+  Stream<RecordingDisposition> get onProgress => _recorder.onProgress;
   bool get recording => _recorder.isRecording;
   bool get paused => _recorder.isPaused;
+  bool get stopped => _recorder.isStopped;
+  bool get active => recording || paused;
+  bool opened = false;
   RecordingDisposition
       currentProgress; // To be able to get the current duration
   File get outputFile => _outputFile;
 
-  Future<void> startRecording() async {
-    // Starts the recording process
-    await _openAudioSession();
-
+  Future<void> initialize() async {
+    // Must initialize the Recorder before using
     if (!await _hasMicrophonePermission()) {
       _askForMicrophonePermission();
     }
+    if (opened) throw RecorderAlreadyInitializedException();
+
+    await _recorder.openAudioSession();
+    opened = true;
+    _initializeStream();
+  }
+
+  Future<void> close() async {
+    // Must close the Recorder when finished
+    if (!opened) throw RecorderAlreadyClosedException();
+    await _closeStream();
+    opened = false;
+    await _recorder.closeAudioSession();
+  }
+
+  Future<void> startRecording() async {
+    // Starts the recording process
+    if (!opened) {
+      throw RecorderNotInitializedException(
+        'Attempted to start recorder without initializing it',
+      );
+    }
+    if (active) await terminate(); // Stop recorder if currently recording
 
     var dir = await getExternalStorageDirectory();
     var recordingName = _generateName();
@@ -42,16 +107,18 @@ class Recorder extends ChangeNotifier {
       bitRate: 64000,
     );
 
-    _listenToStream();
-
     notifyListeners();
   }
 
   Future<Recording> stopRecording([String recordingName]) async {
     // Stops the recording process and returns the resulting file as a Recording
-    await _closeStream();
+    if (!opened)
+      throw RecorderNotInitializedException(
+        'Attempted to stop a recorder that is not initialized',
+      );
+    if (stopped) throw RecorderAlreadyStopped();
+
     await _recorder.stopRecorder();
-    _closeAudioSession();
 
     if (recordingName.isNotEmpty) {
       recordingName += '.aac';
@@ -73,64 +140,48 @@ class Recorder extends ChangeNotifier {
 
   Future<void> terminate() async {
     // Stops any ongoing recording and clean up any files left over
-    await _closeStream();
+    // Note: Must still close the recorder after
     await _recorder.stopRecorder();
-    _closeAudioSession();
     _outputFile.delete();
     _outputFile = null;
   }
 
   Future<void> pauseRecording() async {
     // Pause recording process
+    if (!opened)
+      throw RecorderNotInitializedException(
+        'Attempted to pause a recorder that is not initialized',
+      );
+    if (paused || stopped) return;
+
     await _recorder.pauseRecorder();
     notifyListeners();
   }
 
   Future<void> resumeRecording() async {
     // Resume recording process
+    if (!opened)
+      throw RecorderNotInitializedException(
+        'Attempted to resume a recorder that is not initialized',
+      );
+    if (recording || stopped) return;
+
     await _recorder.resumeRecorder();
     notifyListeners();
   }
 
-  Future<void> _openAudioSession() async {
-    // Audio session must be opened before recording can start
-    await _recorder.openAudioSession();
-  }
-
-  Stream<RecordingDisposition> progressInfo() async* {
-    // Returns a safe progress stream, one that will produce values even when
-    // the recorder is not ready.
-    RecordingDisposition latestProgress = RecordingDisposition.zero();
-    StreamSubscription<RecordingDisposition> internalSub =
-        _recorder.onProgress.listen((RecordingDisposition newProgress) {
-      latestProgress = newProgress;
-    });
-
-    try {
-      while (true) {
-        await Future.delayed(Duration(milliseconds: 100));
-        yield latestProgress;
-      }
-    } finally {
-      internalSub.cancel();
-    }
-  }
-
-  Future<void> _closeAudioSession() async {
-    await _recorder.closeAudioSession();
-  }
-
-  void _listenToStream() {
-    // Begins listening to progress stream
-    _progressSubscription =
-        progressInfo().listen((RecordingDisposition newProgress) {
-      currentProgress = newProgress;
-    });
+  void _initializeStream() {
+    // Initialize internal stream
+    _internalSub = _recorder.onProgress.listen(
+      (RecordingDisposition newProgress) {
+        currentProgress = newProgress;
+      },
+    );
   }
 
   Future<void> _closeStream() async {
-    // Stops listening to the stream
-    await _progressSubscription.cancel();
+    // Close stream
+    await _internalSub.cancel();
   }
 
   Future<void> _askForMicrophonePermission() async {

@@ -36,9 +36,7 @@ class _DurationLabelState extends State<DurationLabel> {
     if (widget._player) {
       _listenToStream(Provider.of<Player>(context, listen: false).onProgress);
     } else {
-      _listenToStream(
-        Provider.of<Recorder>(context, listen: false).progressInfo(),
-      );
+      _listenToStream(Provider.of<Recorder>(context, listen: false).onProgress);
     }
     super.initState();
   }

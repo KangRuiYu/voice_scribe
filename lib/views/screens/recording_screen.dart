@@ -9,7 +9,8 @@ import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/views/widgets/duration_label.dart';
 import 'package:voice_scribe/views/widgets/volume_display.dart';
 
-import 'package:voice_scribe/views/widgets/custom_buttons.dart';
+import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
+import 'package:voice_scribe/utils/mono_theme_constants.dart';
 
 class _SaveState extends ChangeNotifier {
   // The saving state (the name inputted and saving functions)
@@ -35,57 +36,53 @@ class _SaveState extends ChangeNotifier {
 
 class RecordingScreen extends StatelessWidget {
   // The screen when recording
-  final Recorder _recorder = Recorder();
+  final Recorder _recorder;
 
-  RecordingScreen() {
-    _recorder.startRecording();
+  RecordingScreen() : _recorder = Recorder();
+
+  Future<Recorder> _initializeRecorder() async {
+    await _recorder.initialize();
+    await _recorder.startRecording();
+    return _recorder;
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: _recorder),
-        ChangeNotifierProvider(create: (_) => _SaveState()),
-      ],
-      child: WillPopScope(
-        child: SafeArea(
-          child: _RecordingScreenScaffold(),
-        ),
-        onWillPop: () async {
-          await _recorder.terminate();
-          return true;
+    return WillPopScope(
+      onWillPop: () async {
+        if (_recorder.active) await _recorder.terminate();
+        if (_recorder.opened) await _recorder.close();
+        return true;
+      },
+      child: FutureBuilder(
+        future: _initializeRecorder(),
+        builder: (BuildContext context, AsyncSnapshot<Recorder> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return MultiProvider(
+              providers: [
+                ChangeNotifierProvider.value(value: snapshot.data),
+                ChangeNotifierProvider(create: (_) => _SaveState()),
+              ],
+              child: FreeScaffold(
+                body: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _RecordingView(),
+                    DurationLabel.recorder(
+                      textStyle: Theme.of(context).textTheme.subtitle1,
+                    ),
+                    const SizedBox(height: PADDING_MEDIUM),
+                    _Buttons(),
+                  ],
+                ),
+              ),
+            );
+          } else {
+            return FreeScaffold(
+              loading: true,
+            );
+          }
         },
-      ),
-    );
-  }
-}
-
-class _RecordingScreenScaffold extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Recorder')),
-      // resizeToAvoidBottomPadding: false,
-      body: Padding(
-        padding: const EdgeInsets.only(
-          top: 0,
-          bottom: 32.0,
-          left: 32.0,
-          right: 32.0,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _RecordingView(),
-            const SizedBox(height: 10),
-            const Divider(),
-            const SizedBox(height: 40),
-            _PresuppliedDuration(),
-            const SizedBox(height: 20),
-            _Buttons(),
-          ],
-        ),
       ),
     );
   }
@@ -95,38 +92,28 @@ class _RecordingView extends StatelessWidget {
   // Displays different views based on the state of the recorder
   @override
   Widget build(BuildContext context) {
-    return Consumer<Recorder>(builder: (context, recorder, child) {
-      if (recorder.recording) {
-        // While recording
-        return VolumeDisplay(
-          stream: Provider.of<Recorder>(context, listen: false).progressInfo(),
-          numberOfVolumeBars: 18,
-        );
-      } else {
-        // While paused
-        return Expanded(
-          child: TextField(
-            controller: Provider.of<_SaveState>(context, listen: false)
-                .textEditingController,
-            decoration: InputDecoration(
-              labelText: 'Recording Name',
+    _SaveState saveState = Provider.of<_SaveState>(context, listen: false);
+    return Consumer<Recorder>(
+      builder: (context, recorder, child) {
+        if (recorder.paused) {
+          // While paused
+          return Expanded(
+            child: TextField(
+              controller: saveState.textEditingController,
+              decoration: InputDecoration(
+                labelText: 'Recording Name',
+              ),
             ),
-          ),
-        );
-      }
-    });
-  }
-}
-
-class _PresuppliedDuration extends StatelessWidget {
-  // Displays duration when active and nothing when not
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<Recorder>(builder: (context, recorder, child) {
-      return DurationLabel.recorder(
-        textStyle: Theme.of(context).textTheme.headline5,
-      );
-    });
+          );
+        } else {
+          // While recording
+          return VolumeDisplay(
+            stream: recorder.onProgress,
+            numberOfVolumeBars: 18,
+          );
+        }
+      },
+    );
   }
 }
 
@@ -135,10 +122,10 @@ class _Buttons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<Recorder>(builder: (context, recorder, child) {
-      if (recorder.recording)
-        return _ActiveButtons();
-      else
+      if (recorder.paused)
         return _PausedButtons();
+      else
+        return _ActiveButtons();
     });
   }
 }
@@ -147,9 +134,8 @@ class _ActiveButtons extends StatelessWidget {
   // The buttons when active
   @override
   Widget build(BuildContext context) {
-    return RoundedButton(
-      leading: Icon(Icons.pause),
-      child: const Text('Pause'),
+    return CircularIconButton(
+      iconData: Icons.pause_rounded,
       onPressed: Provider.of<Recorder>(context, listen: false).pauseRecording,
     );
   }
@@ -159,26 +145,24 @@ class _PausedButtons extends StatelessWidget {
   // The buttons when paused
   @override
   Widget build(BuildContext context) {
+    _SaveState saveState = Provider.of<_SaveState>(context, listen: false);
+    Recorder recorder = Provider.of<Recorder>(context, listen: false);
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         TextButton(
           child: const Text('Save'),
-          onPressed: () => Provider.of<_SaveState>(context, listen: false)
-              .saveRecording(context),
+          onPressed: () => saveState.saveRecording(context),
         ),
-        SizedBox(width: 10),
-        RoundedButton(
-          leading: Icon(Icons.play_arrow),
-          child: const Text('Resume'),
-          onPressed:
-              Provider.of<Recorder>(context, listen: false).resumeRecording,
+        const SizedBox(width: PADDING_MEDIUM),
+        CircularIconButton(
+          iconData: Icons.play_arrow,
+          onPressed: recorder.resumeRecording,
         ),
-        SizedBox(width: 10),
+        const SizedBox(width: PADDING_MEDIUM),
         TextButton(
           child: const Text('Delete'),
-          onPressed: () => Provider.of<_SaveState>(context, listen: false)
-              .deleteRecording(context),
+          onPressed: () => saveState.deleteRecording(context),
         ),
       ],
     );

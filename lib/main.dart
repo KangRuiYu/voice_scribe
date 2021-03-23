@@ -27,12 +27,16 @@ class VoiceScribe extends StatelessWidget {
         title: 'Voice Scribe',
         theme: ThemeData(
           primarySwatch: Colors.red,
-          primaryColor: Colors.white,
           brightness: Brightness.light,
           visualDensity: VisualDensity.adaptivePlatformDensity,
           textTheme: GoogleFonts.montserratTextTheme(),
           appBarTheme: AppBarTheme(
+            color: Colors.white,
             elevation: ELEVATION,
+            actionsIconTheme: IconThemeData(
+              color: Colors.black,
+              size: ICON_SIZE,
+            ),
           ),
           iconTheme: IconThemeData(size: ICON_SIZE),
           elevatedButtonTheme: ElevatedButtonThemeData(

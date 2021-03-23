@@ -72,7 +72,7 @@ class AppbarScaffold extends StatelessWidget {
     ThemeData theme = Theme.of(context);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
-        statusBarColor: theme.primaryColor,
+        statusBarColor: theme.appBarTheme.color,
         statusBarIconBrightness: theme.brightness == Brightness.light
             ? Brightness.dark
             : Brightness.light,
