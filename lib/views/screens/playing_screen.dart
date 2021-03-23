@@ -10,25 +10,30 @@ import 'package:voice_scribe/utils/mono_theme_constants.dart';
 
 class PlayingScreen extends StatelessWidget {
   final Recording recording;
+  final Player _player;
 
-  PlayingScreen({@required this.recording});
+  PlayingScreen({@required this.recording}) : _player = Player();
 
   Future<Player> _initializePlayer() async {
-    Player player = Player();
-    await player.initialize();
-    player.startPlayer(recording);
-    return player;
+    await _player.initialize();
+    await _player.startPlayer(recording);
+    return _player;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _initializePlayer(),
-      builder: (BuildContext context, AsyncSnapshot<Player> snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return ChangeNotifierProvider.value(
-            value: snapshot.data,
-            child: WillPopScope(
+    return WillPopScope(
+      onWillPop: () async {
+        if (_player.active) await _player.stopPlayer();
+        if (_player.opened) await _player.close();
+        return true;
+      },
+      child: FutureBuilder(
+        future: _initializePlayer(),
+        builder: (BuildContext context, AsyncSnapshot<Player> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return ChangeNotifierProvider.value(
+              value: snapshot.data,
               child: FreeScaffold(
                 body: Column(
                   children: [
@@ -40,19 +45,14 @@ class PlayingScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              onWillPop: () async {
-                await snapshot.data.stopPlayer();
-                await snapshot.data.close();
-                return true;
-              },
-            ),
-          );
-        } else {
-          return FreeScaffold(
-            loading: true,
-          );
-        }
-      },
+            );
+          } else {
+            return FreeScaffold(
+              loading: true,
+            );
+          }
+        },
+      ),
     );
   }
 }

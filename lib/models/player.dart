@@ -54,6 +54,7 @@ class Player extends ChangeNotifier {
   bool playing = false;
   bool paused = false;
   bool stopped = true;
+  bool get opened => _player.isOpen();
   bool get finished => _finished; // If the player just finished a recording
   bool get active => playing || paused; // If the player is in a recording
 
