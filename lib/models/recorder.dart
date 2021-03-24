@@ -63,7 +63,11 @@ class Recorder extends ChangeNotifier {
   bool opened = false;
   RecordingDisposition
       currentProgress; // To be able to get the current duration
-  File get outputFile => _outputFile;
+
+  StreamController<Food> _pcmController; // The pcm stream controller
+  StreamSubscription<Food> _pcmSub; // The pcm stream subscription
+  File get outputFile => _outputFile; // The final output of the recorder
+  IOSink _outputFileSink; // The IOStream that writes to the output file
 
   Future<void> initialize() async {
     // Must initialize the Recorder before using
@@ -96,13 +100,13 @@ class Recorder extends ChangeNotifier {
 
     var dir = await getExternalStorageDirectory();
     var recordingName = _generateName();
-    String outputFilePath = path.join(dir.path, '$recordingName.aac');
+    String outputFilePath = path.join(dir.path, '$recordingName.pcm');
     _outputFile = File(outputFilePath);
-    print(_outputFile.path);
+    _outputFileSink = _outputFile.openWrite();
 
     await _recorder.startRecorder(
-      codec: Codec.aacADTS,
-      toFile: _outputFile.path,
+      codec: Codec.pcm16,
+      toStream: _pcmController.sink,
       sampleRate: 44100,
       bitRate: 64000,
     );
@@ -120,12 +124,18 @@ class Recorder extends ChangeNotifier {
 
     await _recorder.stopRecorder();
 
+    // Close and finalize output file
+    await _outputFileSink.flush();
+    await _outputFileSink.close();
+
+    // Rename file if a recording name is given
     if (recordingName.isNotEmpty) {
-      recordingName += '.aac';
-      Directory parentDir = _outputFile.parent;
-      String newPath = path.join(parentDir.path, recordingName);
+      String newPath = path.join(_outputFile.parent.path, '$recordingName.pcm');
       _outputFile = _outputFile.renameSync(newPath);
     }
+
+    // Convert file
+    _outputFile = await _convertPCM(_outputFile);
 
     Recording recording = Recording(
       file: _outputFile,
@@ -142,6 +152,10 @@ class Recorder extends ChangeNotifier {
     // Stops any ongoing recording and clean up any files left over
     // Note: Must still close the recorder after
     await _recorder.stopRecorder();
+
+    await _outputFileSink.flush();
+    await _outputFileSink.close();
+
     _outputFile.delete();
     _outputFile = null;
   }
@@ -171,10 +185,22 @@ class Recorder extends ChangeNotifier {
   }
 
   void _initializeStream() {
-    // Initialize internal stream
+    // Initialize internal streams
+
+    // Disposition Stream
     _internalSub = _recorder.onProgress.listen(
       (RecordingDisposition newProgress) {
         currentProgress = newProgress;
+      },
+    );
+
+    // Raw Audio Stream
+    _pcmController = StreamController<Food>();
+    _pcmSub = _pcmController.stream.listen(
+      (Food food) {
+        if (food is FoodData) {
+          _outputFileSink.add(food.data);
+        }
       },
     );
   }
@@ -182,6 +208,8 @@ class Recorder extends ChangeNotifier {
   Future<void> _closeStream() async {
     // Close stream
     await _internalSub.cancel();
+    _pcmSub.cancel();
+    _pcmController.close();
   }
 
   Future<void> _askForMicrophonePermission() async {
@@ -199,5 +227,36 @@ class Recorder extends ChangeNotifier {
     // Generates a unique name based on the current time (down to the second)
     DateTime date = DateTime.now();
     return '${date.month}-${date.day}-${date.year}-${date.hour}-${date.minute}-${date.second}';
+  }
+
+  Future<File> _convertPCM(File pcmFile) async {
+    // Convert a PCM file to an .aac file
+    // Note: Removes the source files
+
+    // Compute Helpful Values
+    String parentPath = pcmFile.parent.path;
+    String pcmFileName = path.basenameWithoutExtension(pcmFile.path);
+    FlutterSoundHelper helper = FlutterSoundHelper();
+
+    // Convert to wave
+    String wavePath = path.join(parentPath, '$pcmFileName.wav');
+    await helper.pcmToWave(
+      inputFile: pcmFile.path,
+      outputFile: wavePath,
+      sampleRate: 44100,
+    );
+    pcmFile.deleteSync();
+
+    // Convert to aac
+    String aacPath = path.join(parentPath, '$pcmFileName.aac');
+    await helper.convertFile(
+      wavePath,
+      Codec.pcm16WAV,
+      aacPath,
+      Codec.aacADTS,
+    );
+    File(wavePath).deleteSync();
+
+    return File(aacPath);
   }
 }

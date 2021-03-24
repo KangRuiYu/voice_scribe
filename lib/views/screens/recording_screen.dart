@@ -57,7 +57,8 @@ class RecordingScreen extends StatelessWidget {
       child: FutureBuilder(
         future: _initializeRecorder(),
         builder: (BuildContext context, AsyncSnapshot<Recorder> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.connectionState == ConnectionState.done &&
+              snapshot.hasData) {
             return MultiProvider(
               providers: [
                 ChangeNotifierProvider.value(value: snapshot.data),
