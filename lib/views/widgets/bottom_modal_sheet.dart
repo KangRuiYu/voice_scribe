@@ -136,7 +136,6 @@ class _MenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(Theme.of(context).dividerColor);
     return TextButton(
       style: TextButton.styleFrom(
         primary: Theme.of(context).textTheme.button.color,
