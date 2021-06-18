@@ -228,7 +228,7 @@ class Player extends ChangeNotifier {
       trackTitle: recording.name,
       trackAuthor: 'Unknown author',
       trackPath: recording.path,
-      codec: Codec.aacADTS,
+      codec: Codec.pcm16,
     );
   }
 
