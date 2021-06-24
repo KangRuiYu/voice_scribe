@@ -60,7 +60,7 @@ packages:
   deep_speech_dart:
     dependency: "direct main"
     description:
-      path: "../deep_speech_dart"
+      path: "local_packages/deep_speech_dart"
       relative: true
     source: path
     version: "0.0.1"
