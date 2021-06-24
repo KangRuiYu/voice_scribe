@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:voice_scribe/models/recording.dart';
+import 'package:deep_speech_dart/deep_speech_dart.dart';
 
 class RecorderAlreadyInitializedException implements Exception {
   static const String _message =
@@ -52,6 +53,7 @@ class RecorderAlreadyStopped implements Exception {
 class Recorder extends ChangeNotifier {
   FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   StreamSubscription<RecordingDisposition> _internalSub;
+  StreamController<FoodData> _audioData;
   RecordingFileStream _recordingFileStream;
 
   // States
@@ -93,14 +95,16 @@ class Recorder extends ChangeNotifier {
     }
     if (active) await terminate(); // Stop recorder if currently recording
 
+    // Create new recording file
     var dir = await getExternalStorageDirectory();
     var recordingName = _generateName();
     String outputFilePath = path.join(dir.path, '$recordingName.pcm');
-    _recordingFileStream = RecordingFileStream(outputFilePath);
+    _recordingFileStream =
+        RecordingFileStream(outputFilePath, _audioData.stream);
 
     await _recorder.startRecorder(
       codec: Codec.pcm16,
-      toStream: _recordingFileStream.sink,
+      toStream: _audioData.sink,
       sampleRate: 16000,
       bitRate: 64000,
     );
@@ -132,6 +136,15 @@ class Recorder extends ChangeNotifier {
       duration: currentProgress.duration,
     );
     _recordingFileStream = null;
+
+    DeepSpeech transcriber = DeepSpeech();
+    String modelPath = path.join(
+      (await getExternalStorageDirectory()).path,
+      'deepspeech-0.9.2-models.tflite',
+    );
+    await transcriber.initialize(modelPath);
+    await transcriber.feedAudioContent(finalFile.readAsBytesSync());
+    print(await transcriber.finish());
 
     notifyListeners();
 
@@ -175,6 +188,8 @@ class Recorder extends ChangeNotifier {
 
   void _initializeStream() {
     // Initialize internal streams
+    _audioData = StreamController<FoodData>.broadcast();
+
     _internalSub = _recorder.onProgress.listen(
       (RecordingDisposition newProgress) {
         currentProgress = newProgress;
@@ -185,6 +200,7 @@ class Recorder extends ChangeNotifier {
   Future<void> _closeStream() async {
     // Close stream
     await _internalSub.cancel();
+    await _audioData.close();
   }
 
   Future<void> _askForMicrophonePermission() async {
@@ -207,19 +223,16 @@ class Recorder extends ChangeNotifier {
 
 // Handles the writing of PCM data into a wav file.
 class RecordingFileStream {
-  StreamController<Food> _controller; // The stream controller for pcm data
-  StreamSubscription<Food> _internalSub; // The sub to pcm stream
+  StreamSubscription<Food> _audioSubscription; // The sub to the PCM data
 
   File _outputFile; // The file being written to
   IOSink _outputFileSink; // The IOStream of the output file
 
-  RecordingFileStream(String filePath) {
-    _controller = StreamController<Food>();
-
+  RecordingFileStream(String filePath, Stream<FoodData> audioStream) {
     _outputFile = File(filePath);
     _outputFileSink = _outputFile.openWrite();
 
-    _internalSub = _controller.stream.listen(
+    _audioSubscription = audioStream.listen(
       (Food food) {
         if (food is FoodData) {
           _outputFileSink.add(food.data);
@@ -230,15 +243,11 @@ class RecordingFileStream {
 
   // Ends the output stream, returning the final wav file.
   Future<File> close() async {
-    await _internalSub.cancel();
-    await _controller.close();
+    await _audioSubscription.cancel();
     await _outputFileSink.flush();
     await _outputFileSink.close();
     return await _convertPcmToWave(_outputFile);
   }
-
-  // Getter for the sink for pcm data.
-  StreamSink<Food> get sink => _controller.sink;
 
   // Converts the given PCM file to a wav file and returns it.
   // Deletes the original PCM file in the process.
