@@ -3,6 +3,7 @@ import 'package:flutter_sound/flutter_sound.dart';
 
 import 'dart:io';
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
@@ -96,11 +97,11 @@ class Recorder extends ChangeNotifier {
     if (active) await terminate(); // Stop recorder if currently recording
 
     // Create new recording file
-    var dir = await getExternalStorageDirectory();
-    var recordingName = _generateName();
-    String outputFilePath = path.join(dir.path, '$recordingName.pcm');
-    _recordingFileStream =
-        RecordingFileStream(outputFilePath, _audioData.stream);
+    _recordingFileStream = RecordingFileStream(
+      directoryPath: (await getExternalStorageDirectory()).path,
+      fileName: _generateName(),
+      audioStream: _audioData.stream,
+    );
 
     await _recorder.startRecorder(
       codec: Codec.pcm16,
@@ -221,21 +222,38 @@ class Recorder extends ChangeNotifier {
   }
 }
 
-// Handles the writing of PCM data into a wav file.
+// Handles the writing of a wav file
 class RecordingFileStream {
-  StreamSubscription<Food> _audioSubscription; // The sub to the PCM data
+  static final FlutterSoundHelper helper = FlutterSoundHelper();
+
+  StreamSubscription<Food> _audioSubscription; // The sub to the audio data
 
   File _outputFile; // The file being written to
   IOSink _outputFileSink; // The IOStream of the output file
 
-  RecordingFileStream(String filePath, Stream<FoodData> audioStream) {
-    _outputFile = File(filePath);
+  bool _addedHeader = false;
+
+  RecordingFileStream({
+    String directoryPath,
+    String fileName,
+    Stream<FoodData> audioStream,
+  }) {
+    _outputFile = File(path.join(directoryPath, '$fileName.wav'));
     _outputFileSink = _outputFile.openWrite();
 
     _audioSubscription = audioStream.listen(
-      (Food food) {
+      (Food food) async {
         if (food is FoodData) {
-          _outputFileSink.add(food.data);
+          if (_addedHeader) {
+            _outputFileSink.add(food.data);
+          } else {
+            var newBuffer =
+                await helper.pcmToWaveBuffer(inputBuffer: food.data);
+            _outputFileSink.add(
+              newBuffer,
+            );
+            _addedHeader = true;
+          }
         }
       },
     );
@@ -246,25 +264,24 @@ class RecordingFileStream {
     await _audioSubscription.cancel();
     await _outputFileSink.flush();
     await _outputFileSink.close();
-    return await _convertPcmToWave(_outputFile);
+    await updateWavHeaderByteInfo();
+    return _outputFile;
   }
 
-  // Converts the given PCM file to a wav file and returns it.
-  // Deletes the original PCM file in the process.
-  Future<File> _convertPcmToWave(File file) async {
-    String fileName = path.basenameWithoutExtension(file.path);
-    String parentPath = file.parent.path;
+  // Updates the recorded byte length of the data in the wav header of the file.
+  Future<void> updateWavHeaderByteInfo() async {
+    RandomAccessFile fileAccess = await _outputFile.open(mode: FileMode.append);
+    await fileAccess.setPosition(41);
 
-    String wavePath = path.join(parentPath, '$fileName.wav');
+    Uint8List intAsByteBuffer = Uint8List(4);
+    intAsByteBuffer.buffer.asByteData().setInt32(
+          0,
+          fileAccess.lengthSync() - 44,
+          Endian.little,
+        );
 
-    await FlutterSoundHelper().pcmToWave(
-      inputFile: file.path,
-      outputFile: wavePath,
-      sampleRate: 16000,
-    );
+    await fileAccess.writeFrom(intAsByteBuffer);
 
-    file.deleteSync();
-
-    return File(wavePath);
+    fileAccess.close();
   }
 }
