@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import 'package:voice_scribe/utils/mono_theme_constants.dart';
-import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
-import 'package:voice_scribe/views/widgets/bottom_modal_sheet.dart';
-import 'package:voice_scribe/views/screens/recording_screen.dart';
-import 'package:voice_scribe/views/widgets/recordings_display.dart';
 import 'package:voice_scribe/models/recordings_manager.dart';
+import 'package:voice_scribe/views/screens/recording_screen.dart';
+import 'package:voice_scribe/views/widgets/bottom_modal_sheet.dart';
+import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
+import 'package:voice_scribe/views/widgets/recordings_display.dart';
 
 class MainScreen extends StatelessWidget {
   void startRecording(BuildContext context) {

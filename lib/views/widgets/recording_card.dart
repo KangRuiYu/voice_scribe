@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import 'package:voice_scribe/utils/formatter.dart';
-
-import 'package:voice_scribe/models/recordings_manager.dart';
-
 import 'package:voice_scribe/models/recording.dart';
+import 'package:voice_scribe/models/recordings_manager.dart';
+import 'package:voice_scribe/utils/formatter.dart';
+import 'package:voice_scribe/utils/mono_theme_constants.dart';
 import 'package:voice_scribe/views/screens/playing_screen.dart';
 import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
-import 'package:voice_scribe/utils/mono_theme_constants.dart';
 
 class RecordingCard extends StatelessWidget {
   // A card that displays the information of a single recording and common controls

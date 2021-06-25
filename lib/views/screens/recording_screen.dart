@@ -1,16 +1,13 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:voice_scribe/models/recorder.dart';
-import 'package:voice_scribe/models/recordings_manager.dart';
 import 'package:voice_scribe/models/recording.dart';
-
-import 'package:voice_scribe/views/widgets/duration_label.dart';
-import 'package:voice_scribe/views/widgets/volume_display.dart';
-
-import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
+import 'package:voice_scribe/models/recordings_manager.dart';
 import 'package:voice_scribe/utils/mono_theme_constants.dart';
+import 'package:voice_scribe/views/widgets/duration_label.dart';
+import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
+import 'package:voice_scribe/views/widgets/volume_display.dart';
 
 class _SaveState extends ChangeNotifier {
   // The saving state (the name inputted and saving functions)

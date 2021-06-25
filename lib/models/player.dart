@@ -1,8 +1,7 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter_sound/flutter_sound.dart';
-
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 import 'package:voice_scribe/models/recording.dart';
 
 class PlayerAlreadyInitializedException implements Exception {

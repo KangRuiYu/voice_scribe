@@ -1,12 +1,11 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:voice_scribe/models/player.dart';
 import 'package:voice_scribe/utils/formatter.dart';
-
-import 'package:voice_scribe/views/widgets/duration_label.dart';
 import 'package:voice_scribe/utils/mono_theme_constants.dart';
+import 'package:voice_scribe/views/widgets/duration_label.dart';
 
 class PlaybackSlider extends StatefulWidget {
   // Used to view the current progress of the player playback and to control

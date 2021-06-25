@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/models/player.dart';
-import 'package:voice_scribe/views/widgets/playback_slider.dart';
+import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/utils/formatter.dart' as formatter;
-import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
 import 'package:voice_scribe/utils/mono_theme_constants.dart';
+import 'package:voice_scribe/views/widgets/playback_slider.dart';
+import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
 
 class PlayingScreen extends StatelessWidget {
   final Recording recording;

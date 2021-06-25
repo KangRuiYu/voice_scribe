@@ -1,16 +1,13 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:deep_speech_dart/deep_speech_dart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-
-import 'dart:io';
-import 'dart:async';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-
 import 'package:permission_handler/permission_handler.dart';
-
 import 'package:voice_scribe/models/recording.dart';
-import 'package:deep_speech_dart/deep_speech_dart.dart';
-
 import 'package:voice_scribe/models/wav_writer.dart';
 
 class RecorderAlreadyInitializedException implements Exception {

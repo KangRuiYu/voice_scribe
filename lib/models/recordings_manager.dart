@@ -1,10 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
-import 'dart:convert';
-
+import 'package:path_provider/path_provider.dart';
 import 'package:voice_scribe/models/recording.dart';
 
 class RecordingsManager extends ChangeNotifier {
