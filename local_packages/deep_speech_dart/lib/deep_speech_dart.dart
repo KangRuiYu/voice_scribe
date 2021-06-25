@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
+import 'package:deep_speech_dart/deep_speech_exceptions.dart';
 
 class DeepSpeech {
   static const MethodChannel _channel = const MethodChannel('deep_speech_dart');
@@ -12,6 +14,7 @@ class DeepSpeech {
   }
 
   Future<void> initialize(String modelPath) {
+    if (!File(modelPath).existsSync()) throw ModelDoesNotExist();
     return _channel.invokeMethod('initialize', modelPath);
   }
 
@@ -28,6 +31,7 @@ class DeepSpeech {
   }
 
   Future<void> enableExternalScorer(String scorer) {
+    if (!File(scorer).existsSync()) throw ScorerDoesNotExist();
     return _channel.invokeMethod('enableExternalScorer', scorer);
   }
 
@@ -55,6 +59,7 @@ class DeepSpeech {
   }
 
   Future<void> feedAudioContent(Uint8List byteBuffer) {
+    if (byteBuffer.length.isOdd) throw InvalidByteBuffer();
     return _channel.invokeMethod('feedAudioContent', byteBuffer);
   }
 
@@ -63,6 +68,7 @@ class DeepSpeech {
   }
 
   Future<Metadata> intermediateDecodeWithMetadata(int maxResults) async {
+    if (maxResults.isNegative) throw NegativeResults();
     return Metadata.fromList(await _channel.invokeMethod(
         'intermediateDecodeWithMetadata', maxResults));
   }
@@ -84,6 +90,7 @@ class DeepSpeech {
   }
 
   Future<Metadata> finishWithMetadata(int maxResults) async {
+    if (maxResults.isNegative) throw NegativeResults();
     return Metadata.fromList(
         await _channel.invokeMethod('finishWithMetadata', maxResults));
   }
