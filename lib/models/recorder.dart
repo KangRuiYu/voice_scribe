@@ -3,7 +3,6 @@ import 'package:flutter_sound/flutter_sound.dart';
 
 import 'dart:io';
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
@@ -11,6 +10,8 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:voice_scribe/models/recording.dart';
 import 'package:deep_speech_dart/deep_speech_dart.dart';
+
+import 'package:voice_scribe/models/wav_writer.dart';
 
 class RecorderAlreadyInitializedException implements Exception {
   static const String _message =
@@ -55,7 +56,7 @@ class Recorder extends ChangeNotifier {
   FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   StreamSubscription<RecordingDisposition> _internalSub;
   StreamController<FoodData> _audioData;
-  RecordingFileStream _recordingFileStream;
+  WavWriter _wavWriter;
 
   // States
   Stream<RecordingDisposition> get onProgress => _recorder.onProgress;
@@ -97,7 +98,7 @@ class Recorder extends ChangeNotifier {
     if (active) await terminate(); // Stop recorder if currently recording
 
     // Create new recording file
-    _recordingFileStream = RecordingFileStream(
+    _wavWriter = WavWriter(
       directoryPath: (await getExternalStorageDirectory()).path,
       fileName: _generateName(),
       audioStream: _audioData.stream,
@@ -124,7 +125,7 @@ class Recorder extends ChangeNotifier {
     await _recorder.stopRecorder();
 
     // Close and finalize output file
-    File finalFile = await _recordingFileStream.close();
+    File finalFile = await _wavWriter.close();
 
     // Rename file if a recording name is given
     if (recordingName.isNotEmpty) {
@@ -136,7 +137,7 @@ class Recorder extends ChangeNotifier {
       file: finalFile,
       duration: currentProgress.duration,
     );
-    _recordingFileStream = null;
+    _wavWriter = null;
 
     DeepSpeech transcriber = DeepSpeech();
     String modelPath = path.join(
@@ -157,10 +158,10 @@ class Recorder extends ChangeNotifier {
     // Note: Must still close the recorder after
     await _recorder.stopRecorder();
 
-    File leftOverFile = await _recordingFileStream.close();
+    File leftOverFile = await _wavWriter.close();
 
     leftOverFile.delete();
-    _recordingFileStream = null;
+    _wavWriter = null;
   }
 
   Future<void> pauseRecording() async {
@@ -219,69 +220,5 @@ class Recorder extends ChangeNotifier {
     // Generates a unique name based on the current time (down to the second)
     DateTime date = DateTime.now();
     return '${date.month}-${date.day}-${date.year}-${date.hour}-${date.minute}-${date.second}';
-  }
-}
-
-// Handles the writing of a wav file
-class RecordingFileStream {
-  static final FlutterSoundHelper helper = FlutterSoundHelper();
-
-  StreamSubscription<Food> _audioSubscription; // The sub to the audio data
-
-  File _outputFile; // The file being written to
-  IOSink _outputFileSink; // The IOStream of the output file
-
-  bool _addedHeader = false;
-
-  RecordingFileStream({
-    String directoryPath,
-    String fileName,
-    Stream<FoodData> audioStream,
-  }) {
-    _outputFile = File(path.join(directoryPath, '$fileName.wav'));
-    _outputFileSink = _outputFile.openWrite();
-
-    _audioSubscription = audioStream.listen(
-      (Food food) async {
-        if (food is FoodData) {
-          if (_addedHeader) {
-            _outputFileSink.add(food.data);
-          } else {
-            var newBuffer =
-                await helper.pcmToWaveBuffer(inputBuffer: food.data);
-            _outputFileSink.add(
-              newBuffer,
-            );
-            _addedHeader = true;
-          }
-        }
-      },
-    );
-  }
-
-  // Ends the output stream, returning the final wav file.
-  Future<File> close() async {
-    await _audioSubscription.cancel();
-    await _outputFileSink.flush();
-    await _outputFileSink.close();
-    await updateWavHeaderByteInfo();
-    return _outputFile;
-  }
-
-  // Updates the recorded byte length of the data in the wav header of the file.
-  Future<void> updateWavHeaderByteInfo() async {
-    RandomAccessFile fileAccess = await _outputFile.open(mode: FileMode.append);
-    await fileAccess.setPosition(41);
-
-    Uint8List intAsByteBuffer = Uint8List(4);
-    intAsByteBuffer.buffer.asByteData().setInt32(
-          0,
-          fileAccess.lengthSync() - 44,
-          Endian.little,
-        );
-
-    await fileAccess.writeFrom(intAsByteBuffer);
-
-    fileAccess.close();
   }
 }
