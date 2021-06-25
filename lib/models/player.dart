@@ -2,36 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:voice_scribe/exceptions/player_exceptions.dart';
 import 'package:voice_scribe/models/recording.dart';
-
-class PlayerAlreadyInitializedException implements Exception {
-  static const String _message =
-      'Attempted to initialize an already initialized Player.';
-
-  @override
-  String toString() {
-    return '${super.toString()}: $_message';
-  }
-}
-
-class PlayerAlreadyClosedException implements Exception {
-  static const String _message = 'Attempted to close a non-open Player';
-
-  @override
-  String toString() {
-    return '${super.toString()}: $_message';
-  }
-}
-
-class PlayerNotInitializedException implements Exception {
-  final String _message;
-  PlayerNotInitializedException(this._message);
-
-  @override
-  String toString() {
-    return '${super.toString()}: $_message';
-  }
-}
 
 class Player extends ChangeNotifier {
   final FlutterSoundPlayer _player = FlutterSoundPlayer();

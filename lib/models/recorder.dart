@@ -7,47 +7,9 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:voice_scribe/exceptions/recorder_exceptions.dart';
 import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/models/wav_writer.dart';
-
-class RecorderAlreadyInitializedException implements Exception {
-  static const String _message =
-      'Attempted to initialize an already initialized Recorder.';
-
-  @override
-  String toString() {
-    return '${super.toString()}: $_message';
-  }
-}
-
-class RecorderAlreadyClosedException implements Exception {
-  static const String _message = 'Attempted to close a non-open Recorder';
-
-  @override
-  String toString() {
-    return '${super.toString()}: $_message';
-  }
-}
-
-class RecorderNotInitializedException implements Exception {
-  final String _message;
-  RecorderNotInitializedException(this._message);
-
-  @override
-  String toString() {
-    return '${super.toString()}: $_message';
-  }
-}
-
-class RecorderAlreadyStopped implements Exception {
-  static const String _message =
-      'Attempted to stop an already stopped recorder';
-
-  @override
-  String toString() {
-    return '${super.toString()}: $_message';
-  }
-}
 
 class Recorder extends ChangeNotifier {
   FlutterSoundRecorder _recorder = FlutterSoundRecorder();
