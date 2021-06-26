@@ -9,7 +9,6 @@ import 'package:voice_scribe/models/recordings_manager.dart';
 import 'package:voice_scribe/utils/formatter.dart';
 import 'package:voice_scribe/utils/mono_theme_constants.dart';
 import 'package:voice_scribe/views/screens/playing_screen.dart';
-import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
 import 'package:vosk_dart/vosk_dart.dart';
 
 class RecordingCard extends StatelessWidget {
