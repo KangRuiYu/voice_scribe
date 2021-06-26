@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/models/recordings_manager.dart';
@@ -6,6 +10,7 @@ import 'package:voice_scribe/utils/formatter.dart';
 import 'package:voice_scribe/utils/mono_theme_constants.dart';
 import 'package:voice_scribe/views/screens/playing_screen.dart';
 import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
+import 'package:vosk_dart/vosk_dart.dart';
 
 class RecordingCard extends StatelessWidget {
   // A card that displays the information of a single recording and common controls
@@ -31,6 +36,22 @@ class RecordingCard extends StatelessWidget {
             builder: (context) => PlayingScreen(recording: _recording)));
   }
 
+  void _transcribeRecording() async {
+    String modelPath = join(
+      (await getExternalStorageDirectory()).path,
+      'vosk-model-small-en-us-0.15',
+    );
+    print(Directory(modelPath).existsSync());
+    print(modelPath);
+    Vosk transcriber = Vosk(modelPath: modelPath);
+    await transcriber.open();
+    transcriber.feedAudioBuffer(File(_recording.path).readAsBytesSync()).then(
+      (_) async {
+        print(await transcriber.close());
+      },
+    );
+  }
+
   void _removeRecording(BuildContext context, bool deleteFile) {
     // Deletes the recording that this card displays
     Provider.of<RecordingsManager>(context, listen: false)
@@ -51,6 +72,7 @@ class RecordingCard extends StatelessWidget {
         ),
         trailing: _Buttons(
           playFunc: () => playRecording(context),
+          transcribeFunc: _transcribeRecording,
           removeFunc: () => askToRemoveRecording(context),
         ),
       ),
@@ -114,10 +136,12 @@ class _RemoveConfirmationPopupState extends State<RemoveConfirmationPopup> {
 
 class _Buttons extends StatelessWidget {
   final Function playFunc;
+  final Function transcribeFunc;
   final Function removeFunc;
 
   _Buttons({
     @required this.playFunc,
+    @required this.transcribeFunc,
     @required this.removeFunc,
   });
 
@@ -139,6 +163,10 @@ class _Buttons extends StatelessWidget {
               PopupMenuItem(
                 value: removeFunc,
                 child: const Text('Edit'),
+              ),
+              PopupMenuItem(
+                value: transcribeFunc,
+                child: const Text('Transcribe'),
               ),
               PopupMenuItem(
                 value: removeFunc,
