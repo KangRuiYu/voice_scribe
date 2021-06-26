@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:deep_speech_dart/deep_speech_dart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path/path.dart' as path;
@@ -97,15 +96,6 @@ class Recorder extends ChangeNotifier {
       duration: currentProgress.duration,
     );
     _wavWriter = null;
-
-    DeepSpeech transcriber = DeepSpeech();
-    String modelPath = path.join(
-      (await getExternalStorageDirectory()).path,
-      'deepspeech-0.9.2-models.tflite',
-    );
-    await transcriber.initialize(modelPath);
-    await transcriber.feedAudioContent(finalFile.readAsBytesSync());
-    print(await transcriber.finish());
 
     notifyListeners();
 
