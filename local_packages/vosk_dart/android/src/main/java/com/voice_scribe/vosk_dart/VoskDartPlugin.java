@@ -10,9 +10,9 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 import org.vosk.LibVosk;
-import org.vosk.LogLevel;
 import org.vosk.Model;
 import org.vosk.Recognizer;
 import org.vosk.android.RecognitionListener;
@@ -25,8 +25,6 @@ public class VoskDartPlugin implements FlutterPlugin, MethodCallHandler {
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private MethodChannel channel;
-  private Model model;
-  private Recognizer recognizer;
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -40,58 +38,13 @@ public class VoskDartPlugin implements FlutterPlugin, MethodCallHandler {
       result.success("Android " + android.os.Build.VERSION.RELEASE);
     }
 
-    // Open the Vosk API with the given model and sample rate.
-    else if (call.method.equals("open")) {
-      String modelPath = (String) call.argument("modelPath");
-      int sampleRate = (int) call.argument("sampleRate");
+    else if (call.method.equals("transcribeWavFile")) {
+      String modelPath = call.argument("modelPath");
+      int sampleRate = call.argument("sampleRate");
+      String filePath = call.argument("filePath");
 
-      model = new Model(modelPath);
-      recognizer = new Recognizer(model, sampleRate);
-      result.success(null);
-    }
-
-    // Turns debug mode on or off. Option changes the amount of output
-    // into the console.
-    else if (call.method.equals("setDebug")) {
-      boolean on = (boolean) call.arguments;
-
-      if (on) {
-        LibVosk.setLogLevel(LogLevel.INFO);
-      }
-      else {
-        LibVosk.setLogLevel(LogLevel.WARNINGS);
-      }
-      result.success(null);
-    }
-
-    // Feeds audio buffer to the Vosk in the form of a byte array.
-    else if (call.method.equals("feedAudioBuffer")) {
-      byte[] byteBuffer = (byte[]) call.arguments;
-      recognizer.acceptWaveForm(byteBuffer, byteBuffer.length);
-      result.success(null);
-    }
-
-    // Feeds the audio data of a wav file into the transcriber.
-    else if (call.method.equals("feedWavFile")) {
-//      String filePath = (String) call.arguments;
-//      FileInputStream fileInputStream = FileInputStream(filePath);
-      result.success(null);
-    }
-
-    // Returns the current transcription results.
-    else if (call.method.equals("getPartialResult")) {
-      result.success(recognizer.getPartialResult());
-    }
-
-    // Gets the final result of transcribing the fed audio data.
-    else if (call.method.equals("getFinalResult")) {
-      result.success(recognizer.getFinalResult());
-    }
-
-    // Cleans up.
-    else if (call.method.equals("close")) {
-      model.close();
-      result.success(null);
+      Thread t = new Thread(new WavTranscriber(modelPath, filePath, sampleRate));
+      t.start();
     }
 
     else {
@@ -102,5 +55,73 @@ public class VoskDartPlugin implements FlutterPlugin, MethodCallHandler {
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
     channel.setMethodCallHandler(null);
+  }
+}
+
+// Transcribes a wav file in another thread.
+class WavTranscriber implements Runnable, RecognitionListener {
+  final private String modelPath;
+  final private String filePath;
+  final private int sampleRate;
+
+  private SpeechStreamService speechStreamService;
+  private Recognizer recognizer;
+  private Model model;
+
+  public WavTranscriber(String argModelPath, String argFilePath, int argSampleRate) {
+    modelPath = argModelPath;
+    sampleRate = argSampleRate;
+    filePath = argFilePath;
+  }
+
+  @Override
+  public void run() {
+    model = new Model(modelPath);
+    recognizer = new Recognizer(model, sampleRate);
+
+    try {
+      FileInputStream fileInputStream = new FileInputStream(filePath);
+      speechStreamService = new SpeechStreamService(recognizer, fileInputStream, sampleRate);
+      speechStreamService.start(this);
+    }
+    catch (FileNotFoundException e) {
+      clean();
+      System.out.println("File not found.");
+    }
+  }
+
+  // Callbacks for transcription results.
+  @Override
+  public void onPartialResult(String hypothesis) {
+  }
+
+  @Override
+  public void onResult(String hypothesis) {
+  }
+
+  @Override
+  public void onFinalResult(String hypothesis) {
+    clean();
+    System.out.println(hypothesis);
+  }
+
+  @Override
+  public void onError(Exception exception) {
+  }
+
+  @Override
+  public void onTimeout() {
+  }
+
+  private void clean() {
+    if (speechStreamService != null) {
+      speechStreamService.stop();
+    }
+    if (recognizer != null) {
+      recognizer.close();
+    }
+    if (model != null) {
+      model.close();
+    }
   }
 }
