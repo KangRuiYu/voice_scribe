@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:vosk_dart/vosk_exceptions.dart';
 
-class Vosk {
+class FileTranscriber {
   static const MethodChannel _channel = const MethodChannel('vosk_dart');
 
   static Future<String> get platformVersion async {
@@ -14,28 +12,46 @@ class Vosk {
     return version;
   }
 
-  final String _modelPath;
-  final int _sampleRate;
+  static int _queuedTasks = 0; // The number of queued transcriptions.
+  static int get queuedTasks => _queuedTasks;
 
-  String get modelPath => _modelPath;
-  int get sampleRate => sampleRate;
+  static bool _opened = false;
+  static bool get opened => _opened;
 
-  // Constructor will fail if given a model that doesn't exist or a sample
-  // rate that is non-positive.
-  Vosk({@required String modelPath, int sampleRate = 16000})
-      : _modelPath = modelPath,
-        _sampleRate = sampleRate {
+  // Asks a separate thread to initialize transcription resources.
+  // If transcriber already opened, nothing happens.
+  // (Note: This function only asks for the transcriber to be opened. It's
+  //  completion does not indicate that the opening process has finished.
+  //  However, it is safe to queue files when this functions has finished, as
+  //  transcriptions will automatically wait for resources to be loaded.)
+  static Future<void> open(String modelPath) {
     if (!Directory(modelPath).existsSync()) throw NonExistentModel();
-    if (sampleRate <= 0) throw NonPositiveSampleRate();
+    if (_opened) return null;
+    _channel.invokeMethod('open', modelPath);
+    _opened = true;
+    return null;
   }
 
-  Future<void> transcribeWavFile(String filePath) {
+  // Puts the given file on queue for transcription. Only one file will be
+  // transcribing at a given time.
+  static Future<void> queueFileForTranscription(String filePath) {
     if (!File(filePath).existsSync()) throw NonExistentWavFile();
-    _channel.invokeMethod('transcribeWavFile', {
-      'modelPath': _modelPath,
-      'sampleRate': _sampleRate,
-      'filePath': filePath
-    });
+    return _channel.invokeMethod(
+      'queueFileForTranscription',
+      {'filePath': filePath, 'sampleRate': 16000},
+    );
+  }
+
+  // Frees resources used for transcribing. If transcriber is already closed
+  // nothing happens.
+  // (Note: This function only asks for the transcriber to close. It's
+  //  completion does not indicate that it has fully closed. However, it is safe
+  //  to call open() if close has finished, as open() will open an entirely new
+  //  thread.)
+  static Future<void> close() {
+    if (!_opened) return null;
+    _channel.invokeMethod('close');
+    _opened = false;
     return null;
   }
 }

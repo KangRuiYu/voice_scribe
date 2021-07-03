@@ -40,8 +40,10 @@ class RecordingCard extends StatelessWidget {
       (await getExternalStorageDirectory()).path,
       'vosk-model-small-en-us-0.15',
     );
-    Vosk vosk = Vosk(modelPath: modelPath);
-    vosk.transcribeWavFile(_recording.path);
+
+    await FileTranscriber.open(modelPath);
+    await FileTranscriber.queueFileForTranscription(_recording.path);
+    await FileTranscriber.close();
   }
 
   void _removeRecording(BuildContext context, bool deleteFile) {

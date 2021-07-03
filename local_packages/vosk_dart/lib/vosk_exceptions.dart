@@ -7,15 +7,6 @@ class NonExistentModel implements Exception {
   }
 }
 
-class NonPositiveSampleRate implements Exception {
-  static const String _message = 'Given non-positive sample rate.';
-
-  @override
-  String toString() {
-    return '${super.toString()}: $_message';
-  }
-}
-
 class NonExistentWavFile implements Exception {
   static const String _message =
       'Attempted to transcribe non-existent wav file.';
