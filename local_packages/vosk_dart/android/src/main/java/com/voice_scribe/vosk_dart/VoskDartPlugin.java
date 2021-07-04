@@ -13,39 +13,39 @@ import java.util.concurrent.ExecutorService;
 
 /** VoskDartPlugin */
 public class VoskDartPlugin implements FlutterPlugin {
-  private ExecutorService executorService; // The background thread.
+    private ExecutorService executorService; // The background thread.
 
-  private VoskStreamHandler voskStreamHandler; // Handles stream listen events.
-  private VoskInstance voskInstance; // Encapsulates a single vosk instance.
-  private VoskMethodCallHandler voskMethodCallHandler; // Handles method calls from dart to native.
+    private VoskStreamHandler voskStreamHandler; // Handles stream listen events.
+    private VoskInstance voskInstance; // Encapsulates a single vosk instance.
+    private VoskMethodCallHandler voskMethodCallHandler; // Handles method calls from dart to native.
 
-  private MethodChannel methodChannel; // The channel from which method calls are exchanged.
-  private EventChannel eventChannel; // The channel in which java sends events to  dart.
+    private MethodChannel methodChannel; // The channel from which method calls are exchanged.
+    private EventChannel eventChannel; // The channel in which java sends events to  dart.
 
-  @Override
-  public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    executorService = Executors.newSingleThreadExecutor();
-    voskStreamHandler = new VoskStreamHandler();
-    voskInstance = new VoskInstance(executorService, voskStreamHandler);
-    voskMethodCallHandler = new VoskMethodCallHandler(voskInstance);
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        executorService = Executors.newSingleThreadExecutor();
+        voskStreamHandler = new VoskStreamHandler();
+        voskInstance = new VoskInstance(executorService, voskStreamHandler);
+        voskMethodCallHandler = new VoskMethodCallHandler(voskInstance);
 
-    methodChannel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "vosk_dart");
-    methodChannel.setMethodCallHandler(voskMethodCallHandler);
+        methodChannel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "vosk_dart");
+        methodChannel.setMethodCallHandler(voskMethodCallHandler);
 
-    eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), "vosk_stream");
-    eventChannel.setStreamHandler(voskStreamHandler);
-  }
+        eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), "vosk_stream");
+        eventChannel.setStreamHandler(voskStreamHandler);
+    }
 
-  @Override
-  public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-    eventChannel.setStreamHandler(null);
-    methodChannel.setMethodCallHandler(null);
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+        eventChannel.setStreamHandler(null);
+        methodChannel.setMethodCallHandler(null);
 
-    voskMethodCallHandler = null;
-    voskInstance.queueModelToBeClosed();
-    voskInstance = null;
-    voskStreamHandler = null;
+        voskMethodCallHandler = null;
+        voskInstance.queueModelToBeClosed();
+        voskInstance = null;
+        voskStreamHandler = null;
 
-    executorService.shutdown();
-  }
+        executorService.shutdown();
+    }
 }
