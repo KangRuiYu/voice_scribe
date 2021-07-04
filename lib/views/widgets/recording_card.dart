@@ -41,9 +41,10 @@ class RecordingCard extends StatelessWidget {
       'vosk-model-small-en-us-0.15',
     );
 
-    await FileTranscriber.open(modelPath);
+    await FileTranscriber.queueModelToBeOpened(modelPath);
+    FileTranscriber.getProgressStream().listen((var result) => print(result));
     await FileTranscriber.queueFileForTranscription(_recording.path);
-    await FileTranscriber.close();
+    await FileTranscriber.queueModelToBeClosed();
   }
 
   void _removeRecording(BuildContext context, bool deleteFile) {

@@ -6,6 +6,7 @@ import 'package:vosk_dart/vosk_exceptions.dart';
 
 class FileTranscriber {
   static const MethodChannel _channel = const MethodChannel('vosk_dart');
+  static const EventChannel _eventChannel = const EventChannel('vosk_stream');
 
   static Future<String> get platformVersion async {
     final String version = await _channel.invokeMethod('getPlatformVersion');
@@ -24,10 +25,10 @@ class FileTranscriber {
   //  completion does not indicate that the opening process has finished.
   //  However, it is safe to queue files when this functions has finished, as
   //  transcriptions will automatically wait for resources to be loaded.)
-  static Future<void> open(String modelPath) {
+  static Future<void> queueModelToBeOpened(String modelPath) {
     if (!Directory(modelPath).existsSync()) throw NonExistentModel();
     if (_opened) return null;
-    _channel.invokeMethod('open', modelPath);
+    _channel.invokeMethod('queueModelToBeOpened', modelPath);
     _opened = true;
     return null;
   }
@@ -42,15 +43,20 @@ class FileTranscriber {
     );
   }
 
+  // Returns a broadcast stream of the current transcription progress.
+  static Stream<dynamic> getProgressStream() {
+    return _eventChannel.receiveBroadcastStream();
+  }
+
   // Frees resources used for transcribing. If transcriber is already closed
   // nothing happens.
   // (Note: This function only asks for the transcriber to close. It's
   //  completion does not indicate that it has fully closed. However, it is safe
   //  to call open() if close has finished, as open() will open an entirely new
   //  thread.)
-  static Future<void> close() {
+  static Future<void> queueModelToBeClosed() {
     if (!_opened) return null;
-    _channel.invokeMethod('close');
+    _channel.invokeMethod('queueModelToBeClosed');
     _opened = false;
     return null;
   }
