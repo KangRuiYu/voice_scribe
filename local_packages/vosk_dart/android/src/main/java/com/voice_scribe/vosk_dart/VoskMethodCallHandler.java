@@ -19,32 +19,32 @@ class VoskMethodCallHandler implements MethodCallHandler {
         if (call.method.equals("getPlatformVersion")) {
             result.success("Android " + android.os.Build.VERSION.RELEASE);
         }
+        else if (call.method.equals("allocateSingleThread")) {
+            voskInstance.allocateSingleThread();
+            result.success(null);
+        }
+        else if (call.method.equals("deallocateSingleThread")) {
+            voskInstance.deallocateThread();
+            result.success(null);
+        }
         else if (call.method.equals("queueModelToBeOpened")) {
             String modelPath = (String) call.arguments;
-            if (voskInstance.queueModelToBeOpened(modelPath)) {
-                result.success(null);
-            }
-            else {
-                result.error("ModelError", "Could not queue model to be opened.", null);
-            }
+            voskInstance.queueModelToBeOpened(modelPath);
+            result.success(null);
+        }
+        else if (call.method.equals("queueModelToBeClosed")) {
+            voskInstance.queueModelToBeClosed();
+            result.success(null);
         }
         else if (call.method.equals("queueFileForTranscription")) {
             String filePath = call.argument("filePath");
             int sampleRate = call.argument("sampleRate");
-            if (voskInstance.queueFileForTranscription(filePath, sampleRate)) {
-                result.success(null);
-            }
-            else {
-                result.error("TranscriptionError", "Could not queue file to be transcribed.", null);
-            }
+            voskInstance.queueFileForTranscription(filePath, sampleRate);
+            result.success(null);
         }
-        else if (call.method.equals("queueModelToBeClosed")) {
-            if (voskInstance.queueModelToBeClosed()) {
-                result.success(null);
-            }
-            else {
-                result.error("ModelError", "Could not queue model to be closed.", null);
-            }
+        else if (call.method.equals("clean")) {
+            voskInstance.clean();
+            result.success(null);
         }
         else {
             result.notImplemented();

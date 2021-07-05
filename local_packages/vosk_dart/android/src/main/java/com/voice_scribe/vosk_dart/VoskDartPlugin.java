@@ -8,13 +8,8 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-
 /** VoskDartPlugin */
 public class VoskDartPlugin implements FlutterPlugin {
-    private ExecutorService executorService; // The background thread.
-
     private VoskStreamHandler voskStreamHandler; // Handles stream listen events.
     private VoskInstance voskInstance; // Encapsulates a single vosk instance.
     private VoskMethodCallHandler voskMethodCallHandler; // Handles method calls from dart to native.
@@ -24,12 +19,11 @@ public class VoskDartPlugin implements FlutterPlugin {
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-        executorService = Executors.newSingleThreadExecutor();
         voskStreamHandler = new VoskStreamHandler();
-        voskInstance = new VoskInstance(executorService, voskStreamHandler);
+        voskInstance = new VoskInstance(voskStreamHandler);
         voskMethodCallHandler = new VoskMethodCallHandler(voskInstance);
 
-        methodChannel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "vosk_dart");
+        methodChannel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "vosk_method");
         methodChannel.setMethodCallHandler(voskMethodCallHandler);
 
         eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), "vosk_stream");
@@ -42,10 +36,8 @@ public class VoskDartPlugin implements FlutterPlugin {
         methodChannel.setMethodCallHandler(null);
 
         voskMethodCallHandler = null;
-        voskInstance.queueModelToBeClosed();
+        voskInstance.clean();
         voskInstance = null;
         voskStreamHandler = null;
-
-        executorService.shutdown();
     }
 }
