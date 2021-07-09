@@ -6,38 +6,65 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
+import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
-/** VoskDartPlugin */
-public class VoskDartPlugin implements FlutterPlugin {
-    private VoskStreamHandler voskStreamHandler; // Handles stream listen events.
-    private VoskInstance voskInstance; // Encapsulates a single vosk instance.
-    private VoskMethodCallHandler voskMethodCallHandler; // Handles method calls from dart to native.
+import java.util.HashMap;
 
-    private MethodChannel methodChannel; // The channel from which method calls are exchanged.
-    private EventChannel eventChannel; // The channel in which java sends events to  dart.
+/** VoskDartPlugin */
+public class VoskDartPlugin implements FlutterPlugin, MethodCallHandler {
+    private MethodChannel mainMethodChannel; // The main method channel used to communicate with dart.
+    private FlutterPluginBinding flutterPluginBinding;
+    private final HashMap<Long, VoskInstance> instances = new HashMap<Long, VoskInstance>();
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-        voskStreamHandler = new VoskStreamHandler();
-        voskInstance = new VoskInstance(voskStreamHandler);
-        voskMethodCallHandler = new VoskMethodCallHandler(voskInstance);
+        this.flutterPluginBinding = flutterPluginBinding;
 
-        methodChannel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "vosk_method");
-        methodChannel.setMethodCallHandler(voskMethodCallHandler);
-
-        eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), "vosk_stream");
-        eventChannel.setStreamHandler(voskStreamHandler);
+        mainMethodChannel = new MethodChannel(
+                flutterPluginBinding.getBinaryMessenger(),
+                "vosk_main"
+        );
+        mainMethodChannel.setMethodCallHandler(this);
     }
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-        eventChannel.setStreamHandler(null);
-        methodChannel.setMethodCallHandler(null);
+        for (VoskInstance voskInstance : instances.values()) {
+            voskInstance.close();
+        }
+        instances.clear();
+        mainMethodChannel.setMethodCallHandler(null);
+    }
 
-        voskMethodCallHandler = null;
-        voskInstance.clean();
-        voskInstance = null;
-        voskStreamHandler = null;
+    @Override
+    public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
+        if (call.method.equals("createNewInstance")) {
+            long id = ((Number) call.arguments).longValue();
+            createNewInstance(id);
+            result.success(null);
+        }
+        else if (call.method.equals("removeInstance")) {
+            long id = ((Number) call.arguments).longValue();
+            removeInstance(id);
+            result.success(null);
+        }
+        else {
+            result.notImplemented();
+        }
+    }
+
+    // Creates a new vosk instance with the given name and establishes a connection with it.
+    // If an instance with the name exists, nothing happens.
+    private void createNewInstance(long id) {
+        VoskInstance newInstance = new VoskInstance(flutterPluginBinding.getBinaryMessenger(), id);
+        instances.putIfAbsent(id, newInstance);
+    }
+
+    // Removes the instance with the given name. If no instance with the name exists, nothing
+    // happens. Instance resources are not closed before removal.
+    private void removeInstance(long id) {
+        instances.remove(id);
     }
 }

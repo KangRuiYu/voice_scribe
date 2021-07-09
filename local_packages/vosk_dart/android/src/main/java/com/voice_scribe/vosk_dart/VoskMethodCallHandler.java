@@ -16,10 +16,7 @@ class VoskMethodCallHandler implements MethodCallHandler {
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-        if (call.method.equals("getPlatformVersion")) {
-            result.success("Android " + android.os.Build.VERSION.RELEASE);
-        }
-        else if (call.method.equals("allocateSingleThread")) {
+        if (call.method.equals("allocateSingleThread")) {
             voskInstance.allocateSingleThread();
             result.success(null);
         }
@@ -42,8 +39,8 @@ class VoskMethodCallHandler implements MethodCallHandler {
             voskInstance.queueFileForTranscription(filePath, sampleRate);
             result.success(null);
         }
-        else if (call.method.equals("clean")) {
-            voskInstance.clean();
+        else if (call.method.equals("close")) {
+            voskInstance.close();
             result.success(null);
         }
         else {

@@ -22,13 +22,18 @@ class TranscribeFile implements Runnable {
     private final Future<Model> modelFuture;
     private final String filePath;
     private final int sampleRate;
-    private final EventSink eventSink;
+    private final Bridge bridge;
 
-    public TranscribeFile(Future<Model> modelFuture, String filePath, int sampleRate, EventSink eventSink) {
+    public TranscribeFile(
+            Future<Model> modelFuture,
+            String filePath,
+            int sampleRate,
+            Bridge bridge
+    ) {
         this.modelFuture = modelFuture;
         this.filePath = filePath;
         this.sampleRate = sampleRate;
-        this.eventSink = eventSink;
+        this.bridge = bridge;
     }
 
     @Override
@@ -57,12 +62,12 @@ class TranscribeFile implements Runnable {
                     totalBytesRead += bytesRead;
                 }
 
-                if (eventSink != null) {
+                if (bridge != null) {
                     final double result = (float) totalBytesRead / bytesInFile;
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            eventSink.success(result);
+                            bridge.post(result);
                         }
                     });
                 }

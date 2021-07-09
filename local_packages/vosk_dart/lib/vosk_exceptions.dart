@@ -56,3 +56,12 @@ class NonExistentWavFile implements Exception {
     return '${super.toString()}: $_message';
   }
 }
+
+class ClosedInstance implements Exception {
+  static const String _message = 'Attempted to use a closed Vosk instance.';
+
+  @override
+  String toString() {
+    return '${super.toString()}: $_message';
+  }
+}

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -41,11 +39,12 @@ class RecordingCard extends StatelessWidget {
       'vosk-model-small-en-us-0.15',
     );
 
-    Vosk.getProgressStream().listen((var result) => print(result));
-    await Vosk.allocateSingleThread();
-    await Vosk.queueModelToBeOpened(modelPath);
-    await Vosk.queueFileForTranscription(_recording.path);
-    await Vosk.clean();
+    VoskInstance voskInstance = VoskInstance();
+    voskInstance.progressStream.listen((var result) => print(result));
+    await voskInstance.allocateSingleThread();
+    await voskInstance.queueModelToBeOpened(modelPath);
+    await voskInstance.queueFileForTranscription(_recording.path);
+    voskInstance.close();
   }
 
   void _removeRecording(BuildContext context, bool deleteFile) {
