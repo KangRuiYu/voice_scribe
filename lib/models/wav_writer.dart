@@ -47,12 +47,12 @@ class WavWriter {
     await _audioSubscription.cancel();
     await _outputFileSink.flush();
     await _outputFileSink.close();
-    await updateWavHeaderByteInfo();
+    await _updateWavHeaderByteInfo();
     return _outputFile;
   }
 
   // Updates the recorded byte length of the data in the wav header of the file.
-  Future<void> updateWavHeaderByteInfo() async {
+  Future<void> _updateWavHeaderByteInfo() async {
     RandomAccessFile fileAccess = await _outputFile.open(mode: FileMode.append);
     await fileAccess.setPosition(41);
 
