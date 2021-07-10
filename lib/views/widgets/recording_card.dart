@@ -9,24 +9,24 @@ import 'package:voice_scribe/utils/mono_theme_constants.dart';
 import 'package:voice_scribe/views/screens/playing_screen.dart';
 import 'package:vosk_dart/vosk_dart.dart';
 
+/// Displays info on a recording, allowing to perform certain actions on it.
 class RecordingCard extends StatelessWidget {
-  // A card that displays the information of a single recording and common controls
   final Recording _recording;
 
   RecordingCard(this._recording);
 
-  void askToRemoveRecording(BuildContext context) {
-    // Asks the user for confirmation to delete the recording
+  /// Asks the user for confirmation to delete the recording.
+  void _askToRemoveRecording(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) => RemoveConfirmationPopup(
+      builder: (BuildContext context) => _RemoveConfirmationPopup(
         removeFunc: (bool deleteFile) => _removeRecording(context, deleteFile),
       ),
     );
   }
 
-  void playRecording(BuildContext context) {
-    // Plays the recording that this card displays
+  /// Plays the recording that this card displays.
+  void _playRecording(BuildContext context) {
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -47,8 +47,8 @@ class RecordingCard extends StatelessWidget {
     voskInstance.close();
   }
 
+  /// Deletes the recording that this card displays.
   void _removeRecording(BuildContext context, bool deleteFile) {
-    // Deletes the recording that this card displays
     Provider.of<RecordingsManager>(context, listen: false)
         .removeRecording(_recording, deleteSource: deleteFile);
   }
@@ -56,38 +56,43 @@ class RecordingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: PADDING_LARGE,
-          vertical: PADDING_MEDIUM,
-        ),
-        title: Text(_recording.name),
-        subtitle: Text(
-          '${formatDate(_recording.date)}\n${formatDuration(_recording.duration)}',
-        ),
-        trailing: _Buttons(
-          playFunc: () => playRecording(context),
-          transcribeFunc: _transcribeRecording,
-          removeFunc: () => askToRemoveRecording(context),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(RADIUS),
+        onTap: () => _playRecording(context),
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: PADDING_LARGE,
+            vertical: PADDING_MEDIUM,
+          ),
+          title: Text(_recording.name),
+          subtitle: Text(
+            '${formatDate(_recording.date)}\n${formatDuration(_recording.duration)}',
+          ),
+          trailing: _ActionPopupButton(
+            transcribeFunc: _transcribeRecording,
+            removeFunc: () => _askToRemoveRecording(context),
+          ),
         ),
       ),
     );
   }
 }
 
-class RemoveConfirmationPopup extends StatefulWidget {
-  // The confirmation popup that shows up before the user deletes a recording
+/// The confirmation popup that shows up before the user deletes a recording
+class _RemoveConfirmationPopup extends StatefulWidget {
   final Function removeFunc;
 
-  RemoveConfirmationPopup({@required this.removeFunc});
+  _RemoveConfirmationPopup({@required this.removeFunc});
 
+  @override
   _RemoveConfirmationPopupState createState() =>
       _RemoveConfirmationPopupState();
 }
 
-class _RemoveConfirmationPopupState extends State<RemoveConfirmationPopup> {
+class _RemoveConfirmationPopupState extends State<_RemoveConfirmationPopup> {
   bool _deleteFile = false;
 
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Remove?'),
@@ -129,48 +134,37 @@ class _RemoveConfirmationPopupState extends State<RemoveConfirmationPopup> {
   }
 }
 
-class _Buttons extends StatelessWidget {
-  final Function playFunc;
+/// Button that reveals a popup menu for a list of possible actions.
+class _ActionPopupButton extends StatelessWidget {
   final Function transcribeFunc;
   final Function removeFunc;
 
-  _Buttons({
-    @required this.playFunc,
+  _ActionPopupButton({
     @required this.transcribeFunc,
     @required this.removeFunc,
   });
 
-  // The buttons on the card
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: Icon(Icons.play_arrow),
-          onPressed: playFunc,
-        ),
-        PopupMenuButton(
-          icon: Icon(Icons.more_vert),
-          onSelected: (Function itemFunc) => itemFunc(),
-          itemBuilder: (context) {
-            return [
-              PopupMenuItem(
-                value: removeFunc,
-                child: const Text('Edit'),
-              ),
-              PopupMenuItem(
-                value: transcribeFunc,
-                child: const Text('Transcribe'),
-              ),
-              PopupMenuItem(
-                value: removeFunc,
-                child: const Text('Remove'),
-              ),
-            ];
-          },
-        ),
-      ],
+    return PopupMenuButton(
+      icon: Icon(Icons.more_vert),
+      onSelected: (Function itemFunc) => itemFunc(),
+      itemBuilder: (context) {
+        return [
+          PopupMenuItem(
+            value: removeFunc,
+            child: const Text('Edit'),
+          ),
+          PopupMenuItem(
+            value: transcribeFunc,
+            child: const Text('Transcribe'),
+          ),
+          PopupMenuItem(
+            value: removeFunc,
+            child: const Text('Remove'),
+          ),
+        ];
+      },
     );
   }
 }
