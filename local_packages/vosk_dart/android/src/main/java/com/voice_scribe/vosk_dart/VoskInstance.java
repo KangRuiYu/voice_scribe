@@ -24,9 +24,16 @@ class VoskInstance {
         executorService = Executors.newSingleThreadExecutor();
     }
 
-    // Deallocate the currently allocated thread.
+    // Deallocate the currently allocated thread. Will wait for all existing tasks to complete
+    // before thread is closed.
     public void deallocateThread() {
         executorService.shutdown();
+        executorService = null;
+    }
+
+    // Attempts to interrupt thread and close it.
+    public void terminateThread() {
+        executorService.shutdownNow();
         executorService = null;
     }
 
@@ -54,6 +61,18 @@ class VoskInstance {
         }
         if (executorService != null) {
             deallocateThread();
+        }
+        bridge.close();
+    }
+
+    // Closes any used resources such as threads, models, and connections forcefully.
+    // Instance will be unusable once closed.
+    public void forceClose() {
+        if (modelFuture != null) {
+            queueModelToBeClosed();
+        }
+        if (executorService != null) {
+            terminateThread();
         }
         bridge.close();
     }

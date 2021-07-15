@@ -53,6 +53,10 @@ class TranscribeFile implements Runnable {
             Handler mainHandler = new Handler(Looper.getMainLooper());
 
             while (true) {
+                if (Thread.interrupted()) { // Terminate transcription if thread is interrupted.
+                    break;
+                }
+
                 int bytesRead = fileInputStream.read(buffer);
 
                 if (bytesRead == -1) {

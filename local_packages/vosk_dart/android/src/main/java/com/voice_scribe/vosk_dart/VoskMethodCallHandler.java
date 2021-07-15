@@ -24,6 +24,10 @@ class VoskMethodCallHandler implements MethodCallHandler {
             voskInstance.deallocateThread();
             result.success(null);
         }
+        else if (call.method.equals("terminateThread")) {
+            voskInstance.terminateThread();
+            result.success(null);
+        }
         else if (call.method.equals("queueModelToBeOpened")) {
             String modelPath = (String) call.arguments;
             voskInstance.queueModelToBeOpened(modelPath);
@@ -41,6 +45,10 @@ class VoskMethodCallHandler implements MethodCallHandler {
         }
         else if (call.method.equals("close")) {
             voskInstance.close();
+            result.success(null);
+        }
+        else if (call.method.equals("forceClose")) {
+            voskInstance.forceClose();
             result.success(null);
         }
         else {

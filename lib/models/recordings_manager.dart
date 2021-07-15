@@ -12,6 +12,10 @@ class RecordingsManager extends ChangeNotifier {
   final List<Recording> _recordings = [];
   List<Recording> get recordings => _recordings;
 
+  // States
+  bool _recordingsLoaded = false;
+  bool get recordingsLoaded => _recordingsLoaded;
+
   // Sorting functions
   static Function byName =
       (Recording a, Recording b) => a.name.compareTo(b.name);
@@ -24,8 +28,12 @@ class RecordingsManager extends ChangeNotifier {
   bool _sortReversed = false; // If the sort is currently reversed
   bool get sortReversed => _sortReversed;
 
-  void loadRecordings() async {
-    // Create/load recordings from stored import files
+  RecordingsManager() {
+    loadRecordings();
+  }
+
+  /// Load known recordings.
+  Future<void> loadRecordings() async {
     Directory importsDirectory = await _getImportsDirectory();
 
     _recordings.clear();
@@ -38,22 +46,25 @@ class RecordingsManager extends ChangeNotifier {
       }
     }
 
-    sortRecordings();
+    _recordingsLoaded = true;
 
-    notifyListeners();
+    sortRecordings();
   }
 
+  /// Adds a new recording to the recordings list and create a import file for
+  /// it.
   void addNewRecording(Recording recording) {
-    // Adds a new recording to the recordings list and create a import file for it
     _recordings.add(recording);
     _createImportFile(recording);
     notifyListeners();
   }
 
-  void removeRecording(Recording recording, {bool deleteSource = false}) async {
-    // Removes the given recording and its import file. Optionally delete the
-    // actual file itself as well.
-
+  /// Removes the given recording and its import file. Optionally delete the
+  /// actual file itself as well.
+  Future<void> removeRecording(
+    Recording recording, {
+    bool deleteSource = false,
+  }) async {
     // Remove recording
     _recordings.remove(recording);
 
@@ -72,15 +83,15 @@ class RecordingsManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Creates a recording object and import file for the given file.
   Future<void> importRecordingFile(File recordingFile) async {
-    // Creates a recording object and import file for the given file
     Duration duration = await flutterSoundHelper.duration(recordingFile.path);
     Recording recording = Recording(duration: duration, file: recordingFile);
     addNewRecording(recording);
   }
 
+  /// Scans the primary directory for non-imported recording files.
   Stream<File> scanForUnimportedFiles() async* {
-    // Scans the primary directory for non-imported recording files
     Directory externalStorageDirectory = await getExternalStorageDirectory();
 
     await for (FileSystemEntity entity in externalStorageDirectory.list()) {
@@ -122,13 +133,13 @@ class RecordingsManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Reverses the currently applied sorting order.
   void reverseSort() {
-    // Reverses the currently applied sorting order
     sortRecordings(sortFunction: _currentSortOrder, reversed: !_sortReversed);
   }
 
+  /// Returns the imports directory and creates one if one doesn't already exist.
   Future<Directory> _getImportsDirectory() async {
-    // Returns the imports directory and creates one if one doesn't already exist
     Directory externalStorageDirectory = await getExternalStorageDirectory();
     Directory importsDirectory =
         Directory(join(externalStorageDirectory.path, '.imports'));
@@ -139,8 +150,8 @@ class RecordingsManager extends ChangeNotifier {
     return importsDirectory;
   }
 
+  /// Creates an import file for the given recording.
   void _createImportFile(Recording recording) async {
-    // Creates an import file for the given recording
     Directory importsDirectory = await _getImportsDirectory();
     File importFile =
         File(join(importsDirectory.path, '${recording.name}.import'));

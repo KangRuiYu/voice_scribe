@@ -25,26 +25,16 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppbarScaffold(
       title: 'Recordings',
-      actions: [
-        IconButton(
-          icon: Icon(
-            Provider.of<RecordingsManager>(context, listen: true).sortReversed
-                ? Icons.arrow_upward_outlined
-                : Icons.arrow_downward_outlined,
-          ),
-          onPressed: Provider.of<RecordingsManager>(
-            context,
-            listen: false,
-          ).reverseSort,
-        ),
-      ],
       bottomAppbar: MonoBottomAppBar(child: BottomAppBarButtons()),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: CircularIconButton(
         iconData: Icons.fiber_manual_record_rounded,
         onPressed: () => startRecording(context),
       ),
-      body: RecordingsDisplay(),
+      body:
+          Provider.of<RecordingsManager>(context, listen: true).recordingsLoaded
+              ? RecordingsDisplay()
+              : Center(child: const CircularProgressIndicator()),
     );
   }
 }

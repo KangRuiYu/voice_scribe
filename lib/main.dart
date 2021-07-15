@@ -1,85 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
-
-import 'package:voice_scribe/utils/mono_theme_constants.dart';
-import 'package:voice_scribe/views/screens/main_screen.dart';
+import 'package:voice_scribe/models/recording_transcriber.dart';
 import 'package:voice_scribe/models/recordings_manager.dart';
+import 'package:voice_scribe/views/screens/main_screen.dart';
+import 'package:voice_scribe/utils/main_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(VoiceScribe());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => RecordingsManager()),
+        ChangeNotifierProvider(create: (_) => RecordingTranscriber()),
+      ],
+      child: VoiceScribe(),
+    ),
+  );
 }
 
+/// The main app.
 class VoiceScribe extends StatelessWidget {
-  // The main app
-  final RecordingsManager _recordingsManager = RecordingsManager();
-
-  VoiceScribe() {
-    _recordingsManager.loadRecordings();
-  }
-
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _recordingsManager,
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Voice Scribe',
-        theme: ThemeData(
-          primarySwatch: Colors.red,
-          brightness: Brightness.light,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          textTheme: GoogleFonts.montserratTextTheme(),
-          appBarTheme: AppBarTheme(
-            color: Colors.white,
-            elevation: ELEVATION,
-            actionsIconTheme: IconThemeData(
-              color: Colors.black,
-              size: ICON_SIZE,
-            ),
-          ),
-          iconTheme: IconThemeData(size: ICON_SIZE),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ButtonStyle(
-              elevation: MaterialStateProperty.all<double>(ELEVATION),
-              padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                const EdgeInsets.all(BUTTON_PADDING),
-              ),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(RADIUS_LARGE),
-                ),
-              ),
-            ),
-          ),
-          cardTheme: CardTheme(
-            margin: EdgeInsets.zero,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(RADIUS),
-            ),
-            elevation: ELEVATION,
-          ),
-          popupMenuTheme: PopupMenuThemeData(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(RADIUS),
-            ),
-          ),
-          dividerColor: Colors.black26,
-          dividerTheme: const DividerThemeData(thickness: DIVIDER_THICKNESS),
-          bottomSheetTheme: const BottomSheetThemeData(
-            shape: const RoundedRectangleBorder(
-              borderRadius: const BorderRadius.vertical(
-                top: const Radius.circular(RADIUS),
-              ),
-            ),
-          ),
-          dialogTheme: DialogTheme(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(RADIUS)),
-          ),
-        ),
-        home: MainScreen(),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Voice Scribe',
+      theme: mainTheme,
+      home: MainScreen(),
     );
   }
 }

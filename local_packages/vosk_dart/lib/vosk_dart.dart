@@ -13,7 +13,7 @@ class VoskInstance {
   bool get threadAllocated => _threadAllocated;
 
   bool _modelOpened = false;
-  bool get opened => _modelOpened;
+  bool get modelOpened => _modelOpened;
 
   /// Returns a broadcast stream of the current transcription progress.
   ///
@@ -33,6 +33,14 @@ class VoskInstance {
   Future<void> deallocateThread() async {
     if (!_threadAllocated) return null;
     await _bridge.call('deallocateThread');
+    _threadAllocated = false;
+  }
+
+  /// Attempts to interrupt and close the existing thread. If no thread exists,
+  /// nothing happens.
+  Future<void> terminateThread() async {
+    if (!_threadAllocated) return null;
+    await _bridge.call('terminateThread');
     _threadAllocated = false;
   }
 
@@ -82,8 +90,14 @@ class VoskInstance {
   ///
   /// Once called, this instance is unusable. Any attempt will result in a
   /// [ClosedInstance] thrown by the bridge. If already closed, nothing happens.
-  Future<void> close() async {
-    await _bridge.call('close');
+  /// Can optionally be forcefully closed, where any ongoing transcription
+  /// process will halted.
+  Future<void> close({bool force = false}) async {
+    if (force) {
+      await _bridge.call('forceClose');
+    } else {
+      await _bridge.call('close');
+    }
     await _bridge.close();
     _modelOpened = false;
     _threadAllocated = false;

@@ -21,12 +21,15 @@ class Bridge {
   MethodChannel _methodChannel;
   EventChannel _eventChannel;
 
+  Stream<dynamic> _eventStream;
+
   /// Asks for a new instance, while creating method and event channels for it.
   Bridge() {
     _id = _idCount++;
     _mainMethodChannel.invokeMethod('createNewInstance', _id);
     _methodChannel = MethodChannel(_baseMethodChannelName + _id.toString());
     _eventChannel = EventChannel(_baseEventChannelName + _id.toString());
+    _eventStream = _eventChannel.receiveBroadcastStream();
   }
 
   /// Calls the method on the connected instance.
@@ -42,13 +45,14 @@ class Bridge {
   /// If bridge has been closed, [ClosedInstance] will be thrown.
   Stream<dynamic> get eventStream {
     if (_closed) throw ClosedInstance();
-    return _eventChannel.receiveBroadcastStream();
+    return _eventStream;
   }
 
   /// Closes method and event channels while asking for instance to be removed.
   ///
-  /// The resources on the instance are not freed, those most be explicitly
-  /// called. If already closed, nothing happens.
+  /// Once closed, [Bridge] cannot be used. The resources on the instance are
+  /// not freed, those most be explicitly called. If already closed, nothing
+  /// happens.
   Future<void> close() {
     if (_closed) return null;
     _closed = true;
