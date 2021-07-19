@@ -22,7 +22,9 @@ class VoskInstance {
   /// of the current one.
   Stream<dynamic> get progressStream => _bridge.eventStream;
 
-  /// Allocates a single thread. Exception is thrown if one already exists.
+  /// Allocates a single thread.
+  ///
+  /// Throws [ThreadAlreadyAllocated] if there is an existing thread.
   Future<void> allocateSingleThread() async {
     if (_threadAllocated) throw ThreadAlreadyAllocated();
     await _bridge.call('allocateSingleThread');
@@ -36,20 +38,23 @@ class VoskInstance {
     _threadAllocated = false;
   }
 
-  /// Attempts to interrupt and close the existing thread. If no thread exists,
-  /// nothing happens.
+  /// Attempts to interrupt and close the existing thread.
+  ///
+  /// If no thread exists, nothing happens.
   Future<void> terminateThread() async {
     if (!_threadAllocated) return null;
     await _bridge.call('terminateThread');
     _threadAllocated = false;
   }
 
-  /// Ask open thread to open the given model.
+  /// Ask open thread to open the model at the given [modelPath].
   ///
-  /// If model is already opened, the given [modelPath] doesn't exist or no
-  /// thread is opened, an exception is thrown. The completion of this function
-  /// only means the task has been queued, not necessarily that the model has
-  /// been opened.
+  /// The completion of this function o nly means the task has been queued, not
+  /// necessarily that the model has been opened.
+  /// Throws a [NoOpenThread] exception when called when no thread is open.
+  /// Throws a [ModelAlreadyOpened] exception when a model already exists.
+  /// Throws a [NonExistentModel] exception if [modelPath] does not point to an
+  /// existing model.
   Future<void> queueModelToBeOpened(String modelPath) async {
     if (!_threadAllocated) throw NoOpenThread();
     if (_modelOpened) throw ModelAlreadyOpened();
@@ -60,9 +65,10 @@ class VoskInstance {
 
   /// Closes the currently opened model.
   ///
-  /// If no model is opened, nothing happens. If no thread is open, an exception
-  /// is thrown. The completion of this function only means the task has been
-  /// queued, not necessarily that the model has been opened.
+  /// The completion of this function only means the task has been queued, not
+  /// necessarily that the model has been opened.
+  /// Throws a [NoOpenThread] exception when called when no thread is open.
+  /// If no model is opened, nothing happens.
   Future<void> queueModelToBeClosed() async {
     if (!_threadAllocated) throw NoOpenThread();
     if (!_modelOpened) return null;
@@ -70,26 +76,35 @@ class VoskInstance {
     _modelOpened = false;
   }
 
-  /// Puts the given file on queue for transcription.
+  /// Puts the file at the given [filePath] on queue for transcription
+  /// outputting the result at the given [resultPath].
   ///
-  /// Only one file will be transcribing at a given time. Throws an exception if
-  /// the given file does not exist, no model is opened, or no thread is open.
+  /// Only one file will be transcribing at a given time.
   /// The completion of this function only means the task has been queued, not
-  /// necessarily that the model has opened.
-  Future<void> queueFileForTranscription(String filePath) {
+  /// necessarily that the file has finished transcribing.
+  /// Throws a [NoOpenThread] exception when called when no thread is open.
+  /// Throws a [NoOpenModel] exception when no model is currently opened.
+  /// Throws a [NonExistentWavFile] if the given [filePath] points to a
+  /// non-existent file.
+  /// Throws a [TranscriptionAlreadyExists] if the given [resultPath] points to
+  /// a file that already exists.
+  Future<void> queueFileForTranscription(String filePath, String resultPath) {
     if (!_threadAllocated) throw NoOpenThread();
     if (!_modelOpened) throw NoOpenModel();
     if (!File(filePath).existsSync()) throw NonExistentWavFile();
+    if (File(resultPath).existsSync()) throw TranscriptionAlreadyExists();
+
     return _bridge.call(
       'queueFileForTranscription',
-      {'filePath': filePath, 'sampleRate': 16000},
+      {'filePath': filePath, 'resultPath': resultPath, 'sampleRate': 16000},
     );
   }
 
   /// Closes resources and any associated connections.
   ///
   /// Once called, this instance is unusable. Any attempt will result in a
-  /// [ClosedInstance] thrown by the bridge. If already closed, nothing happens.
+  /// [ClosedInstance] thrown by the bridge.
+  /// If already closed, nothing happens.
   /// Can optionally be forcefully closed, where any ongoing transcription
   /// process will halted.
   Future<void> close({bool force = false}) async {

@@ -65,3 +65,8 @@ class ClosedInstance implements Exception {
     return '${super.toString()}: $_message';
   }
 }
+
+class TranscriptionAlreadyExists implements Exception {
+  final String message;
+  TranscriptionAlreadyExists([this.message]);
+}

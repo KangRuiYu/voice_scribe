@@ -10,8 +10,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.concurrent.Future;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.vosk.Model;
 import org.vosk.Recognizer;
 
@@ -19,20 +23,23 @@ import org.vosk.Recognizer;
 // sample rate. (Note: Some of the code was written with reference to the code examples in the
 // Vosk api.
 class TranscribeFile implements Runnable {
-    private final Future<Model> modelFuture;
     private final String filePath;
+    private final String resultPath;
     private final int sampleRate;
+    private final Future<Model> modelFuture;
     private final Bridge bridge;
 
     public TranscribeFile(
-            Future<Model> modelFuture,
             String filePath,
+            String resultPath,
             int sampleRate,
+            Future<Model> modelFuture,
             Bridge bridge
     ) {
-        this.modelFuture = modelFuture;
         this.filePath = filePath;
+        this.resultPath = resultPath;
         this.sampleRate = sampleRate;
+        this.modelFuture = modelFuture;
         this.bridge = bridge;
     }
 
@@ -40,9 +47,10 @@ class TranscribeFile implements Runnable {
     public void run() {
         try (
                 Recognizer recognizer = new Recognizer(modelFuture.get(), sampleRate);
-                FileInputStream fileInputStream = new FileInputStream(filePath)
+                FileInputStream fileInput = new FileInputStream(filePath);
+                PrintWriter resultOutput = new PrintWriter(resultPath, "UTF-8")
         ) {
-            fileInputStream.skip(44); // Skip the 44 byte wav header.
+            fileInput.skip(44); // Skip the 44 byte wav header.
 
             int bufferSize = Math.round(sampleRate * 0.4f);
             byte[] buffer = new byte[bufferSize];
@@ -53,11 +61,13 @@ class TranscribeFile implements Runnable {
             Handler mainHandler = new Handler(Looper.getMainLooper());
 
             while (true) {
-                if (Thread.interrupted()) { // Terminate transcription if thread is interrupted.
+                // Terminate if interrupted. Deletes transcription file first.
+                if (Thread.interrupted()) {
+                    new File(resultPath).delete();
                     break;
                 }
 
-                int bytesRead = fileInputStream.read(buffer);
+                int bytesRead = fileInput.read(buffer);
 
                 if (bytesRead == -1) {
                     break;
@@ -79,10 +89,11 @@ class TranscribeFile implements Runnable {
                 boolean silence = recognizer.acceptWaveForm(buffer, bytesRead);
 
                 if (silence) {
+                    resultOutput.write(parseResultString(recognizer.getResult()));
                 }
             }
 
-            System.out.println(recognizer.getFinalResult());
+            resultOutput.write(parseResultString(recognizer.getFinalResult()));
         }
         catch (ExecutionException | InterruptedException e) {
             System.out.println("Unable to finish opening the given model.");
@@ -93,5 +104,37 @@ class TranscribeFile implements Runnable {
         catch (IOException e) {
             System.out.println("IO error, could not read contents of wav file.");
         }
+        catch (JSONException e) {
+            System.out.println("Invalid JSON string given.");
+        }
+    }
+
+    // Parses the given result string (JSON) into the proper format.
+    // If the result is empty, an empty string is returned.
+    // If given string is not a proper JSON string, a JSONException is thrown.
+    private String parseResultString(String resultString) throws JSONException{
+        JSONObject result = new JSONObject(resultString);
+
+        if (!result.has("result")) { // Terminate if result is empty.
+            return "";
+        }
+
+        JSONArray wordResults = result.getJSONArray("result");
+        String parsedResultString = "";
+
+        for (int i = 0; i < wordResults.length(); i++) {
+            parsedResultString += parseWordResult(wordResults.getJSONObject(i));
+        }
+
+        return parsedResultString;
+    }
+
+    // Parses and returns the given word result JSON object as a formatted string.
+    // If the given wordResult does not contain the proper data, a JSONException is thrown.
+    private static String parseWordResult(JSONObject wordResult) throws JSONException{
+         return wordResult.getString("word") + " " +
+                String.valueOf(wordResult.getDouble("start")) + " " +
+                String.valueOf(wordResult.getDouble("end")) + " " +
+                String.valueOf(wordResult.getDouble("conf")) + "\n";
     }
 }

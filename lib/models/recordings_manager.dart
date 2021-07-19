@@ -83,6 +83,11 @@ class RecordingsManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Updates the recordings import file to match current meta data.
+  static Future<void> updateImportFile(Recording recording) {
+    return _createImportFile(recording);
+  }
+
   /// Creates a recording object and import file for the given file.
   Future<void> importRecordingFile(File recordingFile) async {
     Duration duration = await flutterSoundHelper.duration(recordingFile.path);
@@ -142,7 +147,7 @@ class RecordingsManager extends ChangeNotifier {
   }
 
   /// Returns the imports directory and creates one if one doesn't already exist.
-  Future<Directory> _getImportsDirectory() async {
+  static Future<Directory> _getImportsDirectory() async {
     Directory externalStorageDirectory = await getExternalStorageDirectory();
     Directory importsDirectory =
         Directory(join(externalStorageDirectory.path, '.imports'));
@@ -154,7 +159,7 @@ class RecordingsManager extends ChangeNotifier {
   }
 
   /// Creates an import file for the given recording.
-  void _createImportFile(Recording recording) async {
+  static Future<void> _createImportFile(Recording recording) async {
     Directory importsDirectory = await _getImportsDirectory();
     File importFile =
         File(join(importsDirectory.path, '${recording.name}.import'));

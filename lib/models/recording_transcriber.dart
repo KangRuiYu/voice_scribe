@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:voice_scribe/exceptions/transcriber_exceptions.dart';
 import 'package:voice_scribe/models/recording.dart';
+import 'package:voice_scribe/models/recordings_manager.dart';
+import 'package:voice_scribe/utils/file_utils.dart';
 import 'package:voice_scribe/utils/model_manager.dart' as modelManager;
 import 'package:vosk_dart/vosk_dart.dart';
 
@@ -30,6 +33,9 @@ class RecordingTranscriber extends ChangeNotifier {
   // Current recording being transcribed.
   Recording _currentRecording;
   Recording get currentRecording => _currentRecording;
+
+  // Current transcription file being written to.
+  File _currentTranscriptionFile;
 
   /// Internal subscription to transcription progress.
   ///
@@ -88,19 +94,31 @@ class RecordingTranscriber extends ChangeNotifier {
     }
   }
 
-  /// Start transcribing the next _recording in [_queue].
+  /// Start transcribing the next recording in [_queue].
   ///
   /// If there is no recordings in [_queue], [_currentRecording] is instead set
   /// to null.
   /// Calls [_allocateResources] if it is the first call.
+  /// Throws a [NonExistentWavFile] exception if the next recording in
+  /// queue does not exist.
+  /// Throws a [TranscriptionAlreadyExists] exception if the recording already
+  /// has a transcription file.
   Future<void> _transcribeNext() async {
     if (_queue.isEmpty) {
       _currentRecording = null;
       return;
     }
+
     _currentRecording = _queue.removeFirst();
+    _currentTranscriptionFile =
+        await generateTranscriptionFile(_currentRecording.name);
+
     await _readyResources();
-    await _voskInstance.queueFileForTranscription(_currentRecording.path);
+
+    await _voskInstance.queueFileForTranscription(
+      _currentRecording.audioPath,
+      _currentTranscriptionFile.path,
+    );
   }
 
   /// Allocates any resources if needed, such as threads or models.
@@ -120,11 +138,14 @@ class RecordingTranscriber extends ChangeNotifier {
 
   /// Called on progress event.
   ///
-  /// When a recording is done, the next recording from [_queue] is transcribed
+  /// When a recording is done, the
+  /// the next recording from [_queue] is transcribed
   /// and any listeners will be notified.
-  void _onProgress(dynamic progress) {
+  void _onProgress(dynamic progress) async {
     if (progress == 1.0) {
-      _transcribeNext();
+      _currentRecording.transcriptionPath = _currentTranscriptionFile.path;
+      await RecordingsManager.updateImportFile(_currentRecording);
+      await _transcribeNext();
       notifyListeners();
     }
   }

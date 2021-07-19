@@ -26,6 +26,24 @@ class RecordingActionPopupButton extends StatelessWidget {
     );
   }
 
+  void _showReTranscribePopup(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => ConfirmationPopup(
+        title: const Text('Re-transcribe?'),
+        content: [
+          Text(
+            'Transcribing this file will delete the existing transcription, even if you later cancel it.',
+          ),
+        ],
+        onConfirm: () {
+          _recording.deleteTranscription();
+          _transcribe(context);
+        },
+      ),
+    );
+  }
+
   void _transcribe(BuildContext context) {
     Provider.of<RecordingTranscriber>(context, listen: false)
         .addToQueue(_recording);
@@ -43,7 +61,9 @@ class RecordingActionPopupButton extends StatelessWidget {
             child: const Text('Edit'),
           ),
           PopupMenuItem(
-            value: () => _transcribe(context),
+            value: () => _recording.transcriptionExists
+                ? _showReTranscribePopup(context)
+                : _transcribe(context),
             child: const Text('Transcribe'),
           ),
           PopupMenuItem(
