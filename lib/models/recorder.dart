@@ -92,7 +92,7 @@ class Recorder extends ChangeNotifier {
     }
 
     Recording recording = Recording(
-      file: finalFile,
+      audioFile: finalFile,
       duration: currentProgress.duration,
     );
     _wavWriter = null;

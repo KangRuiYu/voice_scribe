@@ -138,7 +138,7 @@ class _DetailsCard extends StatelessWidget {
                   ),
                   const SizedBox(height: PADDING_SMALL),
                   Text(
-                    recording.path,
+                    recording.audioPath,
                     style: Theme.of(context).textTheme.caption,
                   ),
                 ],

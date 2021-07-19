@@ -76,7 +76,7 @@ class RecordingsManager extends ChangeNotifier {
 
     // Remove source file
     if (deleteSource) {
-      File recordingFile = File(recording.path);
+      File recordingFile = File(recording.audioPath);
       recordingFile.delete();
     }
 
@@ -86,7 +86,10 @@ class RecordingsManager extends ChangeNotifier {
   /// Creates a recording object and import file for the given file.
   Future<void> importRecordingFile(File recordingFile) async {
     Duration duration = await flutterSoundHelper.duration(recordingFile.path);
-    Recording recording = Recording(duration: duration, file: recordingFile);
+    Recording recording = Recording(
+      audioFile: recordingFile,
+      duration: duration,
+    );
     addNewRecording(recording);
   }
 
