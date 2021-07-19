@@ -8,7 +8,7 @@ class ConfirmationPopup extends StatelessWidget {
   final String _confirmationButtonLabel;
   final String _cancelButtonLabel;
 
-  ConfirmationPopup({
+  const ConfirmationPopup({
     @required Widget title,
     @required List<Widget> content,
     @required void Function() onConfirm,
