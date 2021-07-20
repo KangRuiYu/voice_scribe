@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:voice_scribe/exceptions/transcriber_exceptions.dart';
 import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/models/recordings_manager.dart';
-import 'package:voice_scribe/utils/file_utils.dart';
+import 'package:voice_scribe/utils/asset_utils.dart' as assets;
 import 'package:voice_scribe/utils/model_manager.dart' as modelManager;
 import 'package:vosk_dart/vosk_dart.dart';
 
@@ -111,7 +111,7 @@ class RecordingTranscriber extends ChangeNotifier {
 
     _currentRecording = _queue.removeFirst();
     _currentTranscriptionFile =
-        await generateTranscriptionFile(_currentRecording.name);
+        await assets.transcriptionFile(_currentRecording.name);
 
     await _readyResources();
 
@@ -144,7 +144,7 @@ class RecordingTranscriber extends ChangeNotifier {
   void _onProgress(dynamic progress) async {
     if (progress == 1.0) {
       _currentRecording.transcriptionPath = _currentTranscriptionFile.path;
-      await RecordingsManager.updateImportFile(_currentRecording);
+      await RecordingsManager.saveMetadata(_currentRecording);
       await _transcribeNext();
       notifyListeners();
     }

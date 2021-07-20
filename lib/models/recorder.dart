@@ -4,11 +4,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:voice_scribe/exceptions/recorder_exceptions.dart';
 import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/models/wav_writer.dart';
+import 'package:voice_scribe/utils/asset_utils.dart';
 
 class Recorder extends ChangeNotifier {
   FlutterSoundRecorder _recorder = FlutterSoundRecorder();
@@ -57,7 +57,7 @@ class Recorder extends ChangeNotifier {
 
     // Create new recording file
     _wavWriter = WavWriter(
-      directoryPath: (await getExternalStorageDirectory()).path,
+      directoryPath: (await recordingsDirectory()).path,
       fileName: _generateName(),
       audioStream: _audioData.stream,
     );

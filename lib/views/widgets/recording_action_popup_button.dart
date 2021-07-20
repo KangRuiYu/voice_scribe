@@ -16,8 +16,7 @@ class RecordingActionPopupButton extends StatelessWidget {
       context: context,
       builder: (BuildContext context) => _RemoveFilePopup(
         removeFunc: (bool deleteFile) {
-          Provider.of<RecordingsManager>(context, listen: false)
-              .removeRecording(
+          Provider.of<RecordingsManager>(context, listen: false).remove(
             _recording,
             deleteSource: deleteFile,
           );

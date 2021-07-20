@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
+import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/models/recordings_manager.dart';
 import 'package:voice_scribe/utils/formatter.dart';
 import 'package:voice_scribe/views/widgets/custom_buttons.dart';
@@ -18,10 +20,10 @@ class _ImportState extends ChangeNotifier {
   }
 
   void _initialize() async {
-    await for (File file in _recordingsManager.scanForUnimportedFiles()) {
+    for (File file in await _recordingsManager.unknownRecordingFiles()) {
       _files[file] = false;
-      notifyListeners();
     }
+    notifyListeners();
   }
 
   void check(File file, bool value) {
@@ -38,7 +40,11 @@ class _ImportState extends ChangeNotifier {
       File file = entry.key;
       bool checked = entry.value;
       if (checked) {
-        await _recordingsManager.importRecordingFile(file);
+        Recording recording = Recording(
+          audioFile: file,
+          duration: await FlutterSoundHelper().duration(file.path),
+        );
+        await _recordingsManager.add(recording);
       }
     }
   }

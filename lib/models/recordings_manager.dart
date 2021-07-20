@@ -1,168 +1,155 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:voice_scribe/models/recording.dart';
+import 'package:voice_scribe/utils/asset_utils.dart' as assets;
 
+/// Manages and provides access to the list of known recordings.
 class RecordingsManager extends ChangeNotifier {
-  // Manages all the saved recordings
+  /// The internal recordings list.
+  UnmodifiableListView<Recording> get recordings =>
+      UnmodifiableListView(_recordings);
   final List<Recording> _recordings = [];
-  List<Recording> get recordings => _recordings;
 
-  // States
-  bool _recordingsLoaded = false;
-  bool get recordingsLoaded => _recordingsLoaded;
+  /// If this has finished loading all known recordings.
+  bool get finishedLoading => _finishedLoading;
+  bool _finishedLoading = false;
 
-  // Sorting functions
-  static Function byName =
-      (Recording a, Recording b) => a.name.compareTo(b.name);
-  static Function byDate =
-      (Recording a, Recording b) => a.date.compareTo(b.date);
-  static Function byDuration =
-      (Recording a, Recording b) => a.duration.compareTo(b.duration);
+  // Sorting functions.
+  static int byName(Recording a, Recording b) => a.name.compareTo(b.name);
+  static int byDate(Recording a, Recording b) => a.date.compareTo(b.date);
+  static int byDuration(Recording a, Recording b) =>
+      a.duration.compareTo(b.duration);
 
-  Function _currentSortOrder = byName; // Currently applied sorting
-  bool _sortReversed = false; // If the sort is currently reversed
+  /// Currently applied sorting function.
+  Comparator<Recording> _currentSortOrder = byName;
+
+  /// If the current sorting is reversed.
   bool get sortReversed => _sortReversed;
+  bool _sortReversed = false;
 
-  RecordingsManager() {
-    loadRecordings();
+  /// Creates a metadata file for the given recording.
+  ///
+  /// If the file already exists, it is overwritten.
+  static Future<void> saveMetadata(Recording recording) async {
+    File metadata = await assets.metadataFile(recording.name);
+    await metadata.writeAsString(jsonEncode(recording.toJson()));
+  }
+
+  /// Default constructor that does nothing.
+  RecordingsManager();
+
+  /// Load is called on construction.
+  RecordingsManager.autoLoad() {
+    load();
   }
 
   /// Load known recordings.
-  Future<void> loadRecordings() async {
-    Directory importsDirectory = await _getImportsDirectory();
-
+  ///
+  /// Clears any previously loaded recordings.
+  Future<void> load() async {
     _recordings.clear();
 
-    await for (FileSystemEntity entity in importsDirectory.list()) {
-      if (entity is File && extension(entity.path) == '.import') {
-        String data = entity.readAsStringSync();
-        Recording ri = Recording.fromJson(jsonDecode(data));
-        _recordings.add(ri);
+    Directory metadataDirectory = await assets.metadataDirectory();
+
+    await for (FileSystemEntity entity in metadataDirectory.list()) {
+      if (entity is File && extension(entity.path) == '.metadata') {
+        Map<String, dynamic> metadata = jsonDecode(await entity.readAsString());
+        Recording recording = Recording.fromJson(metadata);
+        _recordings.add(recording);
       }
     }
 
-    _recordingsLoaded = true;
+    _finishedLoading = true;
 
-    sortRecordings();
+    sort(); // NotifyListeners is called here.
   }
 
-  /// Adds a new recording to the recordings list and create a import file for
-  /// it.
-  void addNewRecording(Recording recording) {
+  /// Adds new [recording] to the list of known recordings.
+  ///
+  /// Creates a new metadata file for it.
+  Future<void> add(Recording recording) async {
     _recordings.add(recording);
-    _createImportFile(recording);
+    await saveMetadata(recording);
     notifyListeners();
   }
 
-  /// Removes the given recording and its import file. Optionally delete the
-  /// actual file itself as well.
-  Future<void> removeRecording(
-    Recording recording, {
-    bool deleteSource = false,
-  }) async {
-    // Remove recording
+  /// Removes [recording] from the list of known recordings.
+  ///
+  /// Removes the metadata file for it.
+  /// Optionally removes source files for it as well (audio and transcription).
+  Future<void> remove(Recording recording, {bool deleteSource}) async {
     _recordings.remove(recording);
 
-    // Remove import file
-    Directory importsDirectory = await _getImportsDirectory();
-    File importFile =
-        File(join(importsDirectory.path, '${recording.name}.import'));
-    importFile.delete();
+    List<Future> futureList = [];
 
-    // Remove source file
+    // Remove metadata file
+    File metadataFile = await assets.metadataFile(recording.name);
+    futureList.add(metadataFile.delete());
+
+    // Remove source files
     if (deleteSource) {
-      File recordingFile = File(recording.audioPath);
-      recordingFile.delete();
+      if (recording.audioExists) {
+        futureList.add(recording.deleteAudio());
+      }
+      if (recording.transcriptionExists) {
+        futureList.add(recording.deleteTranscription());
+      }
     }
+
+    await Future.wait(futureList);
 
     notifyListeners();
   }
 
-  /// Updates the recordings import file to match current meta data.
-  static Future<void> updateImportFile(Recording recording) {
-    return _createImportFile(recording);
-  }
-
-  /// Creates a recording object and import file for the given file.
-  Future<void> importRecordingFile(File recordingFile) async {
-    Duration duration = await flutterSoundHelper.duration(recordingFile.path);
-    Recording recording = Recording(
-      audioFile: recordingFile,
-      duration: duration,
-    );
-    addNewRecording(recording);
-  }
-
-  /// Scans the primary directory for non-imported recording files.
-  Stream<File> scanForUnimportedFiles() async* {
-    Directory externalStorageDirectory = await getExternalStorageDirectory();
-
-    await for (FileSystemEntity entity in externalStorageDirectory.list()) {
-      if (entity is File) {
-        String name = basenameWithoutExtension(entity.path);
-        bool unique = true;
-
-        for (Recording recording in _recordings) {
-          // Search for any matching recording names
-          if (name == recording.name) {
-            unique = false;
-            break;
-          }
-        }
-
-        if (unique) yield entity;
-      }
-    }
-  }
-
-  void sortRecordings({Function sortFunction, bool reversed = false}) {
-    // Setup
-    if (sortFunction == _currentSortOrder && reversed == _sortReversed)
-      return; // Return if the current recording list is already in the specified order.
-
-    if (sortFunction == null)
-      sortFunction = byName; // Initialize to default if no function was given
-
+  /// Sorts the internal recordings list.
+  void sort({
+    Comparator<Recording> sortFunction = byName,
+    bool reversed = false,
+  }) {
     // Update state
     _currentSortOrder = sortFunction;
     _sortReversed = reversed;
 
     // Apply
-    if (reversed)
+    if (reversed) {
       _recordings.sort((Recording a, Recording b) => -sortFunction(a, b));
-    else
+    } else {
       _recordings.sort(sortFunction);
+    }
 
     notifyListeners();
   }
 
   /// Reverses the currently applied sorting order.
   void reverseSort() {
-    sortRecordings(sortFunction: _currentSortOrder, reversed: !_sortReversed);
+    sort(sortFunction: _currentSortOrder, reversed: !_sortReversed);
   }
 
-  /// Returns the imports directory and creates one if one doesn't already exist.
-  static Future<Directory> _getImportsDirectory() async {
-    Directory externalStorageDirectory = await getExternalStorageDirectory();
-    Directory importsDirectory =
-        Directory(join(externalStorageDirectory.path, '.imports'));
+  /// Returns the recordings that are not currently loaded.
+  ///
+  /// Will not work properly if [load] is not called beforehand.
+  Future<List<File>> unknownRecordingFiles() async {
+    Directory recordingsDirectory = await assets.recordingsDirectory();
 
-    importsDirectory
-        .create(); // Creates the imports directory if it doesn't already exist
+    Set<String> recordingNames = {};
+    for (Recording recording in _recordings) {
+      recordingNames.add(recording.name);
+    }
 
-    return importsDirectory;
-  }
+    List<File> result = [];
+    await for (FileSystemEntity entity in recordingsDirectory.list()) {
+      if (entity is File && extension(entity.path) == '.wav') {
+        String recordingName = basenameWithoutExtension(entity.path);
+        if (!recordingNames.contains(recordingName)) {
+          result.add(entity);
+        }
+      }
+    }
 
-  /// Creates an import file for the given recording.
-  static Future<void> _createImportFile(Recording recording) async {
-    Directory importsDirectory = await _getImportsDirectory();
-    File importFile =
-        File(join(importsDirectory.path, '${recording.name}.import'));
-    importFile.writeAsString(jsonEncode(recording.toJson()));
+    return result;
   }
 }

@@ -98,13 +98,13 @@ class Recording {
   ///
   /// If audio file could not be deleted (file does not exist), then a
   /// [FileSystemException] is thrown.
-  void deleteAudio() => _audioFile.deleteSync();
+  Future<FileSystemEntity> deleteAudio() => _audioFile.delete();
 
   /// Deletes the transcription file associated with this recording.
   ///
   /// If transcription file could not be deleted (file does not exist), then a
   /// [FileSystemException] is thrown.
-  void deleteTranscription() => _transcriptionFile.deleteSync();
+  Future<FileSystemEntity> deleteTranscription() => _transcriptionFile.delete();
 
   @override
   String toString() {

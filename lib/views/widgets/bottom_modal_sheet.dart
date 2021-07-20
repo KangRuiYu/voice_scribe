@@ -63,21 +63,21 @@ class _SortChoiceDialog extends StatelessWidget {
   // A popup dialog showing available sorting choices
 
   void sortByName(BuildContext context) {
-    Provider.of<RecordingsManager>(context, listen: false).sortRecordings(
+    Provider.of<RecordingsManager>(context, listen: false).sort(
       sortFunction: RecordingsManager.byName,
     );
     Navigator.pop(context);
   }
 
   void sortByDate(BuildContext context) {
-    Provider.of<RecordingsManager>(context, listen: false).sortRecordings(
+    Provider.of<RecordingsManager>(context, listen: false).sort(
       sortFunction: RecordingsManager.byDate,
     );
     Navigator.pop(context);
   }
 
   void sortByDuration(BuildContext context) {
-    Provider.of<RecordingsManager>(context, listen: false).sortRecordings(
+    Provider.of<RecordingsManager>(context, listen: false).sort(
       sortFunction: RecordingsManager.byDuration,
     );
     Navigator.pop(context);

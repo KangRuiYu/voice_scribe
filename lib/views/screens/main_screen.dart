@@ -32,7 +32,7 @@ class MainScreen extends StatelessWidget {
         onPressed: () => startRecording(context),
       ),
       body:
-          Provider.of<RecordingsManager>(context, listen: true).recordingsLoaded
+          Provider.of<RecordingsManager>(context, listen: true).finishedLoading
               ? RecordingsDisplay()
               : Center(child: const CircularProgressIndicator()),
     );
