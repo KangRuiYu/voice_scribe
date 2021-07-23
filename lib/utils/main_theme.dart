@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:voice_scribe/utils/mono_theme_constants.dart';
+
+import 'mono_theme_constants.dart';
 
 final ThemeData mainTheme = ThemeData(
   primarySwatch: Colors.red,

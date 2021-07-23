@@ -4,10 +4,11 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
-import 'package:voice_scribe/exceptions/transcriber_exceptions.dart';
-import 'package:voice_scribe/models/recording.dart';
-import 'package:voice_scribe/utils/model_manager.dart' as modelManager;
 import 'package:vosk_dart/vosk_dart.dart';
+
+import '../exceptions/transcriber_exceptions.dart';
+import 'recording.dart';
+import '../utils/model_manager.dart' as modelManager;
 
 /// Different states for a recording in [RecordingTranscriber].
 enum RecordingState { processing, queued, notQueued }

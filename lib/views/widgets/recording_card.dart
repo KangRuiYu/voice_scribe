@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:voice_scribe/models/recording.dart';
-import 'package:voice_scribe/utils/formatter.dart';
-import 'package:voice_scribe/utils/mono_theme_constants.dart';
-import 'package:voice_scribe/views/screens/playing_screen.dart';
+
+import '../../models/recording.dart';
+import '../../utils/formatter.dart';
+import '../../utils/mono_theme_constants.dart';
+import '../screens/playing_screen.dart';
 
 /// Displays info on a recording and allows it to be played.
 class RecordingCard extends StatelessWidget {

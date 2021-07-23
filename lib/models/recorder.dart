@@ -5,9 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path/path.dart' as path;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:voice_scribe/exceptions/recorder_exceptions.dart';
-import 'package:voice_scribe/models/recording.dart';
-import 'package:voice_scribe/models/wav_writer.dart';
+
+import '../exceptions/recorder_exceptions.dart';
+import 'recording.dart';
+import 'wav_writer.dart';
 
 class Recorder extends ChangeNotifier {
   /// The directory where recordings will be outputted to.

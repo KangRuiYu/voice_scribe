@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
-import 'package:voice_scribe/models/recording.dart';
-import 'package:voice_scribe/models/recordings_manager.dart';
-import 'package:voice_scribe/utils/formatter.dart';
-import 'package:voice_scribe/views/widgets/custom_buttons.dart';
-import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
+
+import '../../models/recording.dart';
+import '../../models/recordings_manager.dart';
+import '../../utils/formatter.dart';
+import '../widgets/custom_buttons.dart';
+import '../widgets/mono_theme_widgets.dart';
 
 class _ImportState extends ChangeNotifier {
   final RecordingsManager _recordingsManager;

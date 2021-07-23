@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:voice_scribe/utils/mono_theme_constants.dart';
+
+import '../../utils/mono_theme_constants.dart';
 
 class FreeScaffold extends StatelessWidget {
   // A scaffold without any appbars

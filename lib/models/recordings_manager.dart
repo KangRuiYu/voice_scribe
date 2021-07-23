@@ -4,7 +4,8 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
-import 'package:voice_scribe/models/recording.dart';
+
+import 'recording.dart';
 
 /// Manages and provides access to the list of known recordings.
 class RecordingsManager extends ChangeNotifier {

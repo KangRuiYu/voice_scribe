@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:voice_scribe/models/player.dart';
-import 'package:voice_scribe/models/recorder.dart';
-import 'package:voice_scribe/utils/formatter.dart';
+
+import '../../models/player.dart';
+import '../../models/recorder.dart';
+import '../../utils/formatter.dart';
 
 class DurationLabel extends StatefulWidget {
   // Displays duration of Player or Recorder.

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:voice_scribe/models/recordings_manager.dart';
-import 'package:voice_scribe/utils/mono_theme_constants.dart';
-import 'package:voice_scribe/views/screens/import_screen.dart';
+
+import '../../models/recordings_manager.dart';
+import '../../utils/mono_theme_constants.dart';
+import '../screens/import_screen.dart';
 
 class BottomModalSheet extends StatelessWidget {
   // A bottom modal sheet that shows the apps common functions (settings, etc)

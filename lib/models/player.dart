@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:voice_scribe/exceptions/player_exceptions.dart';
-import 'package:voice_scribe/models/recording.dart';
+
+import '../exceptions/player_exceptions.dart';
+import 'recording.dart';
 
 class Player extends ChangeNotifier {
   final FlutterSoundPlayer _player = FlutterSoundPlayer();

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:voice_scribe/models/recording.dart';
-import 'package:voice_scribe/models/recording_transcriber.dart';
-import 'package:voice_scribe/models/recordings_manager.dart';
-import 'package:voice_scribe/utils/mono_theme_constants.dart';
-import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
-import 'package:voice_scribe/views/widgets/recording_action_popup_button.dart';
-import 'package:voice_scribe/views/widgets/recording_card.dart';
-import 'package:voice_scribe/views/widgets/stream_circular_progress_indicator.dart';
+
+import '../../models/recording.dart';
+import '../../models/recording_transcriber.dart';
+import '../../models/recordings_manager.dart';
+import '../../utils/mono_theme_constants.dart';
+import 'mono_theme_widgets.dart';
+import 'recording_action_popup_button.dart';
+import 'recording_card.dart';
+import 'stream_circular_progress_indicator.dart';
 
 /// Widget that displays a list of recording cards.
 class RecordingsDisplay extends StatelessWidget {
