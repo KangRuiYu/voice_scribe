@@ -3,12 +3,17 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as path;
 import 'package:voice_scribe/models/recording.dart';
-import 'package:voice_scribe/utils/asset_utils.dart' as assets;
 
 /// Manages and provides access to the list of known recordings.
 class RecordingsManager extends ChangeNotifier {
+  /// The directory that stores all the recording files.
+  final Directory recordingsDirectory;
+
+  /// The directory that stores all the metadata files.
+  final Directory metadataDirectory;
+
   /// The internal recordings list.
   UnmodifiableListView<Recording> get recordings =>
       UnmodifiableListView(_recordings);
@@ -31,19 +36,17 @@ class RecordingsManager extends ChangeNotifier {
   bool get sortReversed => _sortReversed;
   bool _sortReversed = false;
 
-  /// Creates a metadata file for the given recording.
-  ///
-  /// If the file already exists, it is overwritten.
-  static Future<void> saveMetadata(Recording recording) async {
-    File metadata = await assets.metadataFile(recording.name);
-    await metadata.writeAsString(jsonEncode(recording.toJson()));
-  }
-
-  /// Default constructor that does nothing.
-  RecordingsManager();
+  /// Default constructor.
+  RecordingsManager({
+    @required this.recordingsDirectory,
+    @required this.metadataDirectory,
+  });
 
   /// Load is called on construction.
-  RecordingsManager.autoLoad() {
+  RecordingsManager.autoLoad({
+    @required this.recordingsDirectory,
+    @required this.metadataDirectory,
+  }) {
     load();
   }
 
@@ -53,10 +56,8 @@ class RecordingsManager extends ChangeNotifier {
   Future<void> load() async {
     _recordings.clear();
 
-    Directory metadataDirectory = await assets.metadataDirectory();
-
     await for (FileSystemEntity entity in metadataDirectory.list()) {
-      if (entity is File && extension(entity.path) == '.metadata') {
+      if (entity is File && path.extension(entity.path) == '.metadata') {
         Map<String, dynamic> metadata = jsonDecode(await entity.readAsString());
         Recording recording = Recording.fromJson(metadata);
         _recordings.add(recording);
@@ -87,7 +88,7 @@ class RecordingsManager extends ChangeNotifier {
     List<Future> futureList = [];
 
     // Remove metadata file
-    File metadataFile = await assets.metadataFile(recording.name);
+    File metadataFile = _metadataFile(recording.name);
     futureList.add(metadataFile.delete());
 
     // Remove source files
@@ -133,8 +134,6 @@ class RecordingsManager extends ChangeNotifier {
   ///
   /// Will not work properly if [load] is not called beforehand.
   Future<List<File>> unknownRecordingFiles() async {
-    Directory recordingsDirectory = await assets.recordingsDirectory();
-
     Set<String> recordingNames = {};
     for (Recording recording in _recordings) {
       recordingNames.add(recording.name);
@@ -142,8 +141,8 @@ class RecordingsManager extends ChangeNotifier {
 
     List<File> result = [];
     await for (FileSystemEntity entity in recordingsDirectory.list()) {
-      if (entity is File && extension(entity.path) == '.wav') {
-        String recordingName = basenameWithoutExtension(entity.path);
+      if (entity is File && path.extension(entity.path) == '.wav') {
+        String recordingName = path.basenameWithoutExtension(entity.path);
         if (!recordingNames.contains(recordingName)) {
           result.add(entity);
         }
@@ -151,5 +150,21 @@ class RecordingsManager extends ChangeNotifier {
     }
 
     return result;
+  }
+
+  /// Creates a metadata file for the given recording.
+  ///
+  /// If the file already exists, it is overwritten.
+  Future<void> saveMetadata(Recording recording) async {
+    File metadata = _metadataFile(recording.name);
+    await metadata.writeAsString(jsonEncode(recording.toJson()));
+  }
+
+  /// Returns the File containing the path to the metadata file with the given
+  /// name.
+  ///
+  /// The file may not exist.
+  File _metadataFile(String name) {
+    return File(path.join(metadataDirectory.path, '$name.metadata'));
   }
 }

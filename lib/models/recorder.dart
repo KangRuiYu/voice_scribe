@@ -8,9 +8,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:voice_scribe/exceptions/recorder_exceptions.dart';
 import 'package:voice_scribe/models/recording.dart';
 import 'package:voice_scribe/models/wav_writer.dart';
-import 'package:voice_scribe/utils/asset_utils.dart';
 
 class Recorder extends ChangeNotifier {
+  /// The directory where recordings will be outputted to.
+  final Directory recordingsDirectory;
+
   FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   StreamSubscription<RecordingDisposition> _internalSub;
   StreamController<FoodData> _audioData;
@@ -25,6 +27,8 @@ class Recorder extends ChangeNotifier {
   bool opened = false;
   RecordingDisposition
       currentProgress; // To be able to get the current duration
+
+  Recorder(this.recordingsDirectory);
 
   Future<void> initialize() async {
     // Must initialize the Recorder before using
@@ -57,7 +61,7 @@ class Recorder extends ChangeNotifier {
 
     // Create new recording file
     _wavWriter = WavWriter(
-      directoryPath: (await recordingsDirectory()).path,
+      directoryPath: recordingsDirectory.path,
       fileName: _generateName(),
       audioStream: _audioData.stream,
     );

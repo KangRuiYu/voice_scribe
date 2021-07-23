@@ -3,10 +3,9 @@ import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as path;
 import 'package:voice_scribe/exceptions/transcriber_exceptions.dart';
 import 'package:voice_scribe/models/recording.dart';
-import 'package:voice_scribe/models/recordings_manager.dart';
-import 'package:voice_scribe/utils/asset_utils.dart' as assets;
 import 'package:voice_scribe/utils/model_manager.dart' as modelManager;
 import 'package:vosk_dart/vosk_dart.dart';
 
@@ -24,18 +23,25 @@ class RecordingTranscriber extends ChangeNotifier {
   /// Transcription progress for the current recording.
   Stream<dynamic> get progressStream => _voskInstance.progressStream;
 
+  /// The output directory for transcriptions.
+  final Directory transcriptionDirectory;
+
+  // Current recording being transcribed.
+  Recording get currentRecording => _currentRecording;
+  Recording _currentRecording;
+
+  /// Current transcription file being written to.
+  File get currentTranscriptionFile => _currentTranscriptionFile;
+  File _currentTranscriptionFile;
+
+  /// Functions called when a recording has finished transcribing.
+  final void Function(Recording) onDone;
+
   /// Vosk instance that does the transcribing.
   final VoskInstance _voskInstance = VoskInstance();
 
   /// Recordings that will be transcribed.
   final Queue<Recording> _queue = Queue<Recording>();
-
-  // Current recording being transcribed.
-  Recording _currentRecording;
-  Recording get currentRecording => _currentRecording;
-
-  // Current transcription file being written to.
-  File _currentTranscriptionFile;
 
   /// Internal subscription to transcription progress.
   ///
@@ -43,7 +49,10 @@ class RecordingTranscriber extends ChangeNotifier {
   /// state can be updated.
   StreamSubscription<dynamic> _progressSub;
 
-  RecordingTranscriber() {
+  RecordingTranscriber({
+    @required this.transcriptionDirectory,
+    onDone,
+  }) : this.onDone = (onDone ?? (_) => null) {
     _progressSub = _voskInstance.progressStream.listen(_onProgress);
   }
 
@@ -106,12 +115,12 @@ class RecordingTranscriber extends ChangeNotifier {
   Future<void> _transcribeNext() async {
     if (_queue.isEmpty) {
       _currentRecording = null;
+      _currentTranscriptionFile = null;
       return;
     }
 
     _currentRecording = _queue.removeFirst();
-    _currentTranscriptionFile =
-        await assets.transcriptionFile(_currentRecording.name);
+    _currentTranscriptionFile = _transcriptionFile(_currentRecording.name);
 
     await _readyResources();
 
@@ -144,9 +153,16 @@ class RecordingTranscriber extends ChangeNotifier {
   void _onProgress(dynamic progress) async {
     if (progress == 1.0) {
       _currentRecording.transcriptionPath = _currentTranscriptionFile.path;
-      await RecordingsManager.saveMetadata(_currentRecording);
+      onDone(_currentRecording);
       await _transcribeNext();
       notifyListeners();
     }
+  }
+
+  /// Returns a File containing the path to the transcription with the given name.
+  ///
+  /// The file may not exist.
+  File _transcriptionFile(String name) {
+    return File(path.join(transcriptionDirectory.path, '$name.transcription'));
   }
 }

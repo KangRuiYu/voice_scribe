@@ -8,6 +8,7 @@ import 'package:voice_scribe/utils/mono_theme_constants.dart';
 import 'package:voice_scribe/views/widgets/duration_label.dart';
 import 'package:voice_scribe/views/widgets/mono_theme_widgets.dart';
 import 'package:voice_scribe/views/widgets/volume_display.dart';
+import 'package:voice_scribe/utils/asset_utils.dart' as assets;
 
 class _SaveState extends ChangeNotifier {
   // The saving state (the name inputted and saving functions)
@@ -31,11 +32,10 @@ class _SaveState extends ChangeNotifier {
 
 class RecordingScreen extends StatelessWidget {
   // The screen when recording
-  final Recorder _recorder;
-
-  RecordingScreen() : _recorder = Recorder();
+  Recorder _recorder;
 
   Future<Recorder> _initializeRecorder() async {
+    _recorder = Recorder(await assets.recordingsDirectory());
     await _recorder.initialize();
     await _recorder.startRecording();
     return _recorder;
