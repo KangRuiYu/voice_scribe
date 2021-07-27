@@ -18,15 +18,19 @@ class _SaveState extends ChangeNotifier {
 
   void saveRecording(BuildContext context) async {
     // Save recording and return to previous screen
-    Recording recording = await Provider.of<Recorder>(context, listen: false)
-        .stopRecording(_textEditingController.text);
+    Recorder recorder = Provider.of<Recorder>(context, listen: false);
+    Recording recording =
+        await recorder.stopRecording(_textEditingController.text);
+    await recorder.close();
     Provider.of<RecordingsManager>(context, listen: false).add(recording);
     Navigator.pop(context);
   }
 
   void deleteRecording(BuildContext context) async {
     // Delete recording and return to previous screen
-    Provider.of<Recorder>(context, listen: false).terminate();
+    Recorder recorder = Provider.of<Recorder>(context, listen: false);
+    await recorder.terminate();
+    await recorder.close();
     Navigator.pop(context);
   }
 }
