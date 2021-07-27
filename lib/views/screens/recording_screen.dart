@@ -5,11 +5,11 @@ import 'package:provider/provider.dart';
 import '../../models/recorder.dart';
 import '../../models/recording.dart';
 import '../../models/recordings_manager.dart';
+import '../../utils/app_data.dart';
 import '../../utils/mono_theme_constants.dart';
 import '../widgets/duration_label.dart';
 import '../widgets/mono_theme_widgets.dart';
 import '../widgets/volume_display.dart';
-import '../../utils/asset_utils.dart' as assets;
 
 class _SaveState extends ChangeNotifier {
   // The saving state (the name inputted and saving functions)
@@ -33,31 +33,30 @@ class _SaveState extends ChangeNotifier {
 
 class RecordingScreen extends StatelessWidget {
   // The screen when recording
-  Recorder _recorder;
-
-  Future<Recorder> _initializeRecorder() async {
-    _recorder = Recorder(await assets.recordingsDirectory());
-    await _recorder.initialize();
-    await _recorder.startRecording();
-    return _recorder;
+  Future<Recorder> _initializeRecorder(BuildContext context) async {
+    AppData appData = Provider.of<AppData>(context, listen: false);
+    Recorder recorder = Recorder(appData.recordingsDirectory);
+    await recorder.initialize();
+    await recorder.startRecording();
+    return recorder;
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (_recorder.active) await _recorder.terminate();
-        if (_recorder.opened) await _recorder.close();
-        return true;
-      },
-      child: FutureBuilder(
-        future: _initializeRecorder(),
-        builder: (BuildContext context, AsyncSnapshot<Recorder> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done &&
-              snapshot.hasData) {
-            return MultiProvider(
+    return FutureBuilder(
+      future: _initializeRecorder(context),
+      builder: (BuildContext context, AsyncSnapshot<Recorder> snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          Recorder recorder = snapshot.data;
+          return WillPopScope(
+            onWillPop: () async {
+              if (recorder.active) await recorder.terminate();
+              if (recorder.opened) await recorder.close();
+              return true;
+            },
+            child: MultiProvider(
               providers: [
-                ChangeNotifierProvider.value(value: snapshot.data),
+                ChangeNotifierProvider.value(value: recorder),
                 ChangeNotifierProvider(create: (_) => _SaveState()),
               ],
               child: FreeScaffold(
@@ -73,14 +72,14 @@ class RecordingScreen extends StatelessWidget {
                   ],
                 ),
               ),
-            );
-          } else {
-            return FreeScaffold(
-              loading: true,
-            );
-          }
-        },
-      ),
+            ),
+          );
+        } else {
+          return FreeScaffold(
+            loading: true,
+          );
+        }
+      },
     );
   }
 }
