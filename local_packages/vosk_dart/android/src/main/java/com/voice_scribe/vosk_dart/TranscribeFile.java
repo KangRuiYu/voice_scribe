@@ -24,20 +24,20 @@ import org.vosk.Recognizer;
 // Vosk api.
 class TranscribeFile implements Runnable {
     private final String filePath;
-    private final String resultPath;
+    private final String transcriptPath;
     private final int sampleRate;
     private final Future<Model> modelFuture;
     private final Bridge bridge;
 
     public TranscribeFile(
             String filePath,
-            String resultPath,
+            String transcriptPath,
             int sampleRate,
             Future<Model> modelFuture,
             Bridge bridge
     ) {
         this.filePath = filePath;
-        this.resultPath = resultPath;
+        this.transcriptPath = transcriptPath;
         this.sampleRate = sampleRate;
         this.modelFuture = modelFuture;
         this.bridge = bridge;
@@ -48,7 +48,7 @@ class TranscribeFile implements Runnable {
         try (
                 Recognizer recognizer = new Recognizer(modelFuture.get(), sampleRate);
                 FileInputStream fileInput = new FileInputStream(filePath);
-                PrintWriter resultOutput = new PrintWriter(resultPath, "UTF-8")
+                PrintWriter transcriptOutput = new PrintWriter(transcriptPath, "UTF-8");
         ) {
             fileInput.skip(44); // Skip the 44 byte wav header.
 
@@ -61,9 +61,9 @@ class TranscribeFile implements Runnable {
             Handler mainHandler = new Handler(Looper.getMainLooper());
 
             while (true) {
-                // Terminate if interrupted. Deletes transcription file first.
+                // Terminate if interrupted. Deletes any leftover files.
                 if (Thread.interrupted()) {
-                    new File(resultPath).delete();
+                    new File(transcriptPath).delete();
                     break;
                 }
 
@@ -89,11 +89,11 @@ class TranscribeFile implements Runnable {
                 boolean silence = recognizer.acceptWaveForm(buffer, bytesRead);
 
                 if (silence) {
-                    resultOutput.write(parseResultString(recognizer.getResult()));
+                    transcriptOutput.write(parseResultString(recognizer.getResult()));
                 }
             }
 
-            resultOutput.write(parseResultString(recognizer.getFinalResult()));
+            transcriptOutput.write(parseResultString(recognizer.getFinalResult()));
         }
         catch (ExecutionException | InterruptedException e) {
             System.out.println("Unable to finish opening the given model.");

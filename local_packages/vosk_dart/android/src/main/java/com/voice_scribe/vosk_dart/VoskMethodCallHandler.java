@@ -39,9 +39,9 @@ class VoskMethodCallHandler implements MethodCallHandler {
         }
         else if (call.method.equals("queueFileForTranscription")) {
             String filePath = call.argument("filePath");
-            String resultPath = call.argument("resultPath");
+            String transcriptPath = call.argument("transcriptPath");
             int sampleRate = call.argument("sampleRate");
-            voskInstance.queueFileForTranscription(filePath, resultPath, sampleRate);
+            voskInstance.queueFileForTranscription(filePath, transcriptPath, sampleRate);
             result.success(null);
         }
         else if (call.method.equals("close")) {

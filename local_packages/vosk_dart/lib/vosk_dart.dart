@@ -86,17 +86,24 @@ class VoskInstance {
   /// Throws a [NoOpenModel] exception when no model is currently opened.
   /// Throws a [NonExistentWavFile] if the given [filePath] points to a
   /// non-existent file.
-  /// Throws a [TranscriptionAlreadyExists] if the given [resultPath] points to
-  /// a file that already exists.
-  Future<void> queueFileForTranscription(String filePath, String resultPath) {
+  /// Throws a [TranscriptExists] if the given [transcriptPath] points
+  /// to a file that already exists.
+  Future<void> queueFileForTranscription(
+    String filePath,
+    String transcriptPath,
+  ) {
     if (!_threadAllocated) throw NoOpenThread();
     if (!_modelOpened) throw NoOpenModel();
     if (!File(filePath).existsSync()) throw NonExistentWavFile();
-    if (File(resultPath).existsSync()) throw TranscriptionAlreadyExists();
+    if (File(transcriptPath).existsSync()) throw TranscriptExists();
 
     return _bridge.call(
       'queueFileForTranscription',
-      {'filePath': filePath, 'resultPath': resultPath, 'sampleRate': 16000},
+      {
+        'filePath': filePath,
+        'transcriptPath': transcriptPath,
+        'sampleRate': 16000,
+      },
     );
   }
 

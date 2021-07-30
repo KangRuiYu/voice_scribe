@@ -49,10 +49,14 @@ class VoskInstance {
     }
 
     // Ask the thread to transcribe the file at the given path.
-    public void queueFileForTranscription(String filePath, String resultPath, int sampleRate) {
-        executorService.submit(
-                new TranscribeFile(filePath, resultPath, sampleRate, modelFuture, bridge)
-        );
+    public void queueFileForTranscription(String filePath, String transcriptPath, int sampleRate) {
+        executorService.submit(new TranscribeFile(
+                filePath,
+                transcriptPath,
+                sampleRate,
+                modelFuture,
+                bridge
+        ));
     }
 
     // Closes any used resources such as threads, models, and connections.

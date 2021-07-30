@@ -33,7 +33,7 @@ class ClosedInstance implements Exception {
   ClosedInstance([this.message]);
 }
 
-class TranscriptionAlreadyExists implements Exception {
+class TranscriptExists implements Exception {
   final String message;
-  TranscriptionAlreadyExists([this.message]);
+  TranscriptExists([this.message]);
 }
