@@ -89,11 +89,11 @@ class TranscribeFile implements Runnable {
                 boolean silence = recognizer.acceptWaveForm(buffer, bytesRead);
 
                 if (silence) {
-                    transcriptOutput.write(parseResultString(recognizer.getResult()));
+                    writeResult(transcriptOutput, recognizer.getResult(), true);
                 }
             }
 
-            transcriptOutput.write(parseResultString(recognizer.getFinalResult()));
+            writeResult(transcriptOutput, recognizer.getFinalResult(), false);
         }
         catch (ExecutionException | InterruptedException e) {
             System.out.println("Unable to finish opening the given model.");
@@ -109,10 +109,27 @@ class TranscribeFile implements Runnable {
         }
     }
 
+    // Writes the given result string (JSON) into the given output.
+    // Can optionally have a new line added to the end of the result.
+    // If the resultString has no data, then nothing happens.
+    // If given string is not a proper JSON string, a JSONException is thrown.
+    private void writeResult(
+            PrintWriter output,
+            String resultString,
+            boolean newlineAtEnd
+    ) throws JSONException {
+        String parsedResultString = parseResultString(resultString);
+        if (parsedResultString.isEmpty()) { return; }
+        if (newlineAtEnd) {
+            parsedResultString += "\n";
+        }
+        output.write(parsedResultString);
+    }
+
     // Parses the given result string (JSON) into the proper format.
     // If the result is empty, an empty string is returned.
     // If given string is not a proper JSON string, a JSONException is thrown.
-    private String parseResultString(String resultString) throws JSONException{
+    private String parseResultString(String resultString) throws JSONException {
         JSONObject result = new JSONObject(resultString);
 
         if (!result.has("result")) { // Terminate if result is empty.
@@ -123,7 +140,7 @@ class TranscribeFile implements Runnable {
         String parsedResultString = "";
 
         for (int i = 0; i < wordResults.length(); i++) {
-            parsedResultString += parseWordResult(wordResults.getJSONObject(i));
+            parsedResultString += parseWordResult(wordResults.getJSONObject(i)) + '\n';
         }
 
         return parsedResultString;
@@ -131,10 +148,10 @@ class TranscribeFile implements Runnable {
 
     // Parses and returns the given word result JSON object as a formatted string.
     // If the given wordResult does not contain the proper data, a JSONException is thrown.
-    private static String parseWordResult(JSONObject wordResult) throws JSONException{
+    private static String parseWordResult(JSONObject wordResult) throws JSONException {
          return wordResult.getString("word") + " " +
                 String.valueOf(wordResult.getDouble("start")) + " " +
                 String.valueOf(wordResult.getDouble("end")) + " " +
-                String.valueOf(wordResult.getDouble("conf")) + "\n";
+                String.valueOf(wordResult.getDouble("conf"));
     }
 }

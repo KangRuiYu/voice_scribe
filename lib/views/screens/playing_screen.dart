@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/player.dart';
 import '../../models/recording.dart';
+import '../../models/transcript_reader.dart' as transcriptReader;
 import "../../utils/formatter.dart" as formatter;
 import '../../utils/mono_theme_constants.dart';
 import '../widgets/playback_slider.dart';
@@ -37,7 +38,16 @@ class PlayingScreen extends StatelessWidget {
               child: FreeScaffold(
                 body: Column(
                   children: [
-                    _DetailsCard(),
+                    _Header(recording: recording),
+                    const SizedBox(height: PADDING_LARGE),
+                    Expanded(
+                      child: recording.transcriptionExists
+                          ? _TranscriptView(recording: recording)
+                          : const Align(
+                              alignment: Alignment.topLeft,
+                              child: const _NoTranscriptIndicator(),
+                            ),
+                    ),
                     const SizedBox(height: PADDING_LARGE),
                     PlaybackSlider(),
                     const SizedBox(height: PADDING_MEDIUM),
@@ -53,6 +63,116 @@ class PlayingScreen extends StatelessWidget {
           }
         },
       ),
+    );
+  }
+}
+
+/// Displays [recording] name and date.
+class _Header extends StatelessWidget {
+  final Recording recording;
+
+  const _Header({@required this.recording});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          recording.name,
+          style: Theme.of(context).textTheme.subtitle1,
+          // style: Theme.of(context).textTheme.headline5,
+        ),
+        const SizedBox(height: PADDING_SMALL),
+        Text(
+          formatter.formatDate(recording.date),
+          style: Theme.of(context).textTheme.caption,
+        ),
+      ],
+    );
+  }
+}
+
+/// Displays the contents of the transcript of the given [recording].
+class _TranscriptView extends StatelessWidget {
+  final Recording recording;
+
+  const _TranscriptView({@required this.recording});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: transcriptReader.read(recording.transcriptionFile),
+      builder: (
+        BuildContext context,
+        AsyncSnapshot<Map<Duration, String>> snapshot,
+      ) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          Map<Duration, String> transcriptMap = snapshot.data;
+          return Scrollbar(
+            child: ListView.builder(
+              itemCount: transcriptMap.length * 2 - 1,
+              itemBuilder: (BuildContext context, int index) {
+                if (index % 2 == 0) {
+                  return _TranscriptResult(
+                    startTime: transcriptMap.keys.elementAt(index ~/ 2),
+                    resultText: transcriptMap.values.elementAt(index ~/ 2),
+                  );
+                } else {
+                  return SizedBox(height: PADDING_MEDIUM);
+                }
+              },
+            ),
+          );
+        } else {
+          return const Center(child: const CircularProgressIndicator());
+        }
+      },
+    );
+  }
+}
+
+/// Displays a single result (chunk of speech) in a transcript.
+class _TranscriptResult extends StatelessWidget {
+  final Duration startTime;
+  final String resultText;
+
+  const _TranscriptResult({
+    @required this.startTime,
+    @required this.resultText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            style: Theme.of(context).textTheme.caption,
+            text: formatter.formatDuration(startTime) + '\n',
+          ),
+          TextSpan(
+            style: Theme.of(context).textTheme.bodyText1,
+            text: resultText,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Indicates the absence of a transcript.
+class _NoTranscriptIndicator extends StatelessWidget {
+  const _NoTranscriptIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Icon(Icons.attach_file),
+        const SizedBox(width: PADDING_MEDIUM),
+        const Text('No transcript'),
+      ],
     );
   }
 }
@@ -80,8 +200,8 @@ class _ButtonRow extends StatelessWidget {
   }
 }
 
+/// The main button in the player that changes based on the player state.
 class _MainButton extends StatelessWidget {
-  // The main button in the player that changes based on the player state
   @override
   Widget build(BuildContext context) {
     return Consumer<Player>(
@@ -103,51 +223,6 @@ class _MainButton extends StatelessWidget {
           );
         }
       },
-    );
-  }
-}
-
-class _DetailsCard extends StatelessWidget {
-  // Shows the details of the player's recording
-  @override
-  Widget build(BuildContext context) {
-    Recording recording = Provider.of<Player>(context, listen: false).recording;
-    return Expanded(
-      child: Container(
-        width: double.infinity,
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(PADDING_LARGE),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    recording.name,
-                    style: Theme.of(context).textTheme.headline5,
-                    // style: Theme.of(context).textTheme.headline5,
-                  ),
-                  const SizedBox(height: PADDING_SMALL),
-                  Text(
-                    formatter.formatDate(recording.date),
-                    style: Theme.of(context).textTheme.subtitle1,
-                  ),
-                  const SizedBox(height: PADDING_SMALL),
-                  Text(
-                    formatter.formatDuration(recording.duration),
-                    style: Theme.of(context).textTheme.subtitle2,
-                  ),
-                  const SizedBox(height: PADDING_SMALL),
-                  Text(
-                    recording.audioPath,
-                    style: Theme.of(context).textTheme.caption,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
