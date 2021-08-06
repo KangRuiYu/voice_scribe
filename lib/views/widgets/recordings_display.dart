@@ -1,45 +1,35 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/recording.dart';
 import '../../models/recording_transcriber.dart';
 import '../../models/recordings_manager.dart';
-import '../../utils/mono_theme_constants.dart';
-import 'mono_theme_widgets.dart';
+import '../../utils/theme_constants.dart' as themeConstants;
 import 'recording_action_popup_button.dart';
-import 'recording_card.dart';
-import 'stream_circular_progress_indicator.dart';
+import '../screens/playing_screen.dart';
+import '../../utils/formatter.dart' as formatter;
 
-/// Widget that displays a list of recording cards.
+/// Displays the recordings in the [RecordingsManager] as a list of cards.
+///
+/// Has a Sliver app bar above.
+/// Each card provides information and actions for a given recording.
 class RecordingsDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer2<RecordingsManager, RecordingTranscriber>(
+    return Consumer<RecordingsManager>(
       builder: (
         BuildContext context,
         RecordingsManager recordingsManager,
-        RecordingTranscriber recordingTranscriber,
         Widget _,
       ) {
-        int length = recordingsManager.recordings.length + 1;
         return ListView.builder(
-          itemCount: length,
-          itemBuilder: (context, index) {
-            if (index == length - 1) {
-              return SizedBox(height: PADDING_LARGE);
+          itemCount: recordingsManager.recordings.length + 2,
+          itemBuilder: (BuildContext context, int index) {
+            if (index >= recordingsManager.recordings.length) {
+              return const SizedBox(height: themeConstants.padding_large);
             } else {
-              Recording recording = recordingsManager.recordings[index];
-              return Padding(
-                padding: const EdgeInsets.only(
-                  top: PADDING_SMALL,
-                  right: PADDING_MEDIUM,
-                  left: PADDING_MEDIUM,
-                ),
-                child: RecordingCard(
-                  recording: recording,
-                  trailing: _DynamicTrailing(recording),
-                ),
-              );
+              return _RecordingCard(recordingsManager.recordings[index]);
             }
           },
         );
@@ -48,11 +38,21 @@ class RecordingsDisplay extends StatelessWidget {
   }
 }
 
-/// A trailing widget for a recording card that changes dynamically.
-class _DynamicTrailing extends StatelessWidget {
-  final Recording _recording;
+/// Displays info [recording] and allows it to be played.
+class _RecordingCard extends StatelessWidget {
+  final Recording recording;
 
-  _DynamicTrailing(Recording recording) : _recording = recording;
+  const _RecordingCard(this.recording);
+
+  /// Plays the recording that this card displays.
+  void _playRecording(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PlayingScreen(recording: recording),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,39 +62,61 @@ class _DynamicTrailing extends StatelessWidget {
         RecordingTranscriber recordingTranscriber,
         Widget _,
       ) {
-        RecordingState recordingState =
-            recordingTranscriber.progressOf(_recording);
-        Widget cancelButton = MonoIconButton(
-          iconData: Icons.cancel_rounded,
-          onPressed: () => recordingTranscriber.cancel(_recording),
-        );
+        final RecordingState recordingState =
+            recordingTranscriber.progressOf(recording);
 
-        if (recordingState == RecordingState.notQueued) {
-          return RecordingActionPopupButton(_recording);
-        } else if (recordingState == RecordingState.queued) {
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(
-                value: 0.0,
-                backgroundColor: Theme.of(context).backgroundColor,
-              ),
-              const SizedBox(width: PADDING_SMALL),
-              cancelButton,
-            ],
-          );
-        } else {
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              StreamCircularProgressIndicator(
+        final Widget subtitle = recordingState == RecordingState.processing
+            ? _StreamLinearProgressIndicator(
                 recordingTranscriber.progressStream,
-              ),
-              const SizedBox(width: PADDING_SMALL),
-              cancelButton,
-            ],
-          );
-        }
+              )
+            : Text(
+                '${formatter.formatDate(recording.date)} • ${formatter.formatDuration(recording.duration)}',
+              );
+
+        final Widget trailing = recordingState == RecordingState.notQueued
+            ? RecordingActionPopupButton(recording)
+            : ElevatedButton(
+                child: const Text('Cancel'),
+                onPressed: () => recordingTranscriber.cancel(recording),
+              );
+
+        return Card(
+          margin: const EdgeInsets.only(
+            top: themeConstants.padding_tiny,
+            right: themeConstants.padding_medium,
+            left: themeConstants.padding_medium,
+          ),
+          child: ListTile(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(themeConstants.radius),
+            ),
+            contentPadding: const EdgeInsets.only(
+              left: themeConstants.padding_medium,
+              right: themeConstants.padding_small,
+            ),
+            title: Text(recording.name),
+            subtitle: subtitle,
+            onTap: () => _playRecording(context),
+            trailing: trailing,
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Displays the progress of the given [stream] via a linear progress bar.
+class _StreamLinearProgressIndicator extends StatelessWidget {
+  final Stream stream;
+
+  const _StreamLinearProgressIndicator(this.stream);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: stream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return LinearProgressIndicator(value: snapshot.data ?? 0.0);
       },
     );
   }

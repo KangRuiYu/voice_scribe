@@ -1,3 +1,7 @@
+/// Provides a collection of functions for formatting common containers
+/// in a pretty format.
+/// Intended to be used with the alias 'formatter'.
+
 import 'package:intl/intl.dart';
 
 String formatDuration(Duration duration) {

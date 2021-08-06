@@ -6,7 +6,7 @@ import '../../models/recorder.dart';
 import '../../models/recording.dart';
 import '../../models/recordings_manager.dart';
 import '../../utils/app_data.dart';
-import '../../utils/mono_theme_constants.dart';
+import '../../utils/theme_constants.dart';
 import '../widgets/duration_label.dart';
 import '../widgets/mono_theme_widgets.dart';
 import '../widgets/volume_display.dart';
@@ -19,10 +19,12 @@ class _SaveState extends ChangeNotifier {
   void saveRecording(BuildContext context) async {
     // Save recording and return to previous screen
     Recorder recorder = Provider.of<Recorder>(context, listen: false);
+    RecordingsManager recordingsManager =
+        Provider.of<RecordingsManager>(context, listen: false);
     Recording recording =
         await recorder.stopRecording(_textEditingController.text);
     await recorder.close();
-    Provider.of<RecordingsManager>(context, listen: false).add(recording);
+    recordingsManager.add(recording);
     Navigator.pop(context);
   }
 

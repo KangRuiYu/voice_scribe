@@ -5,7 +5,7 @@ import '../../models/player.dart';
 import '../../models/recording.dart';
 import '../../models/transcript_reader.dart' as transcriptReader;
 import "../../utils/formatter.dart" as formatter;
-import '../../utils/mono_theme_constants.dart';
+import '../../utils/theme_constants.dart';
 import '../widgets/playback_slider.dart';
 import '../widgets/mono_theme_widgets.dart';
 

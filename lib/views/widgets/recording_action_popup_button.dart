@@ -6,11 +6,11 @@ import '../../models/recording_transcriber.dart';
 import '../../models/recordings_manager.dart';
 import 'confirmation_popup.dart';
 
-/// Button showing list of actions for a given recording.
+/// Button showing a list of actions for [recording].
 class RecordingActionPopupButton extends StatelessWidget {
-  final Recording _recording;
+  final Recording recording;
 
-  RecordingActionPopupButton(this._recording);
+  const RecordingActionPopupButton(this.recording);
 
   void _showRemoveFilePopup(BuildContext context) {
     showDialog(
@@ -18,7 +18,7 @@ class RecordingActionPopupButton extends StatelessWidget {
       builder: (BuildContext context) => _RemoveFilePopup(
         removeFunc: (bool deleteFile) {
           Provider.of<RecordingsManager>(context, listen: false).remove(
-            _recording,
+            recording,
             deleteSource: deleteFile,
           );
         },
@@ -37,7 +37,7 @@ class RecordingActionPopupButton extends StatelessWidget {
           ),
         ],
         onConfirm: () {
-          _recording.deleteTranscription();
+          recording.deleteTranscription();
           _transcribe(context);
         },
       ),
@@ -46,22 +46,23 @@ class RecordingActionPopupButton extends StatelessWidget {
 
   void _transcribe(BuildContext context) {
     Provider.of<RecordingTranscriber>(context, listen: false)
-        .addToQueue(_recording);
+        .addToQueue(recording);
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton(
-      icon: Icon(Icons.more_vert),
-      onSelected: (Function itemFunc) => itemFunc(),
-      itemBuilder: (context) {
+    return PopupMenuButton<void Function()>(
+      icon: const Icon(Icons.more_vert_rounded),
+      onSelected: (void Function() itemFunc) => itemFunc(),
+      tooltip: 'More options',
+      itemBuilder: (BuildContext context) {
         return [
           PopupMenuItem(
             value: () => _showRemoveFilePopup(context),
             child: const Text('Edit'),
           ),
           PopupMenuItem(
-            value: () => _recording.transcriptionExists
+            value: () => recording.transcriptionExists
                 ? _showReTranscribePopup(context)
                 : _transcribe(context),
             child: const Text('Transcribe'),
@@ -76,11 +77,11 @@ class RecordingActionPopupButton extends StatelessWidget {
   }
 }
 
-/// The confirmation popup that shows up before the user deletes a recording
+/// Popup asking user to delete a recording.
 class _RemoveFilePopup extends StatefulWidget {
   final void Function(bool) _removeFunc;
 
-  _RemoveFilePopup({@required removeFunc}) : _removeFunc = removeFunc;
+  const _RemoveFilePopup({@required removeFunc}) : _removeFunc = removeFunc;
 
   @override
   _RemoveFilePopupState createState() => _RemoveFilePopupState();

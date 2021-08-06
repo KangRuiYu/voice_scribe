@@ -31,6 +31,7 @@ class RecordingsManager extends ChangeNotifier {
       a.duration.compareTo(b.duration);
 
   /// Currently applied sorting function.
+  Comparator<Recording> get currentSortOrder => _currentSortOrder;
   Comparator<Recording> _currentSortOrder = byName;
 
   /// If the current sorting is reversed.

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../utils/mono_theme_constants.dart';
+import '../../utils/theme_constants.dart';
 
 class FreeScaffold extends StatelessWidget {
   // A scaffold without any appbars
@@ -115,7 +115,7 @@ class MonoBottomAppBar extends StatelessWidget {
     return Container(
       height: BOTTOM_APPBAR_HEIGHT,
       decoration: BoxDecoration(
-        boxShadow: kElevationToShadow[BOTTOM_APPBAR_ELEVATION],
+        boxShadow: kElevationToShadow[1],
       ),
       child: BottomAppBar(
         child: child,
@@ -141,8 +141,14 @@ class CircularIconButton extends StatelessWidget {
             shape: MaterialStateProperty.all<CircleBorder>(
               const CircleBorder(),
             ),
+            padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+              const EdgeInsets.all(padding_small),
+            ),
           ),
-      child: Icon(iconData),
+      child: Icon(
+        iconData,
+        size: circular_button_icon_size,
+      ),
       onPressed: onPressed,
     );
   }

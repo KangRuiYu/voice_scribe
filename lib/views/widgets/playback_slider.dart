@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/player.dart';
 import '../../utils/formatter.dart';
-import '../../utils/mono_theme_constants.dart';
+import '../../utils/theme_constants.dart';
 import 'duration_label.dart';
 
 class PlaybackSlider extends StatefulWidget {

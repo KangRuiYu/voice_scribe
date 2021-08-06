@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'models/recording.dart';
 import 'models/recording_transcriber.dart';
 import 'models/recordings_manager.dart';
 import 'utils/app_data.dart';
-import 'utils/main_theme.dart';
+import 'utils/theme_constants.dart' as themeConstants;
 import 'views/screens/main_screen.dart';
 
 void main() {
@@ -26,6 +28,7 @@ Future<void> startVoiceScribe() async {
     recordingsDirectory: appData.recordingsDirectory,
     metadataDirectory: appData.metadataDirectory,
   );
+
   RecordingTranscriber recordingTranscriber = RecordingTranscriber(
     transcriptionDirectory: appData.transcriptionsDirectory,
     onDone: (Recording recording) => recordingsManager.saveMetadata(recording),
@@ -47,11 +50,104 @@ Future<void> startVoiceScribe() async {
 class VoiceScribe extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Voice Scribe',
-      theme: mainTheme,
-      home: MainScreen(),
+    final ColorScheme mainColorScheme = ColorScheme.fromSwatch(
+      primarySwatch: Colors.red,
+      brightness: Brightness.light,
+      accentColor: Colors.redAccent,
+      backgroundColor: Colors.grey.shade50,
+      cardColor: Colors.white,
+    ).copyWith(
+      onBackground: Colors.black,
+      onSurface: Colors.black,
+    );
+
+    final TextTheme mainTextTheme = Theme.of(context).textTheme;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.white,
+      ),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Voice Scribe',
+        home: MainScreen(),
+        theme: ThemeData.from(
+          colorScheme: mainColorScheme,
+          textTheme: mainTextTheme,
+        ).copyWith(
+          appBarTheme: AppBarTheme(
+            backgroundColor: mainColorScheme.surface,
+            foregroundColor: mainColorScheme.onSurface,
+            backwardsCompatibility: false,
+            elevation: themeConstants.elevation,
+          ),
+          bottomAppBarTheme: BottomAppBarTheme(
+            color: mainColorScheme.surface,
+            elevation: themeConstants.elevation,
+          ),
+          bottomSheetTheme: const BottomSheetThemeData(
+            shape: const RoundedRectangleBorder(
+              borderRadius: const BorderRadius.vertical(
+                top: const Radius.circular(themeConstants.radius),
+              ),
+            ),
+          ),
+          cardTheme: const CardTheme(
+            margin: EdgeInsets.zero,
+            shape: const RoundedRectangleBorder(
+              borderRadius: const BorderRadius.all(
+                const Radius.circular(themeConstants.radius),
+              ),
+            ),
+            elevation: themeConstants.elevation,
+          ),
+          dialogTheme: DialogTheme(
+            elevation: themeConstants.high_elevation,
+            contentTextStyle: mainTextTheme.subtitle1,
+            shape: const RoundedRectangleBorder(
+              borderRadius: const BorderRadius.all(
+                const Radius.circular(themeConstants.radius),
+              ),
+            ),
+          ),
+          dividerTheme: const DividerThemeData(
+            thickness: themeConstants.divider_thickness,
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ButtonStyle(
+              elevation: MaterialStateProperty.all<double>(
+                themeConstants.elevation,
+              ),
+              padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                const EdgeInsets.symmetric(
+                  horizontal: themeConstants.padding_medium,
+                  vertical: themeConstants.padding_tiny,
+                ),
+              ),
+              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                const RoundedRectangleBorder(
+                  borderRadius: const BorderRadius.all(
+                    const Radius.circular(themeConstants.radius),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          iconTheme: IconThemeData(
+            color: mainColorScheme.onSurface,
+          ),
+          popupMenuTheme: PopupMenuThemeData(
+            elevation: themeConstants.high_elevation,
+            textStyle: mainTextTheme.subtitle1,
+            shape: const RoundedRectangleBorder(
+              borderRadius: const BorderRadius.all(
+                const Radius.circular(themeConstants.radius),
+              ),
+            ),
+          ),
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+      ),
     );
   }
 }
