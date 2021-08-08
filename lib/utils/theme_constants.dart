@@ -32,6 +32,8 @@ const double padding_huge = 24.0;
 const double elevation = 1.0;
 const double high_elevation = 3.0;
 
+const double bottom_app_bar_height = 48.0;
+
 const double radius = 4.0;
 
 const double circular_button_icon_size = 32.0;

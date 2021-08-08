@@ -43,7 +43,13 @@ class MainScreen extends StatelessWidget {
           onPressed: () => showRecordingScreen(context),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: _BottomAppBar(),
+        bottomNavigationBar: ThemedBottomAppBar(
+          leftChild: const _MenuButton(),
+          rightChild: IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => null,
+          ),
+        ),
         body: Provider.of<RecordingsManager>(context, listen: true)
                 .finishedLoading
             ? RecordingsDisplay()
@@ -100,28 +106,6 @@ class _ReverseSortButton extends StatelessWidget {
           onPressed: () => recordingsManager.reverseSort(),
         );
       },
-    );
-  }
-}
-
-class _BottomAppBar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).bottomAppBarColor,
-        boxShadow: kElevationToShadow[themeConstants.elevation],
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: Row(
-          children: [
-            const _MenuButton(),
-            const Spacer(),
-            IconButton(icon: const Icon(Icons.search), onPressed: () => null),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -61,13 +61,13 @@ class ImportScreen extends StatelessWidget {
                 ChangeNotifierProvider(create: (_) => Selector()),
               ],
               child: Scaffold(
-                appBar: AppBar(
-                  title: const _SelectedCountLabel(),
-                  actions: [_SelectOptionsButton()],
-                ),
+                appBar: AppBar(title: const _SelectedCountLabel()),
                 floatingActionButton: const _ImportButton(),
                 floatingActionButtonLocation:
-                    FloatingActionButtonLocation.centerFloat,
+                    FloatingActionButtonLocation.centerDocked,
+                bottomNavigationBar: const ThemedBottomAppBar(
+                  rightChild: const _SelectOptionsButton(),
+                ),
                 body: const _FileList(),
               ),
             );
@@ -178,15 +178,13 @@ class _FileList extends StatelessWidget {
         Widget _,
       ) {
         return ListView.builder(
-          itemCount: files.length > 0 ? files.length * 2 + 4 : 0,
+          itemCount: files.length > 0 ? files.length + 2 : 0,
           itemBuilder: (BuildContext context, int index) {
-            if (index >= files.length * 2) {
+            if (index >= files.length) {
               return const SizedBox(height: themeConstants.padding_huge);
-            } else if (index % 2 == 0) {
-              File file = files[index ~/ 2];
-              return _FileListing(file);
             } else {
-              return Divider();
+              File file = files[index];
+              return _FileListing(file);
             }
           },
         );
@@ -207,21 +205,31 @@ class _FileListing extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<Selector>(
       builder: (BuildContext context, Selector selector, Widget _) {
-        return CheckboxListTile(
-          contentPadding: const EdgeInsets.only(
-            left: themeConstants.padding_huge,
-            right: themeConstants.padding_small,
+        return Card(
+          margin: const EdgeInsets.only(
+            top: themeConstants.padding_tiny,
+            right: themeConstants.padding_medium,
+            left: themeConstants.padding_medium,
           ),
-          title: Text(_name),
-          subtitle: Text(_date),
-          value: selector.isSelected(file),
-          onChanged: (bool selected) {
-            if (selected) {
-              selector.select(file);
-            } else {
-              selector.deselect(file);
-            }
-          },
+          child: CheckboxListTile(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(themeConstants.radius),
+            ),
+            contentPadding: const EdgeInsets.only(
+              left: themeConstants.padding_medium,
+              right: themeConstants.padding_small,
+            ),
+            title: Text(_name),
+            subtitle: Text(_date),
+            value: selector.isSelected(file),
+            onChanged: (bool selected) {
+              if (selected) {
+                selector.select(file);
+              } else {
+                selector.deselect(file);
+              }
+            },
+          ),
         );
       },
     );

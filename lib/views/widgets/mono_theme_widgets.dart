@@ -104,21 +104,29 @@ class AppbarScaffold extends StatelessWidget {
   }
 }
 
-class MonoBottomAppBar extends StatelessWidget {
-  // A properly themed bottom app bar
-  final Widget child;
+/// A themed bottom app bar.
+class ThemedBottomAppBar extends StatelessWidget {
+  final Widget leftChild;
+  final Widget rightChild;
 
-  MonoBottomAppBar({this.child});
+  const ThemedBottomAppBar({
+    this.leftChild = const SizedBox.shrink(),
+    this.rightChild = const SizedBox.shrink(),
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: BOTTOM_APPBAR_HEIGHT,
+      height: bottom_app_bar_height,
       decoration: BoxDecoration(
-        boxShadow: kElevationToShadow[1],
+        color: Theme.of(context).bottomAppBarColor,
+        boxShadow: kElevationToShadow[elevation],
       ),
-      child: BottomAppBar(
-        child: child,
+      child: Material(
+        type: MaterialType.transparency,
+        child: Row(
+          children: [leftChild, const Spacer(), rightChild],
+        ),
       ),
     );
   }
