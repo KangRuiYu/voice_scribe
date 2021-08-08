@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,110 +9,184 @@ import 'package:provider/provider.dart';
 import '../../models/recording.dart';
 import '../../models/recordings_manager.dart';
 import '../../utils/formatter.dart';
-import '../widgets/custom_buttons.dart';
+import '../../utils/theme_constants.dart' as themeConstants;
 import '../widgets/mono_theme_widgets.dart';
 
-class _ImportState extends ChangeNotifier {
-  final RecordingsManager _recordingsManager;
-  Map<File, bool> _files = {}; // File; To Import
-  Map<File, bool> get files => _files;
+/// Keeps track of selected files while notifying any listeners.
+class Selector extends ChangeNotifier {
+  /// Currently selected files.
+  UnmodifiableSetView<File> get selected => UnmodifiableSetView(_selected);
+  Set<File> _selected = {};
 
-  _ImportState(this._recordingsManager) {
-    _initialize();
-  }
-
-  void _initialize() async {
-    for (File file in await _recordingsManager.unknownRecordingFiles()) {
-      _files[file] = false;
-    }
+  /// Selects the given [file].
+  ///
+  /// If the [file] is already selected, nothing happens.
+  /// Notifies any listeners.
+  void select(File file) {
+    _selected.add(file);
     notifyListeners();
   }
 
-  void check(File file, bool value) {
-    // Checks the following file in the dictionary to the given value.
-    // Will do nothing if the file doesn't exist.
-    if (_files.containsKey(file)) {
-      _files[file] = value;
-    }
+  /// Deselects the give [file].
+  ///
+  /// If the [file] is not selected, nothing happens.
+  /// Notifies any listeners.
+  void deselect(File file) {
+    _selected.remove(file);
+    notifyListeners();
   }
 
-  Future<void> importFiles() async {
-    // Imports all currently checked files
-    for (MapEntry entry in _files.entries) {
-      File file = entry.key;
-      bool checked = entry.value;
-      if (checked) {
-        Recording recording = Recording(
-          audioFile: file,
-          duration: await FlutterSoundHelper().duration(file.path),
-        );
-        await _recordingsManager.add(recording);
-      }
-    }
+  /// Returns true if [file] is currently selected.
+  bool isSelected(File file) {
+    return _selected.contains(file);
   }
 }
 
 class ImportScreen extends StatelessWidget {
-  final RecordingsManager recordingsManager;
-
-  ImportScreen({@required this.recordingsManager});
+  const ImportScreen();
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: ChangeNotifierProvider(
-        create: (BuildContext context) => _ImportState(recordingsManager),
-        child: Scaffold(
-          appBar: AppBar(title: const Text('Import')),
-          body: _FileList(),
-          floatingActionButton: _ImportButton(),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
-          bottomNavigationBar: MonoBottomAppBar(),
-        ),
+      child: FutureBuilder(
+        future: context
+            .select((RecordingsManager rm) => rm.unknownRecordingFiles)
+            .call(),
+        builder: (BuildContext context, AsyncSnapshot<List<File>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done &&
+              !snapshot.hasError) {
+            return MultiProvider(
+              providers: [
+                Provider.value(value: snapshot.data),
+                ChangeNotifierProvider(create: (_) => Selector()),
+              ],
+              child: Scaffold(
+                appBar: AppBar(
+                  title: const _SelectedCountLabel(),
+                  actions: [_SelectOptionsButton()],
+                ),
+                floatingActionButton: const _ImportButton(),
+                floatingActionButtonLocation:
+                    FloatingActionButtonLocation.centerFloat,
+                body: const _FileList(),
+              ),
+            );
+          } else {
+            return const Scaffold(
+              body: const Center(child: const CircularProgressIndicator()),
+            );
+          }
+        },
       ),
     );
   }
 }
 
-class _ImportButton extends StatelessWidget {
+/// Label indicating the number of files currently selected.
+class _SelectedCountLabel extends StatelessWidget {
+  const _SelectedCountLabel();
+
   @override
   Widget build(BuildContext context) {
-    return RoundedButton(
-      leading: Icon(Icons.download_outlined),
-      child: const Text('Import'),
+    return Consumer<Selector>(
+      builder: (BuildContext context, Selector selector, Widget _) {
+        if (selector.selected.length == 0) {
+          return const Text('None selected');
+        } else {
+          return Text(selector.selected.length.toString() + ' selected');
+        }
+      },
+    );
+  }
+}
+
+/// Popup menu button that allows selection/deselection of all files.
+class _SelectOptionsButton extends StatelessWidget {
+  const _SelectOptionsButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<List<File>, Selector>(
+      builder: (
+        BuildContext context,
+        List<File> files,
+        Selector selector,
+        Widget _,
+      ) {
+        return PopupMenuButton<void Function()>(
+          icon: const Icon(Icons.more_vert),
+          initialValue: () => null,
+          onSelected: (void Function() func) => func(),
+          tooltip: 'More options',
+          itemBuilder: (BuildContext context) => [
+            PopupMenuItem(
+              value: () => files.forEach((File file) => selector.select(file)),
+              enabled: selector.selected.length < files.length,
+              child: const Text('Select all'),
+            ),
+            PopupMenuItem(
+              value: () => files.forEach(
+                (File file) => selector.deselect(file),
+              ),
+              enabled: selector.selected.length != 0,
+              child: const Text('Deselect all'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Button that imports selected files in [Selector] into [RecordingsManager].
+class _ImportButton extends StatelessWidget {
+  const _ImportButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return CircularIconButton(
+      iconData: Icons.file_download,
       onPressed: () async {
-        await Provider.of<_ImportState>(context, listen: false).importFiles();
+        Selector selector = context.read<Selector>();
+        RecordingsManager recordingsManager = context.read<RecordingsManager>();
+
+        for (File file in selector.selected) {
+          await recordingsManager.add(
+            Recording(
+              audioFile: file,
+              duration: await FlutterSoundHelper().duration(file.path),
+            ),
+          );
+        }
+
         Navigator.pop(context);
       },
     );
   }
 }
 
+/// Displays a list of files along side their selected state in [Selector].
 class _FileList extends StatelessWidget {
+  const _FileList();
+
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (BuildContext context, _ImportState importState, Widget child) {
+    return Consumer<List<File>>(
+      builder: (
+        BuildContext context,
+        List<File> files,
+        Widget _,
+      ) {
         return ListView.builder(
-          itemCount: importState.files.length > 0
-              ? importState.files.length * 2 - 1
-              : 0,
+          itemCount: files.length > 0 ? files.length * 2 + 4 : 0,
           itemBuilder: (BuildContext context, int index) {
-            if (index % 2 == 0) {
-              File file = importState.files.keys.elementAt(index ~/ 2);
-              return _FileListing(
-                file: file,
-                checkCallback: importState.check,
-                startingCheckedValue: importState.files[file],
-              );
+            if (index >= files.length * 2) {
+              return const SizedBox(height: themeConstants.padding_huge);
+            } else if (index % 2 == 0) {
+              File file = files[index ~/ 2];
+              return _FileListing(file);
             } else {
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                ),
-                child: Divider(),
-              );
+              return Divider();
             }
           },
         );
@@ -120,57 +195,35 @@ class _FileList extends StatelessWidget {
   }
 }
 
-class _FileListing extends StatefulWidget {
-  // A listing of a file in the imports screen
+/// A listing of a [file] in a [_FileList].
+class _FileListing extends StatelessWidget {
   final File file;
-  final Function checkCallback;
-  final bool startingCheckedValue;
   String get _name => basenameWithoutExtension(file.path);
   String get _date => formatDate(file.lastAccessedSync());
 
-  _FileListing({
-    @required this.file,
-    @required this.checkCallback,
-    @required this.startingCheckedValue,
-  });
-
-  @override
-  _FileListingState createState() => _FileListingState();
-}
-
-class _FileListingState extends State<_FileListing> {
-  bool _checked = false;
-
-  @override
-  void initState() {
-    _checked = widget.startingCheckedValue;
-    super.initState();
-  }
-
-  void onChecked(bool value) {
-    setState(
-      () {
-        _checked = value;
-        widget.checkCallback(widget.file, value);
-      },
-    );
-  }
+  const _FileListing(this.file);
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: InkWell(
-        onTap: () => onChecked(!_checked),
-        child: ListTile(
-          title: Text(widget._name),
-          subtitle: Text(widget._date),
-          trailing: Checkbox(
-            value: _checked,
-            onChanged: onChecked,
+    return Consumer<Selector>(
+      builder: (BuildContext context, Selector selector, Widget _) {
+        return CheckboxListTile(
+          contentPadding: const EdgeInsets.only(
+            left: themeConstants.padding_huge,
+            right: themeConstants.padding_small,
           ),
-        ),
-      ),
+          title: Text(_name),
+          subtitle: Text(_date),
+          value: selector.isSelected(file),
+          onChanged: (bool selected) {
+            if (selected) {
+              selector.select(file);
+            } else {
+              selector.deselect(file);
+            }
+          },
+        );
+      },
     );
   }
 }

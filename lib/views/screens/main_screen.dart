@@ -140,12 +140,7 @@ class _MenuButton extends StatelessWidget {
   void showImportScreen(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (BuildContext context) => ImportScreen(
-          recordingsManager:
-              Provider.of<RecordingsManager>(context, listen: false),
-        ),
-      ),
+      MaterialPageRoute(builder: (BuildContext context) => ImportScreen()),
     );
   }
 
