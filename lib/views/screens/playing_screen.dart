@@ -186,20 +186,23 @@ class _ButtonRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Player player = Provider.of<Player>(context, listen: false);
+    Function changePositionRelative = context.select(
+      (Player player) => player.changePositionRelative,
+    );
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
           icon: const Icon(Icons.replay_5),
-          onPressed: () => player.changePositionRelative(Duration(seconds: -5)),
+          onPressed: () => changePositionRelative(Duration(seconds: -5)),
         ),
         const SizedBox(width: themeConstants.padding_medium),
         const _MainButton(),
         const SizedBox(width: themeConstants.padding_medium),
         IconButton(
           icon: const Icon(Icons.forward_10),
-          onPressed: () => player.changePositionRelative(Duration(seconds: 10)),
+          onPressed: () => changePositionRelative(Duration(seconds: 10)),
         ),
       ],
     );
