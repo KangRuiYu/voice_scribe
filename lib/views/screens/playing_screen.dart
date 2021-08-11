@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sound/public/flutter_sound_player.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/player.dart';
