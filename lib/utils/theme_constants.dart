@@ -10,12 +10,6 @@ const double PADDING_LARGE = 32.0;
 @deprecated
 const double BOTTOM_APPBAR_HEIGHT = 50.0;
 
-// Playback Slider
-@deprecated
-const double PLAYBACK_SLIDER_THUMB_SIZE = 12.0;
-@deprecated
-const double PLAYBACK_SLIDER_TRACK_HEIGHT = 8.0;
-
 @deprecated
 const double LOADING_BAR_HEIGHT = 6.0;
 
@@ -39,3 +33,6 @@ const double radius = 4.0;
 const double circular_button_icon_size = 32.0;
 
 const double divider_thickness = 0.8;
+
+const double slider_thumb_size = 12.0;
+const double slider_track_height = 8.0;
