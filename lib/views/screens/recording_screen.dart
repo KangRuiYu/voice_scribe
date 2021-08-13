@@ -16,17 +16,19 @@ class RecordingScreen extends StatelessWidget {
   final Recorder recorder = Recorder();
   final TextEditingController nameController = TextEditingController();
 
-  Future<Recorder> _initializeRecorder(Directory recordingsDirectory) async {
-    if (recorder.active) return recorder;
+  /// Initializes values.
+  ///
+  /// Starts the recorder. If already started, immediately returns.
+  Future<void> _init(Directory recordingsDirectory) async {
+    if (recorder.active) return;
     await recorder.initialize();
     await recorder.startRecording(recordingsDirectory);
-    return recorder;
   }
 
   /// Called when user presses the back button.
   ///
   /// Makes sure recorder is closed before leaving screen.
-  Future<bool> onWillPop() async {
+  Future<bool> _onExit() async {
     if (recorder.active) await recorder.terminate();
     if (recorder.opened) await recorder.close();
     return true;
@@ -34,54 +36,78 @@ class RecordingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: onWillPop,
-      child: SafeArea(
-        child: FutureBuilder(
-          future: _initializeRecorder(
-            context.select((AppData appData) => appData.recordingsDirectory),
-          ),
-          builder: (BuildContext context, AsyncSnapshot<Recorder> snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              Recorder recorder = snapshot.data;
+    final Directory recordingsDirectory = context.select(
+      (AppData appData) => appData.recordingsDirectory,
+    );
 
-              return Scaffold(
-                appBar: AppBar(title: const Text('Recorder')),
-                body: MultiProvider(
-                  providers: [
-                    ChangeNotifierProvider.value(value: recorder),
-                    ChangeNotifierProvider.value(value: nameController),
-                    Provider.value(value: context),
-                  ],
-                  child: Padding(
-                    padding: const EdgeInsets.all(themeConstants.padding_large),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const _RecordingView(),
-                        DurationLabel.recorder(
-                          textStyle: Theme.of(context).textTheme.subtitle1,
-                        ),
-                        const SizedBox(height: themeConstants.padding_medium),
-                        const _ButtonRow(),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            } else {
-              return const Scaffold(
-                body: const Center(child: const CircularProgressIndicator()),
-              );
-            }
-          },
+    // Dynamically created save function.
+    final Future<void> Function() onSave = () async {
+      Recording recording = await recorder.stopRecording(nameController.text);
+      await recorder.close();
+      context.read<RecordingsManager>().add(recording);
+      Navigator.pop(context);
+    };
+
+    // Dynamically created delete function.
+    final Future<void> Function() onDelete = () async {
+      await recorder.terminate();
+      await recorder.close();
+      Navigator.pop(context);
+    };
+
+    return WillPopScope(
+      onWillPop: _onExit,
+      child: FutureBuilder(
+        future: _init(recordingsDirectory),
+        builder: (BuildContext _, AsyncSnapshot snapshot) {
+          if (snapshot.connectionState == ConnectionState.done &&
+              !snapshot.hasError) {
+            return MultiProvider(
+              providers: [
+                ChangeNotifierProvider.value(value: recorder),
+                ChangeNotifierProvider.value(value: nameController),
+                Provider.value(value: {'onSave': onSave, 'onDelete': onDelete}),
+              ],
+              child: const _RecordingScreenScaffold(),
+            );
+          } else {
+            return const LoadingScaffold();
+          }
+        },
+      ),
+    );
+  }
+}
+
+/// The main scaffold for the recording screen.
+class _RecordingScreenScaffold extends StatelessWidget {
+  const _RecordingScreenScaffold();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Recorder')),
+        body: Padding(
+          padding: const EdgeInsets.all(themeConstants.padding_large),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const _RecordingView(),
+              DurationLabel.recorder(
+                textStyle: Theme.of(context).textTheme.subtitle1,
+              ),
+              const SizedBox(height: themeConstants.padding_medium),
+              const _ButtonRow(),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// Displays different views based on the state of the recorder.
+/// The main content. Changed depending on the state of the [Recorder].
 class _RecordingView extends StatelessWidget {
   const _RecordingView();
 
@@ -116,7 +142,7 @@ class _RecordingView extends StatelessWidget {
   }
 }
 
-/// Displays different buttons based on the state of the recorder
+/// Row of buttons that controls the [Recorder]. Changes based on its state.
 class _ButtonRow extends StatelessWidget {
   const _ButtonRow();
 
@@ -136,6 +162,7 @@ class _ButtonRow extends StatelessWidget {
   }
 }
 
+/// Buttons shown when the [Recorder] is active.
 class _RecordingButtons extends StatelessWidget {
   const _RecordingButtons();
 
@@ -148,31 +175,9 @@ class _RecordingButtons extends StatelessWidget {
   }
 }
 
-/// The buttons when paused
+/// Buttons shown when the [Recorder] is paused.
 class _PausedButtons extends StatelessWidget {
   const _PausedButtons();
-
-  Future<void> onSave(BuildContext context) async {
-    Recorder recorder = context.read<Recorder>();
-    TextEditingController nameController =
-        context.read<TextEditingController>();
-    RecordingsManager recordingsManager = context.read<RecordingsManager>();
-    BuildContext mainContext = context.read<BuildContext>();
-
-    Recording recording = await recorder.stopRecording(nameController.text);
-    await recorder.close();
-    recordingsManager.add(recording);
-    Navigator.pop(mainContext);
-  }
-
-  Future<void> onDelete(BuildContext context) async {
-    Recorder recorder = context.read<Recorder>();
-    BuildContext mainContext = context.read<BuildContext>();
-
-    await recorder.terminate();
-    await recorder.close();
-    Navigator.pop(mainContext);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +186,10 @@ class _PausedButtons extends StatelessWidget {
       children: [
         TextButton(
           child: const Text('Save'),
-          onPressed: () => onSave(context),
+          onPressed: context.select(
+            (Map<String, Future<void> Function()> functions) =>
+                functions['onSave'],
+          ),
         ),
         const SizedBox(width: themeConstants.padding_medium),
         CircularIconButton(
@@ -193,7 +201,10 @@ class _PausedButtons extends StatelessWidget {
         const SizedBox(width: themeConstants.padding_medium),
         TextButton(
           child: const Text('Delete'),
-          onPressed: () => onDelete(context),
+          onPressed: context.select(
+            (Map<String, Future<void> Function()> functions) =>
+                functions['onDelete'],
+          ),
         ),
       ],
     );

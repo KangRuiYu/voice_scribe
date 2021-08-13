@@ -80,3 +80,20 @@ class BigIconButton extends StatelessWidget {
     );
   }
 }
+
+/// Empty scaffold with a circular loading bar, usually shown while a screen
+/// is loading.
+class LoadingScaffold extends StatelessWidget {
+  const LoadingScaffold();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SafeArea(
+      child: const Scaffold(
+        body: const Center(
+          child: const CircularProgressIndicator(),
+        ),
+      ),
+    );
+  }
+}
