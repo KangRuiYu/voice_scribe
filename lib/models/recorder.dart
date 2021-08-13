@@ -12,8 +12,6 @@ import 'wav_writer.dart';
 
 class Recorder extends ChangeNotifier {
   /// The directory where recordings will be outputted to.
-  final Directory recordingsDirectory;
-
   FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   StreamSubscription<RecordingDisposition> _internalSub;
   StreamController<FoodData> _audioData;
@@ -28,8 +26,6 @@ class Recorder extends ChangeNotifier {
   bool opened = false;
   RecordingDisposition
       currentProgress; // To be able to get the current duration
-
-  Recorder(this.recordingsDirectory);
 
   Future<void> initialize() async {
     // Must initialize the Recorder before using
@@ -51,7 +47,7 @@ class Recorder extends ChangeNotifier {
     await _recorder.closeAudioSession();
   }
 
-  Future<void> startRecording() async {
+  Future<void> startRecording(Directory recordingsDirectory) async {
     // Starts the recording process
     if (!opened) {
       throw RecorderNotInitializedException(
