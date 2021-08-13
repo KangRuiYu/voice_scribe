@@ -7,7 +7,7 @@ import '../../models/transcript_reader.dart' as transcriptReader;
 import "../../utils/formatter.dart" as formatter;
 import '../../utils/theme_constants.dart' as themeConstants;
 import '../widgets/playback_slider.dart';
-import '../widgets/mono_theme_widgets.dart';
+import '../widgets/custom_widgets.dart';
 
 class PlayingScreen extends StatelessWidget {
   final Recording recording;

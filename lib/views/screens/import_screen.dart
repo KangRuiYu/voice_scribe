@@ -10,7 +10,7 @@ import '../../models/recording.dart';
 import '../../models/recordings_manager.dart';
 import '../../utils/formatter.dart';
 import '../../utils/theme_constants.dart' as themeConstants;
-import '../widgets/mono_theme_widgets.dart';
+import '../widgets/custom_widgets.dart';
 
 /// Keeps track of selected files while notifying any listeners.
 class Selector extends ChangeNotifier {

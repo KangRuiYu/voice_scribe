@@ -9,7 +9,7 @@ import '../../models/recordings_manager.dart';
 import '../../utils/app_data.dart';
 import '../../utils/theme_constants.dart' as themeConstants;
 import '../widgets/duration_label.dart';
-import '../widgets/mono_theme_widgets.dart';
+import '../widgets/custom_widgets.dart';
 import '../widgets/volume_display.dart';
 
 class RecordingScreen extends StatelessWidget {
