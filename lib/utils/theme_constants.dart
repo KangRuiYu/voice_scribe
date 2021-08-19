@@ -19,4 +19,7 @@ const double big_icon_size = 32.0;
 const double divider_thickness = 0.8;
 
 const double slider_thumb_size = 12.0;
-const double slider_track_height = 8.0;
+
+const double bar_height = 8.0;
+
+const int opacity = 0x3d;

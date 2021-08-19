@@ -30,11 +30,10 @@ dependencies:
   cupertino_icons: ^1.0.0
 
   path_provider: ^2.0.1
-  flutter_sound: ^8.0.0+6
-  permission_handler: ^6.1.1
-  intl: ^0.16.1
-  google_fonts: ^1.1.2
-  font_awesome_flutter: ^9.0.0
+  flutter_sound: 8.3.4
+  permission_handler: ^8.1.4+2
+  intl: ^0.17.0
+  flutter_launcher_icons: ^0.9.1
   deep_speech_dart:
     path: local_packages/deep_speech_dart
   vosk_dart:
@@ -43,6 +42,13 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter_icons:
+  android: true
+  image_path: "assets/icon.png"
+  adaptive_icon_background: "assets/background.png"
+  adaptive_icon_foreground: "assets/foreground.png"
+  ios: false
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -62,6 +62,23 @@ class VoiceScribe extends StatelessWidget {
 
     final TextTheme mainTextTheme = Theme.of(context).textTheme;
 
+    final MaterialStateProperty<EdgeInsetsGeometry> buttonPadding =
+        MaterialStateProperty.all<EdgeInsetsGeometry>(
+      const EdgeInsets.symmetric(
+        horizontal: themeConstants.padding_medium,
+        vertical: themeConstants.padding_tiny,
+      ),
+    );
+
+    final MaterialStateProperty<RoundedRectangleBorder> buttonShape =
+        MaterialStateProperty.all<RoundedRectangleBorder>(
+      const RoundedRectangleBorder(
+        borderRadius: const BorderRadius.all(
+          const Radius.circular(themeConstants.radius),
+        ),
+      ),
+    );
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.white,
@@ -118,19 +135,8 @@ class VoiceScribe extends StatelessWidget {
               elevation: MaterialStateProperty.all<double>(
                 themeConstants.elevation,
               ),
-              padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                const EdgeInsets.symmetric(
-                  horizontal: themeConstants.padding_medium,
-                  vertical: themeConstants.padding_tiny,
-                ),
-              ),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                const RoundedRectangleBorder(
-                  borderRadius: const BorderRadius.all(
-                    const Radius.circular(themeConstants.radius),
-                  ),
-                ),
-              ),
+              padding: buttonPadding,
+              shape: buttonShape,
             ),
           ),
           iconTheme: IconThemeData(
@@ -143,6 +149,12 @@ class VoiceScribe extends StatelessWidget {
               borderRadius: const BorderRadius.all(
                 const Radius.circular(themeConstants.radius),
               ),
+            ),
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: ButtonStyle(
+              padding: buttonPadding,
+              shape: buttonShape,
             ),
           ),
           visualDensity: VisualDensity.adaptivePlatformDensity,

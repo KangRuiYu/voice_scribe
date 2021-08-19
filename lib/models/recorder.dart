@@ -63,6 +63,8 @@ class Recorder extends ChangeNotifier {
       audioStream: _audioData.stream,
     );
 
+    await _recorder.setSubscriptionDuration(Duration(milliseconds: 100));
+
     await _recorder.startRecorder(
       codec: Codec.pcm16,
       toStream: _audioData.sink,

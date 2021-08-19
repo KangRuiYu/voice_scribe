@@ -77,7 +77,7 @@ class _PlaybackSliderState extends State<PlaybackSlider> {
   @override
   Widget build(BuildContext context) {
     final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(
-      trackHeight: themeConstants.slider_track_height,
+      trackHeight: themeConstants.bar_height,
       overlayShape: const RoundSliderOverlayShape(
         overlayRadius: themeConstants.slider_thumb_size,
       ),
