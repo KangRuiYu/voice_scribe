@@ -1,29 +1,48 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:vosk_dart/bridge.dart';
 import 'package:vosk_dart/vosk_exceptions.dart';
+
+/// none: No associated data type.
+/// buffer: Was fed a buffer.
+/// file: Was fed a file.
+enum DataType { none, buffer, file }
+
+/// partial: Not finalized, what speech is inferred to be so far.
+/// full: Finalized result.
+/// finalFull: Finalized result and the last one for this transcript.
+enum ResultType { partial, full, finalFull }
 
 /// Bindings to a native Vosk instance, providing basic functions.
 class VoskInstance {
   /// Used to communicate with native code.
   final Bridge _bridge = Bridge();
 
-  bool _threadAllocated = false;
   bool get threadAllocated => _threadAllocated;
+  bool _threadAllocated = false;
 
-  bool _modelOpened = false;
   bool get modelOpened => _modelOpened;
+  bool _modelOpened = false;
 
-  /// Returns a broadcast stream of the current transcription progress.
+  bool get transcriptInProgress => _transcriptInProgress;
+  bool _transcriptInProgress = false;
+
+  /// Broadcast stream of ongoing transcription events.
   ///
-  /// All transcription jobs will share the same stream. Progress for each file
-  /// ranges from 0.0 to 1.0. 0 marks a new transcription and 1 marks the end
-  /// of the current one.
-  Stream<dynamic> get progressStream => _bridge.eventStream;
+  /// Will arrive as a Map<String, Object> in the form:
+  /// {
+  ///   'dataType': integer matching an index for a constant in DataType
+  ///   'resultType': integer matching an index for a constant in ResultType
+  ///   'progress': double from 0 to 1 indicating progress of a task. (Typically used for feedFile).
+  ///   'text': Current transcription result.
+  /// }
+  Stream<dynamic> get eventStream => _bridge.eventStream;
 
   /// Allocates a single thread.
   ///
+  /// Will wait for any previous thread to finish before new tasks are executed.
   /// Throws [ThreadAlreadyAllocated] if there is an existing thread.
   Future<void> allocateSingleThread() async {
     if (_threadAllocated) throw ThreadAlreadyAllocated();
@@ -31,7 +50,11 @@ class VoskInstance {
     _threadAllocated = true;
   }
 
-  /// Deallocate the existing thread. If no thread exists, nothing happens.
+  /// Deallocate the existing thread.
+  ///
+  /// If no thread exists, nothing happens.
+  /// Thread will not accept any new tasks and will wait for existing ones to
+  /// finish before closing.
   Future<void> deallocateThread() async {
     if (!_threadAllocated) return null;
     await _bridge.call('deallocateThread');
@@ -41,6 +64,7 @@ class VoskInstance {
   /// Attempts to interrupt and close the existing thread.
   ///
   /// If no thread exists, nothing happens.
+  /// There is no guarantee that the thread will terminate at request.
   Future<void> terminateThread() async {
     if (!_threadAllocated) return null;
     await _bridge.call('terminateThread');
@@ -49,79 +73,134 @@ class VoskInstance {
 
   /// Ask open thread to open the model at the given [modelPath].
   ///
-  /// The completion of this function o nly means the task has been queued, not
-  /// necessarily that the model has been opened.
   /// Throws a [NoOpenThread] exception when called when no thread is open.
   /// Throws a [ModelAlreadyOpened] exception when a model already exists.
   /// Throws a [NonExistentModel] exception if [modelPath] does not point to an
   /// existing model.
-  Future<void> queueModelToBeOpened(String modelPath) async {
+  Future<void> openModel(String modelPath) async {
     if (!_threadAllocated) throw NoOpenThread();
     if (_modelOpened) throw ModelAlreadyOpened();
     if (!Directory(modelPath).existsSync()) throw NonExistentModel();
-    await _bridge.call('queueModelToBeOpened', modelPath);
+    await _bridge.call('openModel', modelPath);
     _modelOpened = true;
   }
 
   /// Closes the currently opened model.
   ///
-  /// The completion of this function only means the task has been queued, not
-  /// necessarily that the model has been opened.
   /// Throws a [NoOpenThread] exception when called when no thread is open.
   /// If no model is opened, nothing happens.
-  Future<void> queueModelToBeClosed() async {
+  Future<void> closeModel() async {
     if (!_threadAllocated) throw NoOpenThread();
     if (!_modelOpened) return null;
-    await _bridge.call('queueModelToBeClosed');
+    await _bridge.call('closeModel');
     _modelOpened = false;
   }
 
-  /// Puts the file at the given [filePath] on queue for transcription
-  /// outputting the result at the given [resultPath].
+  /// Starts a new transcript file.
   ///
-  /// Only one file will be transcribing at a given time.
-  /// The completion of this function only means the task has been queued, not
-  /// necessarily that the file has finished transcribing.
+  /// Subsequent calls to feed files will write output to [transcriptPath].
   /// Throws a [NoOpenThread] exception when called when no thread is open.
   /// Throws a [NoOpenModel] exception when no model is currently opened.
-  /// Throws a [NonExistentWavFile] if the given [filePath] points to a
-  /// non-existent file.
   /// Throws a [TranscriptExists] if the given [transcriptPath] points
   /// to a file that already exists.
-  Future<void> queueFileForTranscription(
-    String filePath,
-    String transcriptPath,
-  ) {
+  /// Throws a [TranscriptInProgress] exception when called when a transcript
+  /// is currently being processed.
+  Future<void> startNewTranscript(String transcriptPath) async {
     if (!_threadAllocated) throw NoOpenThread();
     if (!_modelOpened) throw NoOpenModel();
-    if (!File(filePath).existsSync()) throw NonExistentWavFile();
     if (File(transcriptPath).existsSync()) throw TranscriptExists();
+    if (_transcriptInProgress) throw TranscriptInProgress();
 
-    return _bridge.call(
-      'queueFileForTranscription',
+    await _bridge.call(
+      'startNewTranscript',
       {
-        'filePath': filePath,
         'transcriptPath': transcriptPath,
         'sampleRate': 16000,
       },
     );
+
+    _transcriptInProgress = true;
+  }
+
+  /// Forcefully closes current transcript file.
+  ///
+  /// The transcript file is not deleted.
+  /// If there is no transcript in progress, nothing happens.
+  /// Throws a [NoOpenThread] exception when called when no thread is open.
+  Future<void> terminateTranscript() async {
+    if (!_threadAllocated) throw NoOpenThread();
+    if (!_transcriptInProgress) return;
+
+    await _bridge.call('terminateTranscript');
+
+    _transcriptInProgress = false;
+  }
+
+  /// Writes final results to transcript file and closes.
+  ///
+  /// If [post] is true (default), then the final events will be posted to the
+  /// event stream. Otherwise, no events are posted.
+  /// If there is no transcript in progress, nothing happens.
+  /// Throws a [NoOpenThread] exception when called when no thread is open.
+  Future<void> finishTranscript({bool post = true}) async {
+    if (!_threadAllocated) throw NoOpenThread();
+    if (!_transcriptInProgress) return;
+
+    await _bridge.call('finishTranscript', post);
+
+    _transcriptInProgress = false;
+  }
+
+  /// Feeds the audio data at [filePath] to the current transcript file.
+  ///
+  /// If [post] is true (default), then the associated events will be posted to
+  /// the event stream. Otherwise, no events are posted.
+  /// Throws a [NoOpenThread] exception when called when no thread is open.
+  /// Throws a [NoTranscriptInProgress] exception when called while no
+  /// transcript is being processed.
+  /// Throws a [NonExistentWavFile] if the given [filePath] points to a
+  /// non-existent file.
+  Future<void> feedFile(String filePath, {bool post = true}) {
+    if (!_threadAllocated) throw NoOpenThread();
+    if (!_transcriptInProgress) throw NoTranscriptInProgress();
+    if (!File(filePath).existsSync()) throw NonExistentWavFile();
+
+    return _bridge.call('feedFile', {'filePath': filePath, 'post': post});
+  }
+
+  /// Feeds [buffer] to the current transcript file.
+  ///
+  /// If [post] is true (default), then the associated events will be posted to
+  /// the event stream. Otherwise, no events are posted.
+  /// Throws a [NoOpenThread] exception when called when no thread is open.
+  /// Throws a [NoTranscriptInProgress] exception when called while no
+  /// transcript is being processed.
+  Future<void> feedBuffer(Uint8List buffer, {bool post = true}) {
+    if (!_threadAllocated) throw NoOpenThread();
+    if (!_transcriptInProgress) throw NoTranscriptInProgress();
+
+    return _bridge.call('feedBuffer', {'buffer': buffer, 'post': post});
   }
 
   /// Closes resources and any associated connections.
   ///
-  /// Once called, this instance is unusable. Any attempt will result in a
-  /// [ClosedInstance] thrown by the bridge.
-  /// If already closed, nothing happens.
-  /// Can optionally be forcefully closed, where any ongoing transcription
-  /// process will halted.
-  Future<void> close({bool force = false}) async {
-    if (force) {
-      await _bridge.call('forceClose');
-    } else {
-      await _bridge.call('close');
-    }
-    await _bridge.close();
+  /// If [force] is false (default), will wait for any existing tasks to finish
+  /// before resources are closed.
+  /// If [force] is true, will attempt to halt any tasks then close resources.
+  Future<void> closeResources({bool force = false}) async {
+    await _bridge.call('closeResources', force);
+    _transcriptInProgress = false;
     _modelOpened = false;
     _threadAllocated = false;
+  }
+
+  /// Disconnects this instance from its native code.
+  ///
+  /// If already disconnected, nothing happens.
+  /// Once called, this instance is unusable. Any attempt will result in a
+  /// [ClosedInstance] thrown by the bridge.
+  Future<void> disconnect() async {
+    await _bridge.call('disconnect');
+    await _bridge.close();
   }
 }

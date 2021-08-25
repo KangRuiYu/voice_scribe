@@ -32,7 +32,8 @@ public class VoskDartPlugin implements FlutterPlugin, MethodCallHandler {
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         for (VoskInstance voskInstance : instances.values()) {
-            voskInstance.forceClose();
+            voskInstance.closeResources(true);
+            voskInstance.disconnect();
         }
         instances.clear();
         mainMethodChannel.setMethodCallHandler(null);

@@ -37,3 +37,13 @@ class TranscriptExists implements Exception {
   final String message;
   TranscriptExists([this.message]);
 }
+
+class TranscriptInProgress implements Exception {
+  final String message;
+  TranscriptInProgress([this.message]);
+}
+
+class NoTranscriptInProgress implements Exception {
+  final String message;
+  NoTranscriptInProgress([this.message]);
+}

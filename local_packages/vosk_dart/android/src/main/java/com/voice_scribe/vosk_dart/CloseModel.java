@@ -13,6 +13,7 @@ class CloseModel implements Runnable {
         this.modelFuture = modelFuture;
     }
 
+    @Override
     public void run() {
         try {
             modelFuture.get().close();

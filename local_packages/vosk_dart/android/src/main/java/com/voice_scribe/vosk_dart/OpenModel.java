@@ -13,6 +13,7 @@ class OpenModel implements Callable<Model> {
         this.modelPath = modelPath;
     }
 
+    @Override
     public Model call() {
         return new Model(modelPath);
     }

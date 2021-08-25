@@ -22,7 +22,7 @@ enum RecordingState { processing, queued, notQueued }
 /// Note: Should not instantiate more than one at a time.
 class RecordingTranscriber extends ChangeNotifier {
   /// Transcription progress for the current recording.
-  Stream<dynamic> get progressStream => _voskInstance.progressStream;
+  Stream<dynamic> get progressStream => _voskInstance.eventStream;
 
   /// The output directory for transcriptions.
   final Directory transcriptionDirectory;
@@ -54,7 +54,7 @@ class RecordingTranscriber extends ChangeNotifier {
     @required this.transcriptionDirectory,
     onDone,
   }) : this.onDone = (onDone ?? (_) => null) {
-    _progressSub = _voskInstance.progressStream.listen(_onProgress);
+    _progressSub = _voskInstance.eventStream.listen(_onProgress);
   }
 
   /// Closes resources and closes this transcriber permanently.
@@ -66,7 +66,8 @@ class RecordingTranscriber extends ChangeNotifier {
   @override
   void dispose() {
     _progressSub.cancel();
-    _voskInstance.close();
+    _voskInstance.closeResources();
+    _voskInstance.disconnect();
     super.dispose();
   }
 
@@ -82,10 +83,14 @@ class RecordingTranscriber extends ChangeNotifier {
 
   /// Remove [recording] from queue or cancel if it is being transcribed.
   ///
+  /// If canceled, then the current transcription file is deleted.
   /// If the recording does not exist, nothing happens.
   void cancel(Recording recording) async {
     if (_currentRecording == recording) {
       await _voskInstance.terminateThread();
+      await _readyResources();
+      await _voskInstance.terminateTranscript();
+      await _currentTranscriptionFile.delete();
       _transcribeNext();
     } else {
       _queue.remove(recording);
@@ -108,7 +113,6 @@ class RecordingTranscriber extends ChangeNotifier {
   ///
   /// If there is no recordings in [_queue], [_currentRecording] is instead set
   /// to null.
-  /// Calls [_allocateResources] if it is the first call.
   /// Throws a [NonExistentWavFile] exception if the next recording in
   /// queue does not exist.
   /// Throws a [TranscriptionAlreadyExists] exception if the recording already
@@ -125,10 +129,8 @@ class RecordingTranscriber extends ChangeNotifier {
 
     await _readyResources();
 
-    await _voskInstance.queueFileForTranscription(
-      _currentRecording.audioPath,
-      _currentTranscriptionFile.path,
-    );
+    await _voskInstance.startNewTranscript(_currentTranscriptionFile.path);
+    await _voskInstance.feedFile(_currentRecording.audioPath);
   }
 
   /// Allocates any resources if needed, such as threads or models.
@@ -142,7 +144,7 @@ class RecordingTranscriber extends ChangeNotifier {
     if (!_voskInstance.modelOpened) {
       String modelPath = await modelManager.firstAvailableModel();
       if (modelPath == null) throw NoAvailableModel();
-      await _voskInstance.queueModelToBeOpened(modelPath);
+      await _voskInstance.openModel(modelPath);
     }
   }
 
@@ -152,10 +154,14 @@ class RecordingTranscriber extends ChangeNotifier {
   /// the next recording from [_queue] is transcribed
   /// and any listeners will be notified.
   void _onProgress(dynamic progress) async {
-    if (progress == 1.0) {
+    if (progress['progress'] == 1.0) {
+      await _voskInstance.finishTranscript(post: false);
       _currentRecording.transcriptionPath = _currentTranscriptionFile.path;
+
       onDone(_currentRecording);
+
       await _transcribeNext();
+
       notifyListeners();
     }
   }

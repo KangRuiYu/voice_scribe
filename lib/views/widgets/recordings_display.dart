@@ -67,7 +67,8 @@ class _RecordingCard extends StatelessWidget {
 
         final Widget subtitle = recordingState == RecordingState.processing
             ? _StreamLinearProgressIndicator(
-                recordingTranscriber.progressStream,
+                recordingTranscriber.progressStream
+                    .map((progress) => progress['progress']),
               )
             : Text(
                 '${formatter.formatDate(recording.date)} • ${formatter.formatDuration(recording.duration)}',
