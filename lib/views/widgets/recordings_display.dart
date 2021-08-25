@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vosk_dart/transcript_event.dart';
 
 import '../../models/recording.dart';
 import '../../models/recording_transcriber.dart';
@@ -67,8 +68,9 @@ class _RecordingCard extends StatelessWidget {
 
         final Widget subtitle = recordingState == RecordingState.processing
             ? _StreamLinearProgressIndicator(
-                recordingTranscriber.progressStream
-                    .map((progress) => progress['progress']),
+                recordingTranscriber.progressStream.map(
+                  (TranscriptEvent event) => event.progress,
+                ),
               )
             : Text(
                 '${formatter.formatDate(recording.date)} • ${formatter.formatDuration(recording.duration)}',

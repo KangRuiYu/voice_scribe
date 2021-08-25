@@ -3,17 +3,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:vosk_dart/bridge.dart';
+import 'package:vosk_dart/transcript_event.dart';
 import 'package:vosk_dart/vosk_exceptions.dart';
-
-/// none: No associated data type.
-/// buffer: Was fed a buffer.
-/// file: Was fed a file.
-enum DataType { none, buffer, file }
-
-/// partial: Not finalized, what speech is inferred to be so far.
-/// full: Finalized result.
-/// finalFull: Finalized result and the last one for this transcript.
-enum ResultType { partial, full, finalFull }
 
 /// Bindings to a native Vosk instance, providing basic functions.
 class VoskInstance {
@@ -30,15 +21,8 @@ class VoskInstance {
   bool _transcriptInProgress = false;
 
   /// Broadcast stream of ongoing transcription events.
-  ///
-  /// Will arrive as a Map<String, Object> in the form:
-  /// {
-  ///   'dataType': integer matching an index for a constant in DataType
-  ///   'resultType': integer matching an index for a constant in ResultType
-  ///   'progress': double from 0 to 1 indicating progress of a task. (Typically used for feedFile).
-  ///   'text': Current transcription result.
-  /// }
-  Stream<dynamic> get eventStream => _bridge.eventStream;
+  Stream<TranscriptEvent> get eventStream =>
+      _bridge.eventStream.map((event) => TranscriptEvent(event));
 
   /// Allocates a single thread.
   ///

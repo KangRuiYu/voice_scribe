@@ -65,11 +65,11 @@ class TranscribeFile extends TranscribeTask {
                 if (silence) {
                     JSONObject result = new JSONObject(recognizer.getResult());
                     transcriptWriter.writeResult(result);
-                    post(result, FILE, FULL, progress);
+                    post(result, RESULT, FILE, progress);
                 }
                 else {
                     JSONObject partialResult = new JSONObject(recognizer.getPartialResult());
-                    post(partialResult, FILE, PARTIAL, progress);
+                    post(partialResult, PARTIAL, FILE, progress);
                 }
             }
         }

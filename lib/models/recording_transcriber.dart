@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
+import 'package:vosk_dart/transcript_event.dart';
 import 'package:vosk_dart/vosk_dart.dart';
 
 import '../exceptions/transcriber_exceptions.dart';
@@ -22,7 +23,7 @@ enum RecordingState { processing, queued, notQueued }
 /// Note: Should not instantiate more than one at a time.
 class RecordingTranscriber extends ChangeNotifier {
   /// Transcription progress for the current recording.
-  Stream<dynamic> get progressStream => _voskInstance.eventStream;
+  Stream<TranscriptEvent> get progressStream => _voskInstance.eventStream;
 
   /// The output directory for transcriptions.
   final Directory transcriptionDirectory;
@@ -153,8 +154,8 @@ class RecordingTranscriber extends ChangeNotifier {
   /// When a recording is done, the
   /// the next recording from [_queue] is transcribed
   /// and any listeners will be notified.
-  void _onProgress(dynamic progress) async {
-    if (progress['progress'] == 1.0) {
+  void _onProgress(TranscriptEvent event) async {
+    if (event.progress == 1.0) {
       await _voskInstance.finishTranscript(post: false);
       _currentRecording.transcriptionPath = _currentTranscriptionFile.path;
 

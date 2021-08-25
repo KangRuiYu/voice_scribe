@@ -30,7 +30,7 @@ class FinishTranscript extends TranscribeTask {
 
             JSONObject finalResult = new JSONObject(recognizer.getFinalResult());
             transcriptWriter.writeResult(finalResult);
-            post(finalResult, NONE, FINAL_FULL, 1.0);
+            post(finalResult, FINAL_RESULT, NONE, 1.0);
 
             recognizer.close();
             transcriptWriter.close();

@@ -21,8 +21,8 @@ abstract class TranscribeTask implements Runnable {
 
     // ResultType Enums
     protected static final int PARTIAL = 0;
-    protected static final int FULL = 1;
-    protected static final int FINAL_FULL = 2;
+    protected static final int RESULT = 1;
+    protected static final int FINAL_RESULT = 2;
 
     protected final Future<Recognizer> recognizerFuture; // For transcribing.
     protected final TranscriptWriter transcriptWriter; // For file writing.
@@ -44,8 +44,8 @@ abstract class TranscribeTask implements Runnable {
     // Post the given transcription result in the UI thread to dart side.
     protected boolean post(
             JSONObject result,
-            int dataType,
             int resultType,
+            int dataType,
             double progress
     ) throws JSONException {
         if (bridge == null) {
@@ -53,10 +53,11 @@ abstract class TranscribeTask implements Runnable {
         }
 
         final HashMap<String, Object> event = new HashMap<String, Object>();
-        event.put("text", result.getString(resultType == PARTIAL ? "partial" : "text"));
-        event.put("dataType", dataType);
         event.put("resultType", resultType);
+        event.put("dataType", dataType);
         event.put("progress", progress);
+        event.put("timestamp", getResultTimestamp(result));
+        event.put("text", result.getString(resultType == PARTIAL ? "partial" : "text"));
 
         mainHandler.post(new Runnable() {
             @Override
@@ -66,5 +67,16 @@ abstract class TranscribeTask implements Runnable {
         });
 
         return true;
+    }
+
+    // Retrieves the timestamp of the given result in seconds.
+    // If the result has no word results (is a partial result), then -1.0 is returned instead.
+    private double getResultTimestamp(JSONObject result) throws JSONException {
+        if (result.has("result")) {
+            return result.getJSONArray("result").getJSONObject(0).getDouble("start");
+        }
+        else {
+            return -1.0;
+        }
     }
 }

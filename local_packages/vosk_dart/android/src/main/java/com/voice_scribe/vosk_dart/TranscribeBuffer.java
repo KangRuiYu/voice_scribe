@@ -37,11 +37,11 @@ class TranscribeBuffer extends TranscribeTask {
             if (silence) {
                 JSONObject result = new JSONObject(recognizer.getResult());
                 transcriptWriter.writeResult(result);
-                post(result, BUFFER, FULL, 1.0);
+                post(result, RESULT, BUFFER, 1.0);
             }
             else {
                 JSONObject partialResult = new JSONObject(recognizer.getPartialResult());
-                post(partialResult, BUFFER, PARTIAL, 1.0);
+                post(partialResult, PARTIAL, BUFFER, 1.0);
             }
         }
         catch (ExecutionException | InterruptedException e) {
