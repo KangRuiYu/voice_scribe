@@ -8,12 +8,10 @@ const _current_version = '0.2';
 /// Contains an audio file's metadata.
 class Recording {
   /// The audio file itself.
-  File get audioFile => _audioFile;
-  File _audioFile;
+  File audioFile;
 
   /// The transcription file itself.
-  File get transcriptionFile => _transcriptionFile;
-  File _transcriptionFile;
+  File transcriptionFile;
 
   /// The length of the recording. Could be inaccurate.
   Duration duration;
@@ -28,18 +26,18 @@ class Recording {
   String get name => path_dart.basenameWithoutExtension(audioPath);
 
   /// The path to the audio file itself.
-  String get audioPath => _audioFile.path;
-  set audioPath(String newPath) => _audioFile = File(newPath);
+  String get audioPath => audioFile.path;
+  set audioPath(String newPath) => audioFile = File(newPath);
 
   /// Path to the transcription file. May not exist.
-  String get transcriptionPath => _transcriptionFile.path;
-  set transcriptionPath(String newPath) => _transcriptionFile = File(newPath);
+  String get transcriptionPath => transcriptionFile.path;
+  set transcriptionPath(String newPath) => transcriptionFile = File(newPath);
 
   /// Returns true if the audio for this exists.
-  bool get audioExists => _audioFile.existsSync();
+  bool get audioExists => audioFile.existsSync();
 
   /// Returns true if the transcription for this exists.
-  bool get transcriptionExists => _transcriptionFile.existsSync();
+  bool get transcriptionExists => transcriptionFile.existsSync();
 
   /// Creates a new recording using given files and info.
   ///
@@ -51,8 +49,8 @@ class Recording {
     @required File audioFile,
     File transcriptionFile,
     @required Duration duration,
-  })  : this._audioFile = audioFile,
-        this._transcriptionFile = transcriptionFile ?? File(''),
+  })  : this.audioFile = audioFile,
+        this.transcriptionFile = transcriptionFile ?? File(''),
         this.duration = duration,
         this.date = DateTime.now(),
         this.version = _current_version;
@@ -67,16 +65,16 @@ class Recording {
     @required String audioPath,
     String transcriptionPath = '',
     @required Duration duration,
-  })  : this._audioFile = File(audioPath),
-        this._transcriptionFile = File(transcriptionPath),
+  })  : this.audioFile = File(audioPath),
+        this.transcriptionFile = File(transcriptionPath),
         this.duration = duration,
         this.date = DateTime.now(),
         this.version = _current_version;
 
   /// Creates a recording from a JSON map.
   Recording.fromJson(Map<String, dynamic> json)
-      : _audioFile = File(json['audioPath']),
-        _transcriptionFile = File(json['transcriptionPath']),
+      : audioFile = File(json['audioPath']),
+        transcriptionFile = File(json['transcriptionPath']),
         duration = Duration(milliseconds: json['duration_in_milliseconds']),
         date = DateTime(json['year'], json['month'], json['day']),
         version = json['version'];
@@ -98,13 +96,13 @@ class Recording {
   ///
   /// If audio file could not be deleted (file does not exist), then a
   /// [FileSystemException] is thrown.
-  Future<FileSystemEntity> deleteAudio() => _audioFile.delete();
+  Future<FileSystemEntity> deleteAudio() => audioFile.delete();
 
   /// Deletes the transcription file associated with this recording.
   ///
   /// If transcription file could not be deleted (file does not exist), then a
   /// [FileSystemException] is thrown.
-  Future<FileSystemEntity> deleteTranscription() => _transcriptionFile.delete();
+  Future<FileSystemEntity> deleteTranscription() => transcriptionFile.delete();
 
   @override
   String toString() {
