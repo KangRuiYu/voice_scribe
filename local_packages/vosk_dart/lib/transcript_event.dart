@@ -1,7 +1,8 @@
 /// partial: Not finalized, what speech is inferred to be so far.
 /// result: Finalized result.
 /// finalResult: Finalized result and the last one for this transcript.
-enum ResultType { partial, result, finalResult }
+/// empty: Used to indicate an empty transcript event.
+enum ResultType { partial, result, finalResult, empty }
 
 /// none: No associated data type.
 /// buffer: Was fed a buffer.
@@ -37,6 +38,13 @@ class TranscriptEvent {
         progress = event['progress'],
         timestamp = Duration(milliseconds: event['timestamp'].toInt()),
         text = event['text'];
+
+  const TranscriptEvent.empty()
+      : resultType = ResultType.empty,
+        dataType = DataType.none,
+        progress = 0,
+        timestamp = Duration.zero,
+        text = '';
 
   @override
   String toString() {
