@@ -208,15 +208,15 @@ class _FileListing extends StatelessWidget {
         return Card(
           margin: const EdgeInsets.only(
             top: themeConstants.padding_tiny,
-            right: themeConstants.padding_medium,
-            left: themeConstants.padding_medium,
+            right: themeConstants.padding_small,
+            left: themeConstants.padding_small,
           ),
           child: CheckboxListTile(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(themeConstants.radius),
             ),
             contentPadding: const EdgeInsets.only(
-              left: themeConstants.padding_medium,
+              left: themeConstants.padding_huge,
               right: themeConstants.padding_small,
             ),
             title: Text(_name),

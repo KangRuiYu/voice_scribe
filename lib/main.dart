@@ -126,10 +126,6 @@ class VoiceScribe extends StatelessWidget {
               ),
             ),
           ),
-          dividerTheme: const DividerThemeData(
-            thickness: themeConstants.divider_thickness,
-            space: 0.0,
-          ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
               elevation: MaterialStateProperty.all<double>(
