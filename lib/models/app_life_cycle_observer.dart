@@ -40,7 +40,6 @@ class AppLifeCycleObserver with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.detached:
         onDetached();
-        stopObserving();
         break;
       case AppLifecycleState.inactive:
         onInactive();
