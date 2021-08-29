@@ -362,37 +362,6 @@ class _PausedButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return Stack(
-    //   alignment: Alignment.center,
-    //   children: [
-    //     Row(
-    //       mainAxisAlignment: MainAxisAlignment.center,
-    //       children: [
-    //         TextButton(
-    //           child: const Text('Save'),
-    //           onPressed: context.select(
-    //             (Map<String, Future<void> Function()> functions) =>
-    //                 functions['onSave'],
-    //           ),
-    //         ),
-    //         SizedBox(width: 100),
-    //         TextButton(
-    //           child: const Text('Delete'),
-    //           onPressed: context.select(
-    //             (Map<String, Future<void> Function()> functions) =>
-    //                 functions['onDelete'],
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //     CircularIconButton(
-    //       iconData: Icons.play_arrow_rounded,
-    //       onPressed: context.select(
-    //         (Recorder recorder) => recorder.resumeRecording,
-    //       ),
-    //     ),
-    //   ],
-    // );
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -455,24 +424,6 @@ class _InactiveButtons extends StatelessWidget {
         ),
         CircularIconButton(
           iconData: Icons.play_arrow_rounded,
-          onPressed: () => null,
-        ),
-      ],
-    );
-    return Row(
-      children: [
-        TextButton(
-          child: const Text('Save'),
-          onPressed: () => null,
-        ),
-        const SizedBox(width: themeConstants.padding_medium),
-        CircularIconButton(
-          iconData: Icons.play_arrow_rounded,
-          onPressed: () => null,
-        ),
-        const SizedBox(width: themeConstants.padding_medium),
-        TextButton(
-          child: const Text('Delete'),
           onPressed: () => null,
         ),
       ],
