@@ -1,64 +1,80 @@
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/public/flutter_sound_recorder.dart';
 import 'package:provider/provider.dart';
+import 'package:vosk_dart/transcript_event.dart';
+import 'package:tuple/tuple.dart';
 
 import '../../models/recorder.dart';
 import '../../models/recording.dart';
 import '../../models/recordings_manager.dart';
+import '../../models/stream_transcriber.dart';
+import '../../models/transcript_event_provider.dart';
 import '../../utils/app_data.dart';
 import '../../utils/formatter.dart' as formatter;
 import '../../utils/theme_constants.dart' as themeConstants;
 import '../widgets/custom_widgets.dart';
+import '../widgets/transcript_result.dart';
 
 class RecordingScreen extends StatelessWidget {
   final Recorder recorder = Recorder();
+  final TranscriptEventProvider transcriptEventProvider =
+      TranscriptEventProvider();
   final TextEditingController nameController = TextEditingController();
 
-  /// Initializes values.
-  ///
-  /// Starts the recorder. If already started, immediately returns.
-  Future<void> _init(Directory recordingsDirectory) async {
+  Future<void> _init({
+    @required AppData appdata,
+    @required StreamTranscriber streamTranscriber,
+  }) async {
     if (recorder.active) return;
     await recorder.initialize();
-    await recorder.startRecording(recordingsDirectory);
-  }
+    await recorder.startRecording(appdata.recordingsDirectory);
 
-  /// Called when user presses the back button.
-  ///
-  /// Makes sure recorder is closed before leaving screen.
-  Future<bool> _onExit() async {
-    if (recorder.active) await recorder.terminate();
-    if (recorder.opened) await recorder.close();
-    return true;
+    await streamTranscriber.initialize();
+    await streamTranscriber.start(
+      audioStream: recorder.audioStream,
+      tempLocation: appdata.generateTempPath(),
+    );
+    await transcriptEventProvider.initialize({
+      'eventStream': streamTranscriber.eventStream,
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final Directory recordingsDirectory = context.select(
-      (AppData appData) => appData.recordingsDirectory,
-    );
+    final AppData appdata = context.watch<AppData>();
+
+    final StreamTranscriber streamTranscriber =
+        context.watch<StreamTranscriber>();
+
+    // Dynamically created exit function.
+    final Future<bool> Function() onExit = () async {
+      if (streamTranscriber.active) await streamTranscriber.stop();
+      if (recorder.active) await recorder.terminate();
+      if (recorder.opened) await recorder.close();
+      return true;
+    };
 
     // Dynamically created save function.
     final Future<void> Function() onSave = () async {
       Recording recording = await recorder.stopRecording(nameController.text);
       await recorder.close();
+
+      File transcript = await streamTranscriber.finish(
+        appdata.generateTranscriptPath(recording.name),
+      );
+      recording.transcriptionFile = transcript;
+
       context.read<RecordingsManager>().add(recording);
       Navigator.pop(context);
     };
 
-    // Dynamically created delete function.
-    final Future<void> Function() onDelete = () async {
-      await recorder.terminate();
-      await recorder.close();
-      Navigator.pop(context);
-    };
-
     return WillPopScope(
-      onWillPop: _onExit,
+      onWillPop: onExit,
       child: FutureBuilder(
-        future: _init(recordingsDirectory),
+        future: _init(appdata: appdata, streamTranscriber: streamTranscriber),
         builder: (BuildContext _, AsyncSnapshot snapshot) {
           Widget body;
 
@@ -77,8 +93,9 @@ class RecordingScreen extends StatelessWidget {
           return MultiProvider(
             providers: [
               ChangeNotifierProvider.value(value: recorder),
+              ChangeNotifierProvider.value(value: transcriptEventProvider),
               ChangeNotifierProvider.value(value: nameController),
-              Provider.value(value: {'onSave': onSave, 'onDelete': onDelete}),
+              Provider<Future<void> Function()>.value(value: onSave),
             ],
             child: SafeArea(
               child: Scaffold(
@@ -103,7 +120,7 @@ class _ContentView extends StatelessWidget {
     return Consumer<Recorder>(
       builder: (BuildContext context, Recorder recorder, Widget _) {
         if (recorder.recording) {
-          return const Expanded(child: const SizedBox.shrink());
+          return const _TranscriptResultList();
         } else if (recorder.paused) {
           return Expanded(
             child: Padding(
@@ -122,6 +139,59 @@ class _ContentView extends StatelessWidget {
           );
         }
       },
+    );
+  }
+}
+
+/// Displays a list of the current transcript results.
+class _TranscriptResultList extends StatelessWidget {
+  const _TranscriptResultList();
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Selector(
+        shouldRebuild: (previous, next) => previous.item1 != next.item1,
+        selector: (BuildContext ctx, TranscriptEventProvider t) => Tuple2(
+          t.resultCount,
+          t.resultEvents,
+        ),
+        builder: (
+          BuildContext context,
+          Tuple2<int, UnmodifiableListView<TranscriptEvent>> data,
+          Widget _,
+        ) {
+          UnmodifiableListView<TranscriptEvent> resultEvents = data.item2;
+          return ListView.builder(
+            itemCount: resultEvents.length + 1,
+            itemBuilder: (BuildContext context, int index) {
+              if (index < resultEvents.length) {
+                TranscriptEvent event = resultEvents[index];
+                return TranscriptResult.duration(
+                  timestampDuration: event.timestamp,
+                  resultText: event.text,
+                );
+              } else {
+                return _PartialResult();
+              }
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// A [TranscriptResult] that displays current partial result.
+class _PartialResult extends StatelessWidget {
+  const _PartialResult();
+
+  @override
+  Widget build(BuildContext context) {
+    return TranscriptResult(
+      timestamp: '--:--',
+      resultText:
+          context.select((TranscriptEventProvider t) => t.partialEvent).text,
     );
   }
 }
@@ -333,10 +403,7 @@ class _PausedButtons extends StatelessWidget {
             children: [
               TextButton(
                 child: const Text('Save'),
-                onPressed: context.select(
-                  (Map<String, Future<void> Function()> functions) =>
-                      functions['onSave'],
-                ),
+                onPressed: context.watch<Future<void> Function()>(),
               ),
             ],
           ),
@@ -356,10 +423,7 @@ class _PausedButtons extends StatelessWidget {
             children: [
               TextButton(
                 child: const Text('Delete'),
-                onPressed: context.select(
-                  (Map<String, Future<void> Function()> functions) =>
-                      functions['onDelete'],
-                ),
+                onPressed: () => Navigator.maybePop(context),
               ),
             ],
           ),

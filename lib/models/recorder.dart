@@ -21,6 +21,7 @@ class Recorder extends ChangeNotifier {
 
   // States
   Stream<RecordingDisposition> get onProgress => _recorder.onProgress;
+  Stream<Food> get audioStream => _audioData.stream;
   bool get recording => _recorder.isRecording;
   bool get paused => _recorder.isPaused;
   bool get stopped => _recorder.isStopped;

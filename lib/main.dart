@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'models/app_life_cycle_observer.dart';
 import 'models/recording.dart';
 import 'models/recording_transcriber.dart';
 import 'models/recordings_manager.dart';
+import 'models/stream_transcriber.dart';
 import 'utils/app_data.dart';
 import 'utils/theme_constants.dart' as themeConstants;
 import 'views/screens/main_screen.dart';
 
 void main() {
-  startVoiceScribe();
+  runVoiceScribe();
 }
 
-Future<void> startVoiceScribe() async {
+Future<void> runVoiceScribe() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   AppData appData = AppData(
@@ -21,6 +23,7 @@ Future<void> startVoiceScribe() async {
     metadataDirectory: await metadataDirectory(),
     modelsDirectory: await modelsDirectory(),
     transcriptionsDirectory: await transcriptionDirectory(),
+    tempDirectory: await tempDirectory(),
   );
 
   RecordingsManager recordingsManager = RecordingsManager.autoLoad(
@@ -33,12 +36,20 @@ Future<void> startVoiceScribe() async {
     onDone: (Recording recording) => recordingsManager.saveMetadata(recording),
   );
 
+  StreamTranscriber streamTranscriber = StreamTranscriber();
+  streamTranscriber.initialize();
+
+  AppLifeCycleObserver(onDetached: () async {
+    await streamTranscriber.terminate();
+  }).startObserving();
+
   runApp(
     MultiProvider(
       providers: [
         Provider.value(value: appData),
         ChangeNotifierProvider.value(value: recordingsManager),
         ChangeNotifierProvider.value(value: recordingTranscriber),
+        Provider.value(value: streamTranscriber),
       ],
       child: VoiceScribe(),
     ),

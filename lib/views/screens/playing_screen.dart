@@ -4,10 +4,10 @@ import 'package:provider/provider.dart';
 import '../../models/player.dart';
 import '../../models/recording.dart';
 import '../../models/transcript_reader.dart' as transcriptReader;
-import "../../utils/formatter.dart" as formatter;
 import '../../utils/theme_constants.dart' as themeConstants;
 import '../widgets/playback_slider.dart';
 import '../widgets/custom_widgets.dart';
+import '../widgets/transcript_result.dart';
 
 class PlayingScreen extends StatelessWidget {
   final Recording recording;
@@ -82,8 +82,8 @@ class _TranscriptView extends StatelessWidget {
               child: ListView.builder(
                 itemCount: transcriptMap.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return _TranscriptResult(
-                    startTime: transcriptMap.keys.elementAt(index),
+                  return TranscriptResult.duration(
+                    timestampDuration: transcriptMap.keys.elementAt(index),
                     resultText: transcriptMap.values.elementAt(index),
                   );
                 },
@@ -93,41 +93,6 @@ class _TranscriptView extends StatelessWidget {
             return const Center(child: const CircularProgressIndicator());
           }
         },
-      ),
-    );
-  }
-}
-
-/// Displays a single result (chunk of speech) in a transcript.
-class _TranscriptResult extends StatelessWidget {
-  final Duration startTime;
-  final String resultText;
-
-  const _TranscriptResult({
-    @required this.startTime,
-    @required this.resultText,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: themeConstants.padding_large,
-        vertical: themeConstants.padding_small,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            formatter.formatDuration(startTime),
-            style: Theme.of(context).textTheme.bodyText1,
-          ),
-          const SizedBox(height: themeConstants.padding_tiny),
-          Text(
-            resultText,
-            style: Theme.of(context).textTheme.bodyText2,
-          ),
-        ],
       ),
     );
   }

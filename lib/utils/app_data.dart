@@ -8,6 +8,7 @@ const _recordings_dir_name = 'recordings';
 const _metadata_dir_name = 'metadata';
 const _models_dir_name = 'models';
 const _transcriptions_dir_name = 'transcriptions';
+const String _temp_dir_name = '.temp';
 
 /// Provides easy access to application data directories.
 ///
@@ -33,20 +34,37 @@ class AppData {
     return _transcriptionsDirectory;
   }
 
+  Directory get tempDirectory {
+    _tempDirectory.createSync();
+    return _tempDirectory;
+  }
+
   final Directory _recordingsDirectory;
   final Directory _metadataDirectory;
   final Directory _modelsDirectory;
   final Directory _transcriptionsDirectory;
+  final Directory _tempDirectory;
 
   const AppData({
     @required Directory recordingsDirectory,
     @required Directory metadataDirectory,
     @required Directory modelsDirectory,
     @required Directory transcriptionsDirectory,
+    @required Directory tempDirectory,
   })  : _recordingsDirectory = recordingsDirectory,
         _metadataDirectory = metadataDirectory,
         _modelsDirectory = modelsDirectory,
-        _transcriptionsDirectory = transcriptionsDirectory;
+        _transcriptionsDirectory = transcriptionsDirectory,
+        _tempDirectory = tempDirectory;
+
+  String generateTranscriptPath(String name) {
+    return path.join(transcriptionsDirectory.path, '$name.transcript');
+  }
+
+  String generateTempPath() {
+    String randomName = DateTime.now().toString();
+    return path.join(tempDirectory.path, '$randomName.temp');
+  }
 }
 
 /// Returns the directory in which recordings are stored.
@@ -75,6 +93,10 @@ Future<Directory> modelsDirectory() async {
 /// The directory returned may not exist.
 Future<Directory> transcriptionDirectory() async {
   return _dataDirectory(_transcriptions_dir_name);
+}
+
+Future<Directory> tempDirectory() {
+  return _dataDirectory(_temp_dir_name);
 }
 
 /// Returns the data directory with the given name.
