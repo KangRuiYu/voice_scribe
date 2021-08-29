@@ -40,8 +40,13 @@ Future<void> runVoiceScribe() async {
   streamTranscriber.initialize();
 
   AppLifeCycleObserver(onDetached: () async {
-    await streamTranscriber.terminate();
+    await Future.wait([
+      appData.tempDirectory.delete(recursive: true),
+      streamTranscriber.terminate(),
+    ]);
   }).startObserving();
+
+  await appData.tempDirectory.delete(recursive: true);
 
   runApp(
     MultiProvider(
