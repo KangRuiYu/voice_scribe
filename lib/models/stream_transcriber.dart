@@ -22,7 +22,13 @@ class StreamTranscriber with FutureInitializer<StreamTranscriber> {
   bool get active => _transcript.path.isNotEmpty;
 
   /// Stream of [TranscriptEvents] from the ongoing transcription.
-  Stream<TranscriptEvent> get eventStream => _voskInstance.eventStream;
+  ///
+  /// Will only show events where the transcript path of the event matches that
+  /// of [_transcript]'s path to prevent events from previous instances from
+  /// leaking over.
+  Stream<TranscriptEvent> get eventStream => _voskInstance.eventStream.where(
+        (TranscriptEvent event) => event.transcriptPath == _transcript.path,
+      );
 
   /// Internal Vosk instance that does the heavy work.
   final VoskInstance _voskInstance = VoskInstance();
