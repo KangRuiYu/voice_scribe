@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:logger/logger.dart' as logger;
 import 'package:path/path.dart' as path;
 import 'package:permission_handler/permission_handler.dart';
 
@@ -11,8 +12,9 @@ import 'recording.dart';
 import 'wav_writer.dart';
 
 class Recorder extends ChangeNotifier {
-  /// The directory where recordings will be outputted to.
-  FlutterSoundRecorder _recorder = FlutterSoundRecorder();
+  FlutterSoundRecorder _recorder = FlutterSoundRecorder(
+    logLevel: logger.Level.info,
+  );
   StreamSubscription<RecordingDisposition> _internalSub;
   StreamController<FoodData> _audioData;
   WavWriter _wavWriter;
