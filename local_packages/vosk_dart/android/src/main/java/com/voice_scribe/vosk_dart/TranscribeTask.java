@@ -62,6 +62,7 @@ abstract class TranscribeTask implements Runnable {
         event.put("resultType", resultType);
         event.put("dataType", dataType);
         event.put("progress", progress);
+        event.put("transcriptPath", transcriptWriter.getTranscriptPath());
         event.put("timestamp", getResultTimestamp(result));
         event.put("text", text);
 

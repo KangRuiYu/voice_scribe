@@ -23,6 +23,9 @@ class TranscriptEvent {
   /// Typically, buffer events will always have a progress of 1.0.
   final double progress;
 
+  /// The transcript that is associated with this event.
+  final String transcriptPath;
+
   /// The timestamp of this event.
   ///
   /// Partial results do not yet support timestamps and will instead have a
@@ -36,6 +39,7 @@ class TranscriptEvent {
       : resultType = ResultType.values[event['resultType']],
         dataType = DataType.values[event['dataType']],
         progress = event['progress'],
+        transcriptPath = event['transcriptPath'],
         timestamp = Duration(milliseconds: (event['timestamp'] * 1000).toInt()),
         text = event['text'];
 
@@ -43,6 +47,7 @@ class TranscriptEvent {
       : resultType = ResultType.empty,
         dataType = DataType.none,
         progress = 0,
+        transcriptPath = '',
         timestamp = Duration.zero,
         text = '';
 
@@ -53,6 +58,7 @@ class TranscriptEvent {
       'resultType': $resultType,
       'dataType': $dataType,
       'progress': $progress,
+      'transcriptPath': $transcriptPath,
       'timestamp': $timestamp,
       'text': $text,
     }

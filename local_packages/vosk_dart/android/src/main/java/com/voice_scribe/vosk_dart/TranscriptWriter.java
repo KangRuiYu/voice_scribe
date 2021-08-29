@@ -10,6 +10,8 @@ import org.json.JSONObject;
 
 // Abstracts the parsing and writing of transcription results to a single file.
 class TranscriptWriter {
+    private final String transcriptPath;
+
     private final PrintWriter output;
 
     private boolean writtenFirstResult = false; // Used to treat first results in a special manner.
@@ -20,12 +22,17 @@ class TranscriptWriter {
     public TranscriptWriter(
             String transcriptPath, String encoding
     ) throws FileNotFoundException, UnsupportedEncodingException {
+        this.transcriptPath = transcriptPath;
         this.output = new PrintWriter(transcriptPath, encoding);
     }
 
     // Closes the writer.
     public void close() {
         output.close();
+    }
+
+    public String getTranscriptPath() {
+        return transcriptPath;
     }
 
     // Writes the given result to the transcript.
