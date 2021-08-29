@@ -34,8 +34,6 @@ dependencies:
   permission_handler: ^8.1.4+2
   intl: ^0.17.0
   flutter_launcher_icons: ^0.9.1
-  deep_speech_dart:
-    path: local_packages/deep_speech_dart
   tuple: ^2.0.0
   vosk_dart:
     path: local_packages/vosk_dart
