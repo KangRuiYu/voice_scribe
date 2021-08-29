@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 /// Provides a collection of constants for the user interface.
 /// Is intended to be used with the alias 'themeConstants'.
 
