@@ -36,7 +36,7 @@ class TranscriptEvent {
       : resultType = ResultType.values[event['resultType']],
         dataType = DataType.values[event['dataType']],
         progress = event['progress'],
-        timestamp = Duration(milliseconds: event['timestamp'].toInt()),
+        timestamp = Duration(milliseconds: (event['timestamp'] * 1000).toInt()),
         text = event['text'];
 
   const TranscriptEvent.empty()
