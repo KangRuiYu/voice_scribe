@@ -5,24 +5,20 @@ import '../../utils/theme_constants.dart' as themeConstants;
 
 /// Widget displaying contents of a single transcription result.
 class TranscriptResult extends StatelessWidget {
-  final String timestamp;
+  final Duration timestamp;
   final String resultText;
 
-  /// Construct result given strings.
   const TranscriptResult({
-    @required this.timestamp,
-    @required this.resultText,
+    this.timestamp = const Duration(seconds: -1),
+    this.resultText = '',
   });
-
-  /// Construct result but with the timestamp generated using given [Duration].
-  TranscriptResult.duration({
-    @required Duration timestampDuration,
-    @required this.resultText,
-  }) : timestamp = formatter.formatDuration(timestampDuration);
 
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
+
+    final String formattedTimestamp =
+        timestamp.isNegative ? '--:--' : formatter.formatDuration(timestamp);
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -32,7 +28,7 @@ class TranscriptResult extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(timestamp, style: textTheme.bodyText1),
+          Text(formattedTimestamp, style: textTheme.bodyText1),
           const SizedBox(height: themeConstants.padding_tiny),
           Text(resultText, style: textTheme.bodyText2),
         ],

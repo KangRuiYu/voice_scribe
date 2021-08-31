@@ -82,8 +82,8 @@ class _TranscriptView extends StatelessWidget {
               child: ListView.builder(
                 itemCount: transcriptMap.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return TranscriptResult.duration(
-                    timestampDuration: transcriptMap.keys.elementAt(index),
+                  return TranscriptResult(
+                    timestamp: transcriptMap.keys.elementAt(index),
                     resultText: transcriptMap.values.elementAt(index),
                   );
                 },

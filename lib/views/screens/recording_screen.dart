@@ -120,7 +120,7 @@ class _ContentView extends StatelessWidget {
     return Consumer<Recorder>(
       builder: (BuildContext context, Recorder recorder, Widget _) {
         if (recorder.recording) {
-          return const _TranscriptResultList();
+          return _TranscriptResultList();
         } else if (recorder.paused) {
           return Expanded(
             child: Padding(
@@ -145,53 +145,83 @@ class _ContentView extends StatelessWidget {
 
 /// Displays a list of the current transcript results.
 class _TranscriptResultList extends StatelessWidget {
-  const _TranscriptResultList();
+  final ScrollController _scrollController = ScrollController();
+
+  /// True if list can't scroll or at the bottom edge of the list.
+  bool _atBottomEdge() {
+    if (!_scrollController.position.hasContentDimensions ||
+        !_scrollController.position.hasPixels) {
+      return true;
+    }
+
+    return _scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent;
+  }
+
+  /// Scrolls the list to the very bottom once build finishes.
+  void _scrollToBottom() {
+    if (!_scrollController.hasClients) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (Duration timeStamp) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.ease,
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Selector(
         shouldRebuild: (previous, next) => previous.item1 != next.item1,
-        selector: (BuildContext ctx, TranscriptEventProvider t) => Tuple2(
-          t.resultCount,
-          t.resultEvents,
-        ),
+        selector: (BuildContext ctx, TranscriptEventProvider t) =>
+            Tuple2(t.resultCount, t.resultEvents),
         builder: (
           BuildContext context,
           Tuple2<int, UnmodifiableListView<TranscriptEvent>> data,
           Widget _,
         ) {
-          UnmodifiableListView<TranscriptEvent> resultEvents = data.item2;
+          final UnmodifiableListView<TranscriptEvent> resultEvents = data.item2;
+
           return ListView.builder(
+            controller: _scrollController,
             itemCount: resultEvents.length + 1,
             itemBuilder: (BuildContext context, int index) {
               if (index < resultEvents.length) {
                 TranscriptEvent event = resultEvents[index];
-                return TranscriptResult.duration(
-                  timestampDuration: event.timestamp,
+                return TranscriptResult(
+                  timestamp: event.timestamp,
                   resultText: event.text,
                 );
               } else {
-                return _PartialResult();
+                return Selector(
+                  selector: (BuildContext ctx, TranscriptEventProvider t) {
+                    return t.partialEvent;
+                  },
+                  builder: (
+                    BuildContext ctx,
+                    TranscriptEvent event,
+                    Widget _,
+                  ) {
+                    // Scroll to bottom at every partial update.
+                    if (_atBottomEdge()) {
+                      _scrollToBottom();
+                    }
+
+                    return TranscriptResult(resultText: event.text);
+                  },
+                );
               }
             },
           );
         },
       ),
-    );
-  }
-}
-
-/// A [TranscriptResult] that displays current partial result.
-class _PartialResult extends StatelessWidget {
-  const _PartialResult();
-
-  @override
-  Widget build(BuildContext context) {
-    return TranscriptResult(
-      timestamp: '--:--',
-      resultText:
-          context.select((TranscriptEventProvider t) => t.partialEvent).text,
     );
   }
 }
