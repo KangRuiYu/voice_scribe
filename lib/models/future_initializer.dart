@@ -60,8 +60,9 @@ mixin FutureInitializer<T> {
   /// Should not be called directly.
   /// It is recommended that subclasses mark implementations of [onInitialize]
   /// as @protected.
+  /// Does not need to be implemented.
   @protected
-  Future<void> onTerminate();
+  Future<void> onTerminate() => Future.value(null);
 }
 
 /// Thrown when [FutureInitializer] has not been initialized prior to
