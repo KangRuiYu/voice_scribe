@@ -54,10 +54,10 @@ class AppResources with FutureInitializer<AppResources> {
 
   @override
   @protected
-  Future<AppResources> onInitialize(Map<String, dynamic> args) async {
-    recordingsManager.load();
+  Future<AppResources> onInitialize(Map<String, dynamic> args) {
+    recordingsManager.initialize();
     streamTranscriber.initialize();
-    return this;
+    return Future.value(this);
   }
 
   @override

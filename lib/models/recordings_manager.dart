@@ -5,12 +5,14 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
+import 'future_initializer.dart';
 import '../utils/file_dir_generator.dart' as fileDirGenerator;
 import '../utils/file_extensions.dart' as fileExtensions;
 import 'recording.dart';
 
 /// Manages and provides access to a list of known recordings.
-class RecordingsManager extends ChangeNotifier {
+class RecordingsManager extends ChangeNotifier
+    with FutureInitializer<RecordingsManager> {
   /// The directory that stores all the recording source folders.
   final Directory recordingsDirectory;
 
@@ -21,10 +23,6 @@ class RecordingsManager extends ChangeNotifier {
   UnmodifiableListView<Recording> get recordings =>
       UnmodifiableListView(_recordings);
   final List<Recording> _recordings = [];
-
-  /// If this has finished loading all known recordings.
-  bool get finishedLoading => _finishedLoading;
-  bool _finishedLoading = false;
 
   // Sorting functions.
   static int byName(Recording a, Recording b) => a.name.compareTo(b.name);
@@ -46,12 +44,11 @@ class RecordingsManager extends ChangeNotifier {
     @required this.importsDirectory,
   });
 
-  /// Load is called on construction.
-  RecordingsManager.autoLoad({
-    @required this.recordingsDirectory,
-    @required this.importsDirectory,
-  }) {
-    load();
+  @override
+  @protected
+  Future<RecordingsManager> onInitialize([Map<String, dynamic> args]) async {
+    await load();
+    return this;
   }
 
   /// Load known recordings.
@@ -70,8 +67,6 @@ class RecordingsManager extends ChangeNotifier {
         _recordings.add(await Recording.existing(recordingSourceDir));
       }
     }
-
-    _finishedLoading = true;
 
     sort(); // NotifyListeners is called here.
   }

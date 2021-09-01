@@ -19,6 +19,8 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    RecordingsManager recordingsManager = context.watch<RecordingsManager>();
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -42,10 +44,19 @@ class MainScreen extends StatelessWidget {
             onPressed: () => null,
           ),
         ),
-        body: Provider.of<RecordingsManager>(context, listen: true)
-                .finishedLoading
-            ? RecordingsDisplay()
-            : Center(child: const CircularProgressIndicator()),
+        body: FutureBuilder(
+          future: recordingsManager.initialize(),
+          builder: (
+            BuildContext _,
+            AsyncSnapshot<RecordingsManager> snapshot,
+          ) {
+            if (snapshot.hasData && !snapshot.hasError) {
+              return RecordingsDisplay();
+            } else {
+              return const Center(child: const CircularProgressIndicator());
+            }
+          },
+        ),
       ),
     );
   }
