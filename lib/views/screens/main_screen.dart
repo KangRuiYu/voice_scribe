@@ -10,7 +10,7 @@ import '../widgets/recordings_display.dart';
 
 /// The starting screen of the application.
 class MainScreen extends StatelessWidget {
-  void showRecordingScreen(BuildContext context) {
+  void _showRecordingScreen(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (BuildContext context) => RecordingScreen()),
@@ -34,7 +34,7 @@ class MainScreen extends StatelessWidget {
         ),
         floatingActionButton: CircularIconButton(
           iconData: Icons.fiber_manual_record_rounded,
-          onPressed: () => showRecordingScreen(context),
+          onPressed: () => _showRecordingScreen(context),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         bottomNavigationBar: ThemedBottomAppBar(
