@@ -16,7 +16,7 @@ mixin FutureInitializer<T> {
   /// Is idempotent, ie. subsequent calls after the first call will have no
   /// effect, and will just return the previous result.
   /// Should not override this method.
-  Future<T> initialize([Map<String, dynamic> args = const {}]) async {
+  Future<T> initialize([Map<String, dynamic> args = const {}]) {
     if (_initializeFuture != null) return _initializeFuture;
     _initializeFuture = onInitialize(args);
     return _initializeFuture;
