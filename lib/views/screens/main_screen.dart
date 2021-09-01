@@ -13,14 +13,7 @@ class MainScreen extends StatelessWidget {
   void showRecordingScreen(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return ChangeNotifierProvider.value(
-            value: Provider.of<RecordingsManager>(context, listen: false),
-            child: RecordingScreen(),
-          );
-        },
-      ),
+      MaterialPageRoute(builder: (BuildContext context) => RecordingScreen()),
     );
   }
 

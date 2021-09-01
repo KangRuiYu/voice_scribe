@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/public/flutter_sound_recorder.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 import 'package:vosk_dart/transcript_event.dart';
 import 'package:tuple/tuple.dart';
 
@@ -12,7 +13,9 @@ import '../../models/recording.dart';
 import '../../models/recordings_manager.dart';
 import '../../models/stream_transcriber.dart';
 import '../../models/transcript_event_provider.dart';
-import '../../utils/app_data.dart';
+import '../../utils/app_dir.dart';
+import '../../utils/file_dir_generator.dart' as fileDirGenerator;
+import '../../utils/file_extensions.dart' as fileExtensions;
 import '../../utils/formatter.dart' as formatter;
 import '../../utils/theme_constants.dart' as themeConstants;
 import '../widgets/custom_widgets.dart';
@@ -24,27 +27,50 @@ class RecordingScreen extends StatelessWidget {
       TranscriptEventProvider();
   final TextEditingController nameController = TextEditingController();
 
+  /// Initialize both [recorder], [StreamTranscriber] and
+  /// [transcriptEventProvider] for use.
   Future<void> _init({
-    @required AppData appdata,
+    @required AppDirs appDirs,
     @required StreamTranscriber streamTranscriber,
   }) async {
     if (recorder.active) return;
+
+    Uuid uuid = Uuid();
+    File tempRecordingFile = fileDirGenerator.fileIn(
+      parentDirectory: appDirs.tempDirectory,
+      name: uuid.v1(),
+      extension: fileExtensions.temp,
+    );
+    File tempTranscriptFile = fileDirGenerator.fileIn(
+      parentDirectory: appDirs.tempDirectory,
+      name: uuid.v1(),
+      extension: fileExtensions.temp,
+    );
+
     await recorder.initialize();
-    await recorder.startRecording(appdata.recordingsDirectory);
+    await recorder.startRecording(tempRecordingFile.path);
 
     await streamTranscriber.initialize();
     await streamTranscriber.start(
       audioStream: recorder.audioStream,
-      tempLocation: appdata.generateTempPath(),
+      tempLocation: tempTranscriptFile.path,
     );
     await transcriptEventProvider.initialize({
       'eventStream': streamTranscriber.eventStream,
     });
   }
 
+  // Generates a unique name based on the current time (down to the second) used
+  // for recordings without a defined name.
+  String _generateTimeString() {
+    DateTime date = DateTime.now();
+    return '${date.month}-${date.day}-${date.year}' +
+        '-${date.hour}-${date.minute}-${date.second}';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final AppData appdata = context.watch<AppData>();
+    final AppDirs appDirs = context.watch<AppDirs>();
 
     final StreamTranscriber streamTranscriber =
         context.watch<StreamTranscriber>();
@@ -59,22 +85,41 @@ class RecordingScreen extends StatelessWidget {
 
     // Dynamically created save function.
     final Future<void> Function() onSave = () async {
-      Recording recording = await recorder.stopRecording(nameController.text);
+      // Get/Create source directory.
+      Directory recordingSourceDir = fileDirGenerator.directoryIn(
+        parentDirectory: appDirs.recordingsDirectory,
+        name: nameController.text.isNotEmpty
+            ? nameController.text
+            : _generateTimeString(),
+      );
+      await recordingSourceDir.create();
+
+      // Create recording.
+      Recording recording = Recording(sourceDirectory: recordingSourceDir);
+
+      // Save duration and audio file.
+      recording.duration = await recorder.stopRecording(
+        recording.audioFile.path,
+      );
       await recorder.close();
 
-      File transcript = await streamTranscriber.finish(
-        appdata.generateTranscriptPath(recording.name),
+      // Save transcript file.
+      await streamTranscriber.finish(
+        recording.transcriptFile.path,
       );
-      recording.transcriptionFile = transcript;
+
+      // Write metadata.
+      recording.writeMetadata();
 
       context.read<RecordingsManager>().add(recording);
+
       Navigator.pop(context);
     };
 
     return WillPopScope(
       onWillPop: onExit,
       child: FutureBuilder(
-        future: _init(appdata: appdata, streamTranscriber: streamTranscriber),
+        future: _init(appDirs: appDirs, streamTranscriber: streamTranscriber),
         builder: (BuildContext _, AsyncSnapshot snapshot) {
           Widget body;
 

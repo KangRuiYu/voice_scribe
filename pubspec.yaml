@@ -35,6 +35,7 @@ dependencies:
   intl: ^0.17.0
   flutter_launcher_icons: ^0.9.1
   tuple: ^2.0.0
+  uuid: ^3.0.4
   vosk_dart:
     path: local_packages/vosk_dart
 

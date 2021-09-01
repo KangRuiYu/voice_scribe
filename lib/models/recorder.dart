@@ -4,11 +4,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:logger/logger.dart' as logger;
-import 'package:path/path.dart' as path;
 import 'package:permission_handler/permission_handler.dart';
 
 import '../exceptions/recorder_exceptions.dart';
-import 'recording.dart';
 import 'wav_writer.dart';
 
 class Recorder extends ChangeNotifier {
@@ -50,7 +48,7 @@ class Recorder extends ChangeNotifier {
     await _recorder.closeAudioSession();
   }
 
-  Future<void> startRecording(Directory recordingsDirectory) async {
+  Future<void> startRecording(String tempLocation) async {
     // Starts the recording process
     if (!opened) {
       throw RecorderNotInitializedException(
@@ -61,8 +59,7 @@ class Recorder extends ChangeNotifier {
 
     // Create new recording file
     _wavWriter = WavWriter(
-      directoryPath: recordingsDirectory.path,
-      fileName: _generateName(),
+      outputPath: tempLocation,
       audioStream: _audioData.stream,
     );
 
@@ -78,7 +75,7 @@ class Recorder extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<Recording> stopRecording([String recordingName]) async {
+  Future<Duration> stopRecording(String saveLocation) async {
     // Stops the recording process and returns the resulting file as a Recording
     if (!opened)
       throw RecorderNotInitializedException(
@@ -89,23 +86,13 @@ class Recorder extends ChangeNotifier {
     await _recorder.stopRecorder();
 
     // Close and finalize output file
-    File finalFile = await _wavWriter.close();
-
-    // Rename file if a recording name is given
-    if (recordingName.isNotEmpty) {
-      String newPath = path.join(finalFile.parent.path, '$recordingName.wav');
-      finalFile = finalFile.renameSync(newPath);
-    }
-
-    Recording recording = Recording(
-      audioFile: finalFile,
-      duration: currentProgress.duration,
-    );
+    File audioFile = await _wavWriter.close();
+    await audioFile.rename(saveLocation);
     _wavWriter = null;
 
     notifyListeners();
 
-    return recording;
+    return currentProgress.duration;
   }
 
   Future<void> terminate() async {
@@ -169,11 +156,5 @@ class Recorder extends ChangeNotifier {
     // Returns True if microphone permissions have been granted
     var status = await Permission.microphone.status;
     return status == PermissionStatus.granted;
-  }
-
-  String _generateName() {
-    // Generates a unique name based on the current time (down to the second)
-    DateTime date = DateTime.now();
-    return '${date.month}-${date.day}-${date.year}-${date.hour}-${date.minute}-${date.second}';
   }
 }

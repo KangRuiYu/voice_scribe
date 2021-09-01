@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:path/path.dart' as path;
 
 // Handles the writing of a wav file
 class WavWriter {
@@ -17,11 +16,10 @@ class WavWriter {
   bool _addedHeader = false;
 
   WavWriter({
-    String directoryPath,
-    String fileName,
+    String outputPath,
     Stream<FoodData> audioStream,
   }) {
-    _outputFile = File(path.join(directoryPath, '$fileName.wav'));
+    _outputFile = File(outputPath);
     _outputFileSink = _outputFile.openWrite();
 
     _audioSubscription = audioStream.listen(

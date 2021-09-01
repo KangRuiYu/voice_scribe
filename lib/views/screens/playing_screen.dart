@@ -41,7 +41,7 @@ class PlayingScreen extends StatelessWidget {
                   value: snapshot.data,
                   child: Column(
                     children: [
-                      recording.transcriptionExists
+                      recording.transcriptFile.existsSync()
                           ? _TranscriptView(recording: recording)
                           : const _NoTranscriptIndicator(),
                       const _ControlPanel(),
@@ -71,7 +71,7 @@ class _TranscriptView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: FutureBuilder(
-        future: transcriptReader.read(recording.transcriptionFile),
+        future: transcriptReader.read(recording.transcriptFile),
         builder: (
           BuildContext context,
           AsyncSnapshot<Map<Duration, String>> snapshot,

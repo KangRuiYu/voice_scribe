@@ -199,7 +199,7 @@ class Player extends ChangeNotifier {
     return Track(
       trackTitle: recording.name,
       trackAuthor: 'Unknown author',
-      trackPath: recording.audioPath,
+      trackPath: recording.audioFile.path,
       codec: Codec.pcm16,
     );
   }

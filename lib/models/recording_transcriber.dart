@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as path;
 import 'package:vosk_dart/transcript_event.dart';
 import 'package:vosk_dart/vosk_dart.dart';
 
@@ -25,19 +23,9 @@ class RecordingTranscriber extends ChangeNotifier {
   /// Transcription progress for the current recording.
   Stream<TranscriptEvent> get progressStream => _voskInstance.eventStream;
 
-  /// The output directory for transcriptions.
-  final Directory transcriptionDirectory;
-
   // Current recording being transcribed.
   Recording get currentRecording => _currentRecording;
   Recording _currentRecording;
-
-  /// Current transcription file being written to.
-  File get currentTranscriptionFile => _currentTranscriptionFile;
-  File _currentTranscriptionFile;
-
-  /// Functions called when a recording has finished transcribing.
-  final void Function(Recording) onDone;
 
   /// Vosk instance that does the transcribing.
   final VoskInstance _voskInstance = VoskInstance();
@@ -51,10 +39,7 @@ class RecordingTranscriber extends ChangeNotifier {
   /// state can be updated.
   StreamSubscription<dynamic> _progressSub;
 
-  RecordingTranscriber({
-    @required this.transcriptionDirectory,
-    onDone,
-  }) : this.onDone = (onDone ?? (_) => null) {
+  RecordingTranscriber() {
     _progressSub = _voskInstance.eventStream.listen(_onProgress);
   }
 
@@ -91,7 +76,7 @@ class RecordingTranscriber extends ChangeNotifier {
       await _voskInstance.terminateThread();
       await _readyResources();
       await _voskInstance.terminateTranscript();
-      await _currentTranscriptionFile.delete();
+      await _currentRecording.transcriptFile.delete();
       _transcribeNext();
     } else {
       _queue.remove(recording);
@@ -121,17 +106,19 @@ class RecordingTranscriber extends ChangeNotifier {
   Future<void> _transcribeNext() async {
     if (_queue.isEmpty) {
       _currentRecording = null;
-      _currentTranscriptionFile = null;
       return;
     }
 
     _currentRecording = _queue.removeFirst();
-    _currentTranscriptionFile = _transcriptionFile(_currentRecording.name);
 
     await _readyResources();
 
-    await _voskInstance.startNewTranscript(_currentTranscriptionFile.path);
-    await _voskInstance.feedFile(_currentRecording.audioPath);
+    print(_currentRecording);
+
+    await _voskInstance.startNewTranscript(
+      _currentRecording.transcriptFile.path,
+    );
+    await _voskInstance.feedFile(_currentRecording.audioFile.path);
   }
 
   /// Allocates any resources if needed, such as threads or models.
@@ -157,20 +144,8 @@ class RecordingTranscriber extends ChangeNotifier {
   void _onProgress(TranscriptEvent event) async {
     if (event.progress == 1.0) {
       await _voskInstance.finishTranscript(post: false);
-      _currentRecording.transcriptionPath = _currentTranscriptionFile.path;
-
-      onDone(_currentRecording);
-
       await _transcribeNext();
-
       notifyListeners();
     }
-  }
-
-  /// Returns a File containing the path to the transcription with the given name.
-  ///
-  /// The file may not exist.
-  File _transcriptionFile(String name) {
-    return File(path.join(transcriptionDirectory.path, '$name.transcription'));
   }
 }

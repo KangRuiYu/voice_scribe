@@ -5,15 +5,17 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
+import '../utils/file_dir_generator.dart' as fileDirGenerator;
+import '../utils/file_extensions.dart' as fileExtensions;
 import 'recording.dart';
 
-/// Manages and provides access to the list of known recordings.
+/// Manages and provides access to a list of known recordings.
 class RecordingsManager extends ChangeNotifier {
-  /// The directory that stores all the recording files.
+  /// The directory that stores all the recording source folders.
   final Directory recordingsDirectory;
 
-  /// The directory that stores all the metadata files.
-  final Directory metadataDirectory;
+  /// The directory that stores all the import files.
+  final Directory importsDirectory;
 
   /// The internal recordings list.
   UnmodifiableListView<Recording> get recordings =>
@@ -41,13 +43,13 @@ class RecordingsManager extends ChangeNotifier {
   /// Default constructor.
   RecordingsManager({
     @required this.recordingsDirectory,
-    @required this.metadataDirectory,
+    @required this.importsDirectory,
   });
 
   /// Load is called on construction.
   RecordingsManager.autoLoad({
     @required this.recordingsDirectory,
-    @required this.metadataDirectory,
+    @required this.importsDirectory,
   }) {
     load();
   }
@@ -58,11 +60,14 @@ class RecordingsManager extends ChangeNotifier {
   Future<void> load() async {
     _recordings.clear();
 
-    await for (FileSystemEntity entity in metadataDirectory.list()) {
-      if (entity is File && path.extension(entity.path) == '.metadata') {
-        Map<String, dynamic> metadata = jsonDecode(await entity.readAsString());
-        Recording recording = Recording.fromJson(metadata);
-        _recordings.add(recording);
+    await for (FileSystemEntity entity in importsDirectory.list()) {
+      if (entity is File &&
+          path.extension(entity.path) == fileExtensions.import) {
+        Directory recordingSourceDir = Directory(
+          await entity.readAsString(encoding: utf8),
+        );
+
+        _recordings.add(await Recording.existing(recordingSourceDir));
       }
     }
 
@@ -73,37 +78,29 @@ class RecordingsManager extends ChangeNotifier {
 
   /// Adds new [recording] to the list of known recordings.
   ///
-  /// Creates a new metadata file for it.
+  /// Creates a new import file for it.
   Future<void> add(Recording recording) async {
     _recordings.add(recording);
-    await saveMetadata(recording);
+    await _createImportFile(recording);
     notifyListeners();
   }
 
   /// Removes [recording] from the list of known recordings.
   ///
-  /// Removes the metadata file for it.
+  /// Removes the import file for it.
   /// Optionally removes source files for it as well (audio and transcription).
   Future<void> remove(Recording recording, {bool deleteSource}) async {
     _recordings.remove(recording);
 
-    List<Future> futureList = [];
+    List<Future> deletionFuture = [];
 
-    // Remove metadata file
-    File metadataFile = _metadataFile(recording.name);
-    futureList.add(metadataFile.delete());
+    // Remove import file.
+    deletionFuture.add(_importFile(recording).delete());
 
-    // Remove source files
-    if (deleteSource) {
-      if (recording.audioExists) {
-        futureList.add(recording.deleteAudio());
-      }
-      if (recording.transcriptionExists) {
-        futureList.add(recording.deleteTranscription());
-      }
+    // Remove source files.
+    if (deleteSource && await recording.sourceDirectory.exists()) {
+      await recording.sourceDirectory.delete(recursive: true);
     }
-
-    await Future.wait(futureList);
 
     notifyListeners();
   }
@@ -135,18 +132,24 @@ class RecordingsManager extends ChangeNotifier {
   /// Returns the recordings that are not currently loaded.
   ///
   /// Will not work properly if [load] is not called beforehand.
-  Future<List<File>> unknownRecordingFiles() async {
-    Set<String> recordingNames = {};
+  Future<List<Recording>> unknownRecordingFiles() async {
+    Set<Directory> knownSourceDirectories = {};
     for (Recording recording in _recordings) {
-      recordingNames.add(recording.name);
+      knownSourceDirectories.add(recording.sourceDirectory);
     }
 
-    List<File> result = [];
+    List<Recording> result = [];
     await for (FileSystemEntity entity in recordingsDirectory.list()) {
-      if (entity is File && path.extension(entity.path) == '.wav') {
-        String recordingName = path.basenameWithoutExtension(entity.path);
-        if (!recordingNames.contains(recordingName)) {
-          result.add(entity);
+      if (entity is Directory && !knownSourceDirectories.contains(entity)) {
+        File metadataFile = fileDirGenerator.fileIn(
+          parentDirectory: entity,
+          name: path.basename(entity.path),
+          extension: fileExtensions.metadata,
+        );
+
+        if (await metadataFile.exists()) {
+          // Is a recording source directory.
+          result.add(await Recording.existing(entity));
         }
       }
     }
@@ -154,19 +157,19 @@ class RecordingsManager extends ChangeNotifier {
     return result;
   }
 
-  /// Creates a metadata file for the given recording.
+  /// Creates a import file for the given [recording].
   ///
-  /// If the file already exists, it is overwritten.
-  Future<void> saveMetadata(Recording recording) async {
-    File metadata = _metadataFile(recording.name);
-    await metadata.writeAsString(jsonEncode(recording.toJson()));
+  /// If the import file already exists, it is overwritten.
+  Future<void> _createImportFile(Recording recording) async {
+    await _importFile(recording).writeAsString(recording.sourceDirectory.path);
   }
 
-  /// Returns the File containing the path to the metadata file with the given
-  /// name.
-  ///
-  /// The file may not exist.
-  File _metadataFile(String name) {
-    return File(path.join(metadataDirectory.path, '$name.metadata'));
+  /// Returns the import file associated with the given [recording].
+  File _importFile(Recording recording) {
+    return fileDirGenerator.fileIn(
+      parentDirectory: importsDirectory,
+      name: recording.id,
+      extension: fileExtensions.import,
+    );
   }
 }

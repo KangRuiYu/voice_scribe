@@ -1,9 +1,6 @@
 import 'dart:collection';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_sound/flutter_sound.dart';
-import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/recording.dart';
@@ -12,33 +9,33 @@ import '../../utils/formatter.dart';
 import '../../utils/theme_constants.dart' as themeConstants;
 import '../widgets/custom_widgets.dart';
 
-/// Keeps track of selected files while notifying any listeners.
+/// Keeps track of selected recordings while notifying any listeners.
 class Selector extends ChangeNotifier {
-  /// Currently selected files.
-  UnmodifiableSetView<File> get selected => UnmodifiableSetView(_selected);
-  Set<File> _selected = {};
+  /// Currently selected recordings.
+  UnmodifiableSetView<Recording> get selected => UnmodifiableSetView(_selected);
+  Set<Recording> _selected = {};
 
-  /// Selects the given [file].
+  /// Selects the given [recording].
   ///
-  /// If the [file] is already selected, nothing happens.
+  /// If the [recording] is already selected, nothing happens.
   /// Notifies any listeners.
-  void select(File file) {
-    _selected.add(file);
+  void select(Recording recording) {
+    _selected.add(recording);
     notifyListeners();
   }
 
-  /// Deselects the give [file].
+  /// Deselects the give [recording].
   ///
-  /// If the [file] is not selected, nothing happens.
+  /// If the [recording] is not selected, nothing happens.
   /// Notifies any listeners.
-  void deselect(File file) {
-    _selected.remove(file);
+  void deselect(Recording recording) {
+    _selected.remove(recording);
     notifyListeners();
   }
 
-  /// Returns true if [file] is currently selected.
-  bool isSelected(File file) {
-    return _selected.contains(file);
+  /// Returns true if [recording] is currently selected.
+  bool isSelected(Recording recording) {
+    return _selected.contains(recording);
   }
 }
 
@@ -52,7 +49,10 @@ class ImportScreen extends StatelessWidget {
         future: context
             .select((RecordingsManager rm) => rm.unknownRecordingFiles)
             .call(),
-        builder: (BuildContext context, AsyncSnapshot<List<File>> snapshot) {
+        builder: (
+          BuildContext context,
+          AsyncSnapshot<List<Recording>> snapshot,
+        ) {
           if (snapshot.connectionState == ConnectionState.done &&
               !snapshot.hasError) {
             return MultiProvider(
@@ -68,7 +68,7 @@ class ImportScreen extends StatelessWidget {
                 bottomNavigationBar: const ThemedBottomAppBar(
                   rightChild: const _SelectOptionsButton(),
                 ),
-                body: const _FileList(),
+                body: const _RecordingList(),
               ),
             );
           } else {
@@ -82,7 +82,7 @@ class ImportScreen extends StatelessWidget {
   }
 }
 
-/// Label indicating the number of files currently selected.
+/// Label indicating the number of recordings currently selected.
 class _SelectedCountLabel extends StatelessWidget {
   const _SelectedCountLabel();
 
@@ -100,16 +100,16 @@ class _SelectedCountLabel extends StatelessWidget {
   }
 }
 
-/// Popup menu button that allows selection/deselection of all files.
+/// Popup menu button that allows selection/deselection of all recordings.
 class _SelectOptionsButton extends StatelessWidget {
   const _SelectOptionsButton();
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<List<File>, Selector>(
+    return Consumer2<List<Recording>, Selector>(
       builder: (
         BuildContext context,
-        List<File> files,
+        List<Recording> recordings,
         Selector selector,
         Widget _,
       ) {
@@ -120,13 +120,15 @@ class _SelectOptionsButton extends StatelessWidget {
           tooltip: 'More options',
           itemBuilder: (BuildContext context) => [
             PopupMenuItem(
-              value: () => files.forEach((File file) => selector.select(file)),
-              enabled: selector.selected.length < files.length,
+              value: () => recordings.forEach(
+                (Recording recording) => selector.select(recording),
+              ),
+              enabled: selector.selected.length < recordings.length,
               child: const Text('Select all'),
             ),
             PopupMenuItem(
-              value: () => files.forEach(
-                (File file) => selector.deselect(file),
+              value: () => recordings.forEach(
+                (Recording recording) => selector.deselect(recording),
               ),
               enabled: selector.selected.length != 0,
               child: const Text('Deselect all'),
@@ -138,7 +140,7 @@ class _SelectOptionsButton extends StatelessWidget {
   }
 }
 
-/// Button that imports selected files in [Selector] into [RecordingsManager].
+/// Button that imports selected recordings in [Selector] into [RecordingsManager].
 class _ImportButton extends StatelessWidget {
   const _ImportButton();
 
@@ -150,13 +152,8 @@ class _ImportButton extends StatelessWidget {
         Selector selector = context.read<Selector>();
         RecordingsManager recordingsManager = context.read<RecordingsManager>();
 
-        for (File file in selector.selected) {
-          await recordingsManager.add(
-            Recording(
-              audioFile: file,
-              duration: await FlutterSoundHelper().duration(file.path),
-            ),
-          );
+        for (Recording recording in selector.selected) {
+          await recordingsManager.add(recording);
         }
 
         Navigator.pop(context);
@@ -165,26 +162,25 @@ class _ImportButton extends StatelessWidget {
   }
 }
 
-/// Displays a list of files along side their selected state in [Selector].
-class _FileList extends StatelessWidget {
-  const _FileList();
+/// Displays a list of recordings along side their selected state in [Selector].
+class _RecordingList extends StatelessWidget {
+  const _RecordingList();
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<List<File>>(
+    return Consumer<List<Recording>>(
       builder: (
         BuildContext context,
-        List<File> files,
+        List<Recording> recordings,
         Widget _,
       ) {
         return ListView.builder(
-          itemCount: files.length > 0 ? files.length + 2 : 0,
+          itemCount: recordings.length > 0 ? recordings.length + 2 : 0,
           itemBuilder: (BuildContext context, int index) {
-            if (index >= files.length) {
+            if (index >= recordings.length) {
               return const SizedBox(height: themeConstants.padding_huge);
             } else {
-              File file = files[index];
-              return _FileListing(file);
+              return _RecordingListing(recordings[index]);
             }
           },
         );
@@ -193,13 +189,11 @@ class _FileList extends StatelessWidget {
   }
 }
 
-/// A listing of a [file] in a [_FileList].
-class _FileListing extends StatelessWidget {
-  final File file;
-  String get _name => basenameWithoutExtension(file.path);
-  String get _date => formatDate(file.lastAccessedSync());
+/// A listing of a [Recording] in a [_RecordingList].
+class _RecordingListing extends StatelessWidget {
+  final Recording recording;
 
-  const _FileListing(this.file);
+  const _RecordingListing(this.recording);
 
   @override
   Widget build(BuildContext context) {
@@ -219,14 +213,14 @@ class _FileListing extends StatelessWidget {
               left: themeConstants.padding_huge,
               right: themeConstants.padding_small,
             ),
-            title: Text(_name),
-            subtitle: Text(_date),
-            value: selector.isSelected(file),
+            title: Text(recording.name),
+            subtitle: Text(formatDate(recording.date)),
+            value: selector.isSelected(recording),
             onChanged: (bool selected) {
               if (selected) {
-                selector.select(file);
+                selector.select(recording);
               } else {
-                selector.deselect(file);
+                selector.deselect(recording);
               }
             },
           ),

@@ -1,17 +1,29 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as path_dart;
+import 'package:path/path.dart' as path;
+import 'package:uuid/uuid.dart';
 
-const _current_version = '0.2';
+import '../utils/file_dir_generator.dart' as fileDirGenerator;
+import '../utils/file_extensions.dart' as fileExtensions;
 
-/// Contains an audio file's metadata.
+const Uuid _uuid = Uuid();
+
+const _current_version = '0.3';
+
+/// Recording object representing a "Recording Source Folder" on disk.
+///
+/// A Recording consists of a folder that contains three files.
+/// (1) A .wav file, which contains the actual audio data.
+/// (2) A .transcript file, which contains the transcript information for the
+///     audio file.
+/// (3) A .meta file, which contains the metadata for the audio file such as its
+///     duration, date created, and version.
 class Recording {
-  /// The audio file itself.
-  File audioFile;
-
-  /// The transcription file itself.
-  File transcriptionFile;
+  /// The directory where all the source files are.
+  Directory sourceDirectory;
 
   /// The length of the recording. Could be inaccurate.
   Duration duration;
@@ -22,95 +34,110 @@ class Recording {
   /// The Recording model version this was originally created in.
   String version;
 
-  /// Name of the audio file.
-  String get name => path_dart.basenameWithoutExtension(audioPath);
+  /// A unique 128-bit id used to identify this recording.
+  String id;
 
-  /// The path to the audio file itself.
-  String get audioPath => audioFile.path;
-  set audioPath(String newPath) => audioFile = File(newPath);
+  /// Name of the recording (Corresponds to the name of the asset directory).
+  String get name => path.basenameWithoutExtension(sourceDirectory.path);
 
-  /// Path to the transcription file. May not exist.
-  String get transcriptionPath => transcriptionFile.path;
-  set transcriptionPath(String newPath) => transcriptionFile = File(newPath);
+  File get audioFile => fileDirGenerator.fileIn(
+        parentDirectory: sourceDirectory,
+        name: name,
+        extension: fileExtensions.audio,
+      );
 
-  /// Returns true if the audio for this exists.
-  bool get audioExists => audioFile.existsSync();
+  File get transcriptFile => fileDirGenerator.fileIn(
+        parentDirectory: sourceDirectory,
+        name: name,
+        extension: fileExtensions.transcript,
+      );
 
-  /// Returns true if the transcription for this exists.
-  bool get transcriptionExists => transcriptionFile.existsSync();
+  /// Location where the metadata (duration, date) of this recording is actually
+  /// stored.
+  File get metadataFile => fileDirGenerator.fileIn(
+        parentDirectory: sourceDirectory,
+        name: name,
+        extension: fileExtensions.metadata,
+      );
 
-  /// Creates a new recording using given files and info.
+  /// Creates a new recording using given info instead of reading from a metadata
+  /// file.
   ///
-  /// If no [transcriptionFile] is given, it defaults to a File pointing to an
-  /// empty path, signifying the absence of a transcription file.
-  /// The [date] of the recording is the this is constructed.
-  /// The [version] of the recording is the version on construction.
+  /// If no duration is given, defaults to [Duration.zero].
+  /// If no date is given, defaults to the result of calling [DateTime.now].
+  /// If no version is given, (generally should be left to defaults), then it
+  /// will default to the current constant.
+  /// If no id is given, (generally should be left to defaults), then it will
+  /// default to a newly generated uuid.
+  /// Creating a recording does not mean any of the assets actually exists.
   Recording({
-    @required File audioFile,
-    File transcriptionFile,
-    @required Duration duration,
-  })  : this.audioFile = audioFile,
-        this.transcriptionFile = transcriptionFile ?? File(''),
-        this.duration = duration,
-        this.date = DateTime.now(),
-        this.version = _current_version;
+    @required this.sourceDirectory,
+    this.duration = Duration.zero,
+    this.version = _current_version,
+    this.date,
+    this.id,
+  }) {
+    this.date ??= DateTime.now();
+    this.id ??= _uuid.v1();
+  }
 
-  /// Creates a new recording using given string paths and info.
+  /// Factory function that creates a recording pointing at the given
+  /// [sourceDirectory].
   ///
-  /// If no [transcriptionPath] is given, it defaults to an empty path,
-  /// signifying the absence of a transcription file.
-  /// The [date] of the recording is the time this is constructed.
-  /// The [version] of the recording is the version on construction.
-  Recording.path({
-    @required String audioPath,
-    String transcriptionPath = '',
-    @required Duration duration,
-  })  : this.audioFile = File(audioPath),
-        this.transcriptionFile = File(transcriptionPath),
-        this.duration = duration,
-        this.date = DateTime.now(),
-        this.version = _current_version;
+  /// Infers metadata information from the metadata file in [sourceDirectory].
+  /// If no metadata file exists, then a [MissingMetadataFile] exception is
+  /// thrown.
+  static Future<Recording> existing(Directory sourceDirectory) async {
+    File metadataFile = fileDirGenerator.fileIn(
+      parentDirectory: sourceDirectory,
+      name: path.basename(sourceDirectory.path),
+      extension: fileExtensions.metadata,
+    );
 
-  /// Creates a recording from a JSON map.
-  Recording.fromJson(Map<String, dynamic> json)
-      : audioFile = File(json['audioPath']),
-        transcriptionFile = File(json['transcriptionPath']),
-        duration = Duration(milliseconds: json['duration_in_milliseconds']),
-        date = DateTime(json['year'], json['month'], json['day']),
-        version = json['version'];
+    if (!(await metadataFile.exists())) throw MissingMetadataFile();
+    Map<String, dynamic> metadata = jsonDecode(
+      await metadataFile.readAsString(),
+    );
 
-  /// Creates a JSON map containing the recording information.
-  ///
-  /// Some information accuracy, like exact duration, may be lost.
-  Map<String, dynamic> toJson() => {
-        'audioPath': audioPath,
-        'transcriptionPath': transcriptionPath,
-        'duration_in_milliseconds': duration.inMilliseconds,
-        'day': date.day,
-        'month': date.month,
-        'year': date.year,
-        'version': version,
-      };
+    return Recording(
+      sourceDirectory: sourceDirectory,
+      duration: Duration(milliseconds: metadata['duration_in_milliseconds']),
+      date: DateTime(metadata['year'], metadata['month'], metadata['day']),
+      version: metadata['version'],
+      id: metadata['id'],
+    );
+  }
 
-  /// Deletes the audio file associated with this recording.
-  ///
-  /// If audio file could not be deleted (file does not exist), then a
-  /// [FileSystemException] is thrown.
-  Future<FileSystemEntity> deleteAudio() => audioFile.delete();
+  /// Writes/Overwrites a metadata file containing the current metadata
+  /// information into the [sourceDirectory].
+  Future<void> writeMetadata() async {
+    Map<String, dynamic> metadataContents = {
+      'duration_in_milliseconds': duration.inMilliseconds,
+      'day': date.day,
+      'month': date.month,
+      'year': date.year,
+      'version': version,
+      'id': id,
+    };
 
-  /// Deletes the transcription file associated with this recording.
-  ///
-  /// If transcription file could not be deleted (file does not exist), then a
-  /// [FileSystemException] is thrown.
-  Future<FileSystemEntity> deleteTranscription() => transcriptionFile.delete();
+    await metadataFile.writeAsString(jsonEncode(metadataContents));
+  }
 
   @override
   String toString() {
     return 'RECORDING\n' +
+        'Source Directory: ${sourceDirectory.path}\n' +
+        'Audio Path: ${audioFile.path}\n' +
+        'Transcript Path: ${transcriptFile.path}\n' +
         'Name: $name\n' +
-        'Audio Path: $audioPath\n' +
-        'Transcription Path: $transcriptionPath\n' +
         'Duration: $duration\n' +
-        'Date: $date\n';
+        'Date: $date\n' +
+        'Version: $version\n' +
+        'ID: $id\n';
   }
+}
+
+class MissingMetadataFile implements Exception {
+  final String message;
+  const MissingMetadataFile([this.message]);
 }

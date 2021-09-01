@@ -1,68 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:voice_scribe/models/app_life_cycle_observer.dart';
 
-import 'models/app_life_cycle_observer.dart';
-import 'models/recording.dart';
-import 'models/recording_transcriber.dart';
-import 'models/recordings_manager.dart';
-import 'models/stream_transcriber.dart';
-import 'utils/app_data.dart';
+import 'models/app_resources.dart';
 import 'utils/theme_constants.dart' as themeConstants;
 import 'views/screens/main_screen.dart';
 
-void main() {
-  runVoiceScribe();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  AppResources appResources = await onStartup();
+  AppLifeCycleObserver(onDetached: () => onExit(appResources)).startObserving();
+  runApp(VoiceScribe(appResources));
 }
 
-Future<void> runVoiceScribe() async {
-  WidgetsFlutterBinding.ensureInitialized();
+/// Called on startup.
+///
+/// Creates resources, gathers permissions, and sets up directories.
+Future<AppResources> onStartup() async {
+  await Permission.microphone.request();
+  await Permission.storage.request();
 
-  AppData appData = AppData(
-    recordingsDirectory: await recordingsDirectory(),
-    metadataDirectory: await metadataDirectory(),
-    modelsDirectory: await modelsDirectory(),
-    transcriptionsDirectory: await transcriptionDirectory(),
-    tempDirectory: await tempDirectory(),
-  );
+  AppResources appResources = await AppResources.create();
 
-  RecordingsManager recordingsManager = RecordingsManager.autoLoad(
-    recordingsDirectory: appData.recordingsDirectory,
-    metadataDirectory: appData.metadataDirectory,
-  );
+  if (await appResources.appDirs.tempDirectory.exists()) {
+    await appResources.appDirs.tempDirectory.delete(recursive: true);
+  }
 
-  RecordingTranscriber recordingTranscriber = RecordingTranscriber(
-    transcriptionDirectory: appData.transcriptionsDirectory,
-    onDone: (Recording recording) => recordingsManager.saveMetadata(recording),
-  );
+  await appResources.appDirs.createAll();
 
-  StreamTranscriber streamTranscriber = StreamTranscriber();
-  streamTranscriber.initialize();
+  return appResources;
+}
 
-  AppLifeCycleObserver(onDetached: () async {
-    await Future.wait([
-      appData.tempDirectory.delete(recursive: true),
-      streamTranscriber.terminate(),
-    ]);
-  }).startObserving();
-
-  await appData.tempDirectory.delete(recursive: true);
-
-  runApp(
-    MultiProvider(
-      providers: [
-        Provider.value(value: appData),
-        ChangeNotifierProvider.value(value: recordingsManager),
-        ChangeNotifierProvider.value(value: recordingTranscriber),
-        Provider.value(value: streamTranscriber),
-      ],
-      child: VoiceScribe(),
-    ),
-  );
+/// Called on exit.
+///
+/// Closes any resources and deletes the temporary directory.
+Future<void> onExit(AppResources appResources) async {
+  await Future.wait([
+    appResources.appDirs.tempDirectory.delete(recursive: true),
+    appResources.terminate(),
+  ]);
 }
 
 /// The main app.
 class VoiceScribe extends StatelessWidget {
+  final AppResources appResources;
+
+  VoiceScribe(this.appResources);
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme mainColorScheme = ColorScheme.fromSwatch(
@@ -95,81 +81,104 @@ class VoiceScribe extends StatelessWidget {
       ),
     );
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.white,
-      ),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Voice Scribe',
-        home: MainScreen(),
-        theme: ThemeData.from(
-          colorScheme: mainColorScheme,
-          textTheme: mainTextTheme,
-        ).copyWith(
-          appBarTheme: AppBarTheme(
-            backgroundColor: mainColorScheme.surface,
-            foregroundColor: mainColorScheme.onSurface,
-            backwardsCompatibility: false,
-            elevation: themeConstants.elevation,
+    return MultiProvider(
+      providers: [
+        Provider.value(value: appResources.appDirs),
+        ChangeNotifierProvider.value(value: appResources.recordingsManager),
+        ChangeNotifierProvider.value(value: appResources.recordingTranscriber),
+        Provider.value(value: appResources.streamTranscriber),
+      ],
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark.copyWith(
+          statusBarColor: Colors.white,
+        ),
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Voice Scribe',
+          home: FutureBuilder(
+            future: appResources.initialize(),
+            builder: (BuildContext _, AsyncSnapshot<AppResources> snapshot) {
+              if (snapshot.hasData && !snapshot.hasError) {
+                return MainScreen();
+              } else {
+                return const SafeArea(
+                  child: const Scaffold(
+                    body: const Center(
+                      child: const CircularProgressIndicator(),
+                    ),
+                  ),
+                );
+              }
+            },
           ),
-          bottomAppBarTheme: BottomAppBarTheme(
-            color: mainColorScheme.surface,
-            elevation: themeConstants.elevation,
-          ),
-          bottomSheetTheme: const BottomSheetThemeData(
-            shape: const RoundedRectangleBorder(
-              borderRadius: const BorderRadius.vertical(
-                top: const Radius.circular(themeConstants.radius),
+          theme: ThemeData.from(
+            colorScheme: mainColorScheme,
+            textTheme: mainTextTheme,
+          ).copyWith(
+            appBarTheme: AppBarTheme(
+              backgroundColor: mainColorScheme.surface,
+              foregroundColor: mainColorScheme.onSurface,
+              backwardsCompatibility: false,
+              elevation: themeConstants.elevation,
+            ),
+            bottomAppBarTheme: BottomAppBarTheme(
+              color: mainColorScheme.surface,
+              elevation: themeConstants.elevation,
+            ),
+            bottomSheetTheme: const BottomSheetThemeData(
+              shape: const RoundedRectangleBorder(
+                borderRadius: const BorderRadius.vertical(
+                  top: const Radius.circular(themeConstants.radius),
+                ),
               ),
             ),
-          ),
-          cardTheme: const CardTheme(
-            margin: EdgeInsets.zero,
-            shape: const RoundedRectangleBorder(
-              borderRadius: const BorderRadius.all(
-                const Radius.circular(themeConstants.radius),
+            cardTheme: const CardTheme(
+              margin: EdgeInsets.zero,
+              shape: const RoundedRectangleBorder(
+                borderRadius: const BorderRadius.all(
+                  const Radius.circular(themeConstants.radius),
+                ),
+              ),
+              elevation: themeConstants.elevation,
+            ),
+            dialogTheme: DialogTheme(
+              elevation: themeConstants.high_elevation,
+              contentTextStyle: mainTextTheme.subtitle1,
+              shape: const RoundedRectangleBorder(
+                borderRadius: const BorderRadius.all(
+                  const Radius.circular(themeConstants.radius),
+                ),
               ),
             ),
-            elevation: themeConstants.elevation,
-          ),
-          dialogTheme: DialogTheme(
-            elevation: themeConstants.high_elevation,
-            contentTextStyle: mainTextTheme.subtitle1,
-            shape: const RoundedRectangleBorder(
-              borderRadius: const BorderRadius.all(
-                const Radius.circular(themeConstants.radius),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ButtonStyle(
+                elevation: MaterialStateProperty.all<double>(
+                  themeConstants.elevation,
+                ),
+                padding: buttonPadding,
+                shape: buttonShape,
               ),
             ),
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ButtonStyle(
-              elevation: MaterialStateProperty.all<double>(
-                themeConstants.elevation,
-              ),
-              padding: buttonPadding,
-              shape: buttonShape,
+            iconTheme: IconThemeData(
+              color: mainColorScheme.onSurface,
             ),
-          ),
-          iconTheme: IconThemeData(
-            color: mainColorScheme.onSurface,
-          ),
-          popupMenuTheme: PopupMenuThemeData(
-            elevation: themeConstants.high_elevation,
-            textStyle: mainTextTheme.subtitle1,
-            shape: const RoundedRectangleBorder(
-              borderRadius: const BorderRadius.all(
-                const Radius.circular(themeConstants.radius),
+            popupMenuTheme: PopupMenuThemeData(
+              elevation: themeConstants.high_elevation,
+              textStyle: mainTextTheme.subtitle1,
+              shape: const RoundedRectangleBorder(
+                borderRadius: const BorderRadius.all(
+                  const Radius.circular(themeConstants.radius),
+                ),
               ),
             ),
-          ),
-          textButtonTheme: TextButtonThemeData(
-            style: ButtonStyle(
-              padding: buttonPadding,
-              shape: buttonShape,
+            textButtonTheme: TextButtonThemeData(
+              style: ButtonStyle(
+                padding: buttonPadding,
+                shape: buttonShape,
+              ),
             ),
+            visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
-          visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
       ),
     );

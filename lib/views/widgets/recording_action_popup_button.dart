@@ -17,10 +17,10 @@ class RecordingActionPopupButton extends StatelessWidget {
       context: context,
       builder: (BuildContext context) => _RemoveFilePopup(
         removeFunc: (bool deleteFile) {
-          Provider.of<RecordingsManager>(context, listen: false).remove(
-            recording,
-            deleteSource: deleteFile,
-          );
+          context.read<RecordingsManager>().remove(
+                recording,
+                deleteSource: deleteFile,
+              );
         },
       ),
     );
@@ -36,8 +36,8 @@ class RecordingActionPopupButton extends StatelessWidget {
             'Transcribing this file will delete the existing transcription, even if you later cancel it.',
           ),
         ],
-        onConfirm: () {
-          recording.deleteTranscription();
+        onConfirm: () async {
+          await recording.transcriptFile.delete();
           _transcribe(context);
         },
       ),
@@ -62,7 +62,7 @@ class RecordingActionPopupButton extends StatelessWidget {
             child: const Text('Edit'),
           ),
           PopupMenuItem(
-            value: () => recording.transcriptionExists
+            value: () => recording.transcriptFile.existsSync()
                 ? _showReTranscribePopup(context)
                 : _transcribe(context),
             child: const Text('Transcribe'),
