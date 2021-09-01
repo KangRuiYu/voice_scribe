@@ -53,7 +53,9 @@ class TranscriptEventProvider extends ChangeNotifier with FutureInitializer {
   void _onEvent(TranscriptEvent event) {
     if (event.resultType == ResultType.partial) {
       _partialEvent = event;
-    } else if (event.resultType == ResultType.result) {
+    } else if (event.resultType == ResultType.result &&
+        !event.timestamp.isNegative) {
+      // If non-empty result.
       _resultEvents.add(event);
       _partialEvent = TranscriptEvent.empty();
     }

@@ -28,8 +28,9 @@ class TranscriptEvent {
 
   /// The timestamp of this event.
   ///
-  /// Partial results do not yet support timestamps and will instead have a
-  /// negative time.
+  /// Partial results always have a negative timestamp.
+  /// Results/Final Results may also have a negative timestamp if there it is
+  /// empty.
   final Duration timestamp;
 
   /// The text result so far.

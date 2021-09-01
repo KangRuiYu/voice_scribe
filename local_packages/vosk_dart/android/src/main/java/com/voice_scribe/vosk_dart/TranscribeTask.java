@@ -52,19 +52,13 @@ abstract class TranscribeTask implements Runnable {
             return false;
         }
 
-        String text = result.getString(resultType == PARTIAL ? "partial" : "text");
-
-        if (text.isEmpty()) { // Don't post if result is result is empty.
-            return false;
-        }
-
         final HashMap<String, Object> event = new HashMap<String, Object>();
         event.put("resultType", resultType);
         event.put("dataType", dataType);
         event.put("progress", progress);
         event.put("transcriptPath", transcriptWriter.getTranscriptPath());
         event.put("timestamp", getResultTimestamp(result));
-        event.put("text", text);
+        event.put("text", result.getString(resultType == PARTIAL ? "partial" : "text"));
 
         mainHandler.post(new Runnable() {
             @Override
