@@ -113,8 +113,6 @@ class RecordingTranscriber extends ChangeNotifier {
 
     await _readyResources();
 
-    print(_currentRecording);
-
     await _voskInstance.startNewTranscript(
       _currentRecording.transcriptFile.path,
     );
