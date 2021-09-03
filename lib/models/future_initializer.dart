@@ -27,13 +27,12 @@ mixin FutureInitializer<T> {
   /// Calling other methods after calling [terminate] may have unexpected
   /// effects.
   /// Is idempotent.
-  /// If called before [initialize] is called, throws a [NotInitialized]
-  /// exception.
+  /// If called before [initialize] is called, nothing happens.
   /// If called before [initialize] is finished, waits for its completion
   /// before proceeding.
   /// Should not override this method.
   Future<void> terminate() async {
-    if (_initializeFuture == null) throw NotInitialized();
+    if (_initializeFuture == null) return;
     if (_terminateFuture != null) return _terminateFuture;
     await _initializeFuture;
     _terminateFuture = onTerminate();
