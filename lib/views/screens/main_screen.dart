@@ -21,43 +21,55 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     RecordingsManager recordingsManager = context.watch<RecordingsManager>();
 
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Row(
-            // mainAxisSize: MainAxisSize.min,
-            children: [
-              const _SortOrderLabel(),
-              const _ReverseSortButton(),
-            ],
-          ),
-        ),
-        floatingActionButton: CircularIconButton(
-          iconData: Icons.fiber_manual_record_rounded,
-          onPressed: () => _showRecordingScreen(context),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: ThemedBottomAppBar(
-          leftChild: const _MenuButton(),
-          rightChild: IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () => null,
-          ),
-        ),
-        body: FutureBuilder(
-          future: recordingsManager.initialize(),
-          builder: (
-            BuildContext _,
-            AsyncSnapshot<RecordingsManager> snapshot,
-          ) {
-            if (snapshot.hasData && !snapshot.hasError) {
-              return RecordingsDisplay();
-            } else {
-              return const Center(child: const CircularProgressIndicator());
-            }
-          },
-        ),
-      ),
+    return FutureBuilder(
+      future:
+          context.watch<Future<void> Function()>().call(), // Call to onReady.
+      builder: (BuildContext _, AsyncSnapshot snapshot) {
+        if (snapshot.connectionState == ConnectionState.done &&
+            !snapshot.hasError) {
+          return SafeArea(
+            child: Scaffold(
+              appBar: AppBar(
+                title: Row(
+                  // mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const _SortOrderLabel(),
+                    const _ReverseSortButton(),
+                  ],
+                ),
+              ),
+              floatingActionButton: CircularIconButton(
+                iconData: Icons.fiber_manual_record_rounded,
+                onPressed: () => _showRecordingScreen(context),
+              ),
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.centerDocked,
+              bottomNavigationBar: ThemedBottomAppBar(
+                leftChild: const _MenuButton(),
+                rightChild: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () => null,
+                ),
+              ),
+              body: FutureBuilder(
+                future: recordingsManager.initialize(),
+                builder: (
+                  BuildContext _,
+                  AsyncSnapshot<RecordingsManager> snapshot,
+                ) {
+                  if (snapshot.hasData && !snapshot.hasError) {
+                    return RecordingsDisplay();
+                  } else {
+                    return CenterLoadingIndicator();
+                  }
+                },
+              ),
+            ),
+          );
+        } else {
+          return LoadingScreen();
+        }
+      },
     );
   }
 }

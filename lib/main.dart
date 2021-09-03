@@ -1,53 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:voice_scribe/models/app_life_cycle_observer.dart';
 
 import 'models/app_resources.dart';
 import 'utils/theme_constants.dart' as themeConstants;
 import 'views/screens/main_screen.dart';
+import 'views/screens/setup_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  AppResources appResources = await onStartup();
-  AppLifeCycleObserver(onDetached: () => onExit(appResources)).startObserving();
-  runApp(VoiceScribe(appResources));
-}
-
-/// Called on startup.
-///
-/// Creates resources, gathers permissions, and sets up directories.
-Future<AppResources> onStartup() async {
-  await Permission.microphone.request();
-  await Permission.storage.request();
-
-  AppResources appResources = await AppResources.create();
-
-  if (await appResources.appDirs.tempDirectory.exists()) {
-    await appResources.appDirs.tempDirectory.delete(recursive: true);
-  }
-
-  await appResources.appDirs.createAll();
-
-  return appResources;
-}
-
-/// Called on exit.
-///
-/// Closes any resources and deletes the temporary directory.
-Future<void> onExit(AppResources appResources) async {
-  await Future.wait([
-    appResources.appDirs.tempDirectory.delete(recursive: true),
-    appResources.terminate(),
-  ]);
+  VoiceScribeState appState = VoiceScribeState();
+  await appState.onBoot();
+  AppLifeCycleObserver(onDetached: appState.onExit).startObserving();
+  runApp(VoiceScribe(appState));
 }
 
 /// The main app.
 class VoiceScribe extends StatelessWidget {
-  final AppResources appResources;
+  final VoiceScribeState appState;
+  final bool showMainScreenFirst;
 
-  VoiceScribe(this.appResources);
+  VoiceScribe(this.appState)
+      : showMainScreenFirst = appState.requirementsManager.allSatisfied();
 
   @override
   Widget build(BuildContext context) {
@@ -83,10 +58,12 @@ class VoiceScribe extends StatelessWidget {
 
     return MultiProvider(
       providers: [
-        Provider.value(value: appResources.appDirs),
-        ChangeNotifierProvider.value(value: appResources.recordingsManager),
-        ChangeNotifierProvider.value(value: appResources.recordingTranscriber),
-        Provider.value(value: appResources.streamTranscriber),
+        Provider.value(value: appState.onReady),
+        Provider.value(value: appState.appDirs),
+        ChangeNotifierProvider.value(value: appState.recordingsManager),
+        ChangeNotifierProvider.value(value: appState.requirementsManager),
+        ChangeNotifierProvider.value(value: appState.recordingTranscriber),
+        Provider.value(value: appState.streamTranscriber),
       ],
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark.copyWith(
@@ -95,22 +72,7 @@ class VoiceScribe extends StatelessWidget {
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Voice Scribe',
-          home: FutureBuilder(
-            future: appResources.initialize(),
-            builder: (BuildContext _, AsyncSnapshot<AppResources> snapshot) {
-              if (snapshot.hasData && !snapshot.hasError) {
-                return MainScreen();
-              } else {
-                return const SafeArea(
-                  child: const Scaffold(
-                    body: const Center(
-                      child: const CircularProgressIndicator(),
-                    ),
-                  ),
-                );
-              }
-            },
-          ),
+          home: showMainScreenFirst ? MainScreen() : SetupScreen(),
           theme: ThemeData.from(
             colorScheme: mainColorScheme,
             textTheme: mainTextTheme,
@@ -149,6 +111,9 @@ class VoiceScribe extends StatelessWidget {
                   const Radius.circular(themeConstants.radius),
                 ),
               ),
+            ),
+            dividerTheme: const DividerThemeData(
+              space: themeConstants.zero,
             ),
             elevatedButtonTheme: ElevatedButtonThemeData(
               style: ButtonStyle(

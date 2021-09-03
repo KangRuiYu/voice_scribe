@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
+import 'file_dir_generator.dart' as fileDirGenerator;
+
 /// Handles retrieving paths to model files.
 
 const List<String> _supportedModels = ['vosk-model-small-en-us-0.15'];
@@ -18,6 +20,31 @@ Future<String> firstAvailableModel() async {
     }
   }
   return null;
+}
+
+/// Returns the path of the first model that exists in the given [modelDirectory].
+/// If none are available, an empty string is returned.
+Future<String> firstModelIn(Directory modelDirectory) async {
+  for (String modelName in _supportedModels) {
+    Directory model = fileDirGenerator.directoryIn(
+      parentDirectory: modelDirectory,
+      name: modelName,
+    );
+
+    if (await model.exists()) {
+      return model.path;
+    }
+  }
+
+  return '';
+}
+
+/// Returns true if there is a model available in the given [modelDirectory].
+///
+/// Typically better to use [firstModelIn] directly, but this is useful if you
+/// do not need the actual model path.
+Future<bool> modelAvailableIn(Directory modelDirectory) async {
+  return (await firstModelIn(modelDirectory)).isNotEmpty;
 }
 
 /// Private method that gets the path to the model with the given name.

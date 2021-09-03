@@ -80,3 +80,28 @@ class BigIconButton extends StatelessWidget {
     );
   }
 }
+
+/// Empty screen with a [CircularProgressIndicator] in the middle;
+class LoadingScreen extends StatelessWidget {
+  const LoadingScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SafeArea(
+      child: const Scaffold(
+        body: const CenterLoadingIndicator(),
+      ),
+    );
+  }
+}
+
+/// A widget that expands to parent constraints and displays a
+/// [CircularProgressIndicator] in the middle.
+class CenterLoadingIndicator extends StatelessWidget {
+  const CenterLoadingIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: const CircularProgressIndicator());
+  }
+}
