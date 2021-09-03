@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:voice_scribe/models/app_life_cycle_observer.dart';
 
-import 'models/app_resources.dart';
+import 'models/voice_scribe_state.dart';
 import 'utils/theme_constants.dart' as themeConstants;
 import 'views/screens/main_screen.dart';
 import 'views/screens/setup_screen.dart';

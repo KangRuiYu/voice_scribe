@@ -3,7 +3,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:voice_scribe/views/screens/main_screen.dart';
 
-import '../../models/app_resources.dart';
+import '../../models/voice_scribe_state.dart';
 import '../../models/requirement_manager.dart';
 import '../../utils/theme_constants.dart' as themeConstants;
 
