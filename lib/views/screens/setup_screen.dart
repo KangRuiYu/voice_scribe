@@ -28,22 +28,16 @@ class SetupScreen extends StatelessWidget {
           child: Column(
             children: [
               _PermissionCard(
-                title: storage_requirement,
-                body: _storage_permission_description,
-                status: requirementsManager.value(storage_requirement),
-                onGrant: () async {
-                  await Permission.storage.request();
-                  await requirementsManager.updateAllAndNotify();
-                },
+                permissionName: storage_requirement,
+                reason: _storage_permission_description,
+                permission: Permission.storage,
+                requirementsManager: requirementsManager,
               ),
               _PermissionCard(
-                title: microphone_requirement,
-                body: _microphone_permission_description,
-                status: requirementsManager.value(microphone_requirement),
-                onGrant: () async {
-                  await Permission.microphone.request();
-                  await requirementsManager.updateAllAndNotify();
-                },
+                permissionName: microphone_requirement,
+                reason: _microphone_permission_description,
+                permission: Permission.microphone,
+                requirementsManager: requirementsManager,
               ),
             ],
           ),
@@ -66,24 +60,27 @@ class SetupScreen extends StatelessWidget {
 ///
 /// Provides a button to grant said permissions.
 class _PermissionCard extends StatelessWidget {
-  final String title;
-  final String body;
-  final PermissionStatus status;
-  final Function onGrant;
+  final String permissionName;
+  final String reason;
+
+  final Permission permission;
+  final RequirementsManager requirementsManager;
 
   const _PermissionCard({
-    @required this.title,
-    @required this.body,
-    @required this.status,
-    @required this.onGrant,
+    @required this.permissionName,
+    @required this.reason,
+    @required this.permission,
+    @required this.requirementsManager,
   });
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
+    final PermissionStatus status = requirementsManager.value(permissionName);
+
     Widget button;
-    if (status == PermissionStatus.granted) {
+    if (status.isGranted) {
       button = Padding(
         padding: const EdgeInsets.all(themeConstants.padding_tiny),
         child: Text(
@@ -96,14 +93,25 @@ class _PermissionCard extends StatelessWidget {
     } else {
       button = ElevatedButton(
         child: const Text('Grant'),
-        onPressed: onGrant,
+        onPressed: () async {
+          PermissionStatus newStatus = await permission.request();
+          if (newStatus.isPermanentlyDenied) {
+            await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return _DeniedPermissionAlert();
+              },
+            );
+          }
+          await requirementsManager.updateAllAndNotify();
+        },
       );
     }
 
     return _CardSection(
-      title: title,
+      title: permissionName,
       children: [
-        Text(body, style: theme.textTheme.bodyText2),
+        Text(reason, style: theme.textTheme.bodyText2),
         const SizedBox(height: themeConstants.padding_small),
         Align(alignment: Alignment.centerRight, child: button),
       ],
@@ -144,6 +152,37 @@ class _CardSection extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _DeniedPermissionAlert extends StatelessWidget {
+  const _DeniedPermissionAlert();
+
+  @override
+  Widget build(BuildContext context) {
+    final String bodyText = 'You have permanently denied this permission ' +
+        'which is required for this application to function. The permission ' +
+        'must be granted through the settings app.';
+
+    return AlertDialog(
+      title: const Text('Denied permission'),
+      content: SingleChildScrollView(
+        child: ListBody(children: [Text(bodyText)]),
+      ),
+      actions: [
+        TextButton(
+          child: const Text('Cancel'),
+          onPressed: () => Navigator.pop(context),
+        ),
+        TextButton(
+          child: const Text('Open settings'),
+          onPressed: () {
+            openAppSettings();
+            Navigator.pop(context);
+          },
+        ),
+      ],
     );
   }
 }

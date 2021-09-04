@@ -12,7 +12,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   VoiceScribeState appState = VoiceScribeState();
   await appState.onBoot();
-  AppLifeCycleObserver(onDetached: appState.onExit).startObserving();
+  AppLifeCycleObserver(
+    onDetached: appState.onExit,
+    onResumed: () => appState.requirementsManager.updateAllAndNotify(),
+  ).startObserving();
   runApp(VoiceScribe(appState));
 }
 
