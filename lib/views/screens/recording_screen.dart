@@ -481,23 +481,38 @@ class _InactiveButtons extends StatelessWidget {
   const _InactiveButtons();
 
   Widget build(BuildContext context) {
-    return Stack(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Row(
-          children: [
-            TextButton(
-              child: const Text('Save'),
-              onPressed: () => null,
-            ),
-            TextButton(
-              child: const Text('Delete'),
-              onPressed: () => null,
-            ),
-          ],
+        Expanded(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton(
+                child: const Text('Save'),
+                onPressed: () => null,
+              ),
+            ],
+          ),
         ),
+        const SizedBox(width: theme_constants.padding_medium),
         CircularIconButton(
           iconData: Icons.play_arrow_rounded,
           onPressed: () => null,
+        ),
+        const SizedBox(width: theme_constants.padding_medium),
+        Expanded(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton(
+                child: const Text('Delete'),
+                onPressed: () => null,
+              ),
+            ],
+          ),
         ),
       ],
     );
