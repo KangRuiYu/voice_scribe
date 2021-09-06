@@ -130,6 +130,10 @@ class _PermissionCard extends StatelessWidget {
   }
 }
 
+/// Card that displays current model status and provides options based on it.
+///
+/// If user has no model, will provide an option to download one.
+/// If user is retrieving a model, will display ongoing progress.
 class _ModelCard extends StatelessWidget {
   final bool hasModel;
   final ModelDownloader modelDownloader = ModelDownloader();
@@ -351,6 +355,10 @@ class _CardSection extends StatelessWidget {
   }
 }
 
+/// Shown when user has permanently denied a permission.
+///
+/// Prompts user to be redirected to app settings, where permission can be
+/// manually granted.
 class _DeniedPermissionAlert extends StatelessWidget {
   const _DeniedPermissionAlert();
 
