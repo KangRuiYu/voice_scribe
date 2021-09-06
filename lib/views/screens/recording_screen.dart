@@ -15,9 +15,9 @@ import '../../models/stream_transcriber.dart';
 import '../../models/transcript_event_provider.dart';
 import '../../utils/app_dir.dart';
 import '../../utils/file_utils.dart' as file_utils;
-import '../../utils/file_extensions.dart' as fileExtensions;
+import '../../utils/file_extensions.dart' as file_extensions;
 import '../../utils/formatter.dart' as formatter;
-import '../../utils/theme_constants.dart' as themeConstants;
+import '../../utils/theme_constants.dart' as theme_constants;
 import '../widgets/custom_widgets.dart';
 import '../widgets/transcript_result.dart';
 
@@ -39,12 +39,12 @@ class RecordingScreen extends StatelessWidget {
     File tempRecordingFile = file_utils.fileIn(
       parentDirectory: appDirs.tempDirectory,
       name: uuid.v1(),
-      extension: fileExtensions.temp,
+      extension: file_extensions.temp,
     );
     File tempTranscriptFile = file_utils.fileIn(
       parentDirectory: appDirs.tempDirectory,
       name: uuid.v1(),
-      extension: fileExtensions.temp,
+      extension: file_extensions.temp,
     );
 
     await recorder.initialize();
@@ -170,7 +170,7 @@ class _ContentView extends StatelessWidget {
           return Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: themeConstants.padding_medium,
+                horizontal: theme_constants.padding_medium,
               ),
               child: TextField(
                 controller: context.watch<TextEditingController>(),
@@ -278,15 +278,15 @@ class _BottomPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(themeConstants.padding_large),
+      padding: const EdgeInsets.all(theme_constants.padding_large),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        boxShadow: kElevationToShadow[themeConstants.elevation],
+        boxShadow: kElevationToShadow[theme_constants.elevation],
       ),
       child: Column(
         children: [
           const _InfoLine(),
-          const SizedBox(height: themeConstants.padding_medium),
+          const SizedBox(height: theme_constants.padding_medium),
           const _ButtonRow(),
         ],
       ),
@@ -311,9 +311,9 @@ class _InfoLine extends StatelessWidget {
           return Row(
             children: [
               _VolumeLabel(snapshot.data.decibels),
-              const SizedBox(width: themeConstants.padding_small),
+              const SizedBox(width: theme_constants.padding_small),
               Expanded(child: _VolumeIndicator(snapshot.data.decibels)),
-              const SizedBox(width: themeConstants.padding_huge),
+              const SizedBox(width: theme_constants.padding_huge),
               _DurationLabel(snapshot.data.duration),
             ],
           );
@@ -367,7 +367,7 @@ class _VolumeIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme mainColorScheme = Theme.of(context).colorScheme;
     final Color activeColor = mainColorScheme.secondary;
-    final Color inactiveColor = activeColor.withAlpha(themeConstants.opacity);
+    final Color inactiveColor = activeColor.withAlpha(theme_constants.opacity);
 
     final double activePercentage = decibels.clamp(0, max_volume) / max_volume;
 
@@ -376,7 +376,7 @@ class _VolumeIndicator extends StatelessWidget {
         return Stack(
           children: [
             Container(
-              height: themeConstants.bar_height,
+              height: theme_constants.bar_height,
               width: constraints.maxWidth,
               decoration: BoxDecoration(
                 color: inactiveColor,
@@ -384,7 +384,7 @@ class _VolumeIndicator extends StatelessWidget {
               ),
             ),
             AnimatedContainer(
-              height: themeConstants.bar_height,
+              height: theme_constants.bar_height,
               width: constraints.maxWidth * activePercentage,
               duration: const Duration(milliseconds: 500),
               decoration: BoxDecoration(
@@ -452,14 +452,14 @@ class _PausedButtons extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: themeConstants.padding_medium),
+        const SizedBox(width: theme_constants.padding_medium),
         CircularIconButton(
           iconData: Icons.play_arrow_rounded,
           onPressed: context.select(
             (Recorder recorder) => recorder.resumeRecording,
           ),
         ),
-        const SizedBox(width: themeConstants.padding_medium),
+        const SizedBox(width: theme_constants.padding_medium),
         Expanded(
           child: Row(
             mainAxisSize: MainAxisSize.min,

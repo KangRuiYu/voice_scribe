@@ -7,7 +7,7 @@ import 'package:path/path.dart' as path;
 
 import 'future_initializer.dart';
 import '../utils/file_utils.dart' as file_utils;
-import '../utils/file_extensions.dart' as fileExtensions;
+import '../utils/file_extensions.dart' as file_extensions;
 import 'recording.dart';
 
 /// Manages and provides access to a list of known recordings.
@@ -59,7 +59,7 @@ class RecordingsManager extends ChangeNotifier
 
     await for (FileSystemEntity entity in importsDirectory.list()) {
       if (entity is File &&
-          path.extension(entity.path) == fileExtensions.import) {
+          path.extension(entity.path) == file_extensions.import) {
         Directory recordingSourceDir = Directory(
           await entity.readAsString(encoding: utf8),
         );
@@ -139,7 +139,7 @@ class RecordingsManager extends ChangeNotifier
         File metadataFile = file_utils.fileIn(
           parentDirectory: entity,
           name: path.basename(entity.path),
-          extension: fileExtensions.metadata,
+          extension: file_extensions.metadata,
         );
 
         if (await metadataFile.exists()) {
@@ -164,7 +164,7 @@ class RecordingsManager extends ChangeNotifier
     return file_utils.fileIn(
       parentDirectory: importsDirectory,
       name: recording.id,
-      extension: fileExtensions.import,
+      extension: file_extensions.import,
     );
   }
 }

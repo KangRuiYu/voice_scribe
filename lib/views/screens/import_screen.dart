@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../../models/recording.dart';
 import '../../models/recordings_manager.dart';
 import '../../utils/formatter.dart';
-import '../../utils/theme_constants.dart' as themeConstants;
+import '../../utils/theme_constants.dart' as theme_constants;
 import '../widgets/custom_widgets.dart';
 
 /// Keeps track of selected recordings while notifying any listeners.
@@ -178,7 +178,7 @@ class _RecordingList extends StatelessWidget {
           itemCount: recordings.length > 0 ? recordings.length + 2 : 0,
           itemBuilder: (BuildContext context, int index) {
             if (index >= recordings.length) {
-              return const SizedBox(height: themeConstants.padding_huge);
+              return const SizedBox(height: theme_constants.padding_huge);
             } else {
               return _RecordingListing(recordings[index]);
             }
@@ -201,17 +201,17 @@ class _RecordingListing extends StatelessWidget {
       builder: (BuildContext context, Selector selector, Widget _) {
         return Card(
           margin: const EdgeInsets.only(
-            top: themeConstants.padding_tiny,
-            right: themeConstants.padding_small,
-            left: themeConstants.padding_small,
+            top: theme_constants.padding_tiny,
+            right: theme_constants.padding_small,
+            left: theme_constants.padding_small,
           ),
           child: CheckboxListTile(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(themeConstants.radius),
+              borderRadius: BorderRadius.circular(theme_constants.radius),
             ),
             contentPadding: const EdgeInsets.only(
-              left: themeConstants.padding_huge,
-              right: themeConstants.padding_small,
+              left: theme_constants.padding_huge,
+              right: theme_constants.padding_small,
             ),
             title: Text(recording.name),
             subtitle: Text(formatDate(recording.date)),

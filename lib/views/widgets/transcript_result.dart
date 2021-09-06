@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../utils/formatter.dart' as formatter;
-import '../../utils/theme_constants.dart' as themeConstants;
+import '../../utils/theme_constants.dart' as theme_constants;
 
 /// Widget displaying contents of a single transcription result.
 class TranscriptResult extends StatelessWidget {
@@ -22,14 +22,14 @@ class TranscriptResult extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: themeConstants.padding_large,
-        vertical: themeConstants.padding_small,
+        horizontal: theme_constants.padding_large,
+        vertical: theme_constants.padding_small,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(formattedTimestamp, style: textTheme.bodyText1),
-          const SizedBox(height: themeConstants.padding_tiny),
+          const SizedBox(height: theme_constants.padding_tiny),
           Text(resultText, style: textTheme.bodyText2),
         ],
       ),

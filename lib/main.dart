@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:voice_scribe/models/app_life_cycle_observer.dart';
 
 import 'models/voice_scribe_state.dart';
-import 'utils/theme_constants.dart' as themeConstants;
+import 'utils/theme_constants.dart' as theme_constants;
 import 'views/screens/main_screen.dart';
 import 'views/screens/setup_screen.dart';
 
@@ -45,8 +45,8 @@ class VoiceScribe extends StatelessWidget {
     final MaterialStateProperty<EdgeInsetsGeometry> buttonPadding =
         MaterialStateProperty.all<EdgeInsetsGeometry>(
       const EdgeInsets.symmetric(
-        horizontal: themeConstants.padding_medium,
-        vertical: themeConstants.padding_tiny,
+        horizontal: theme_constants.padding_medium,
+        vertical: theme_constants.padding_tiny,
       ),
     );
 
@@ -54,7 +54,7 @@ class VoiceScribe extends StatelessWidget {
         MaterialStateProperty.all<RoundedRectangleBorder>(
       const RoundedRectangleBorder(
         borderRadius: const BorderRadius.all(
-          const Radius.circular(themeConstants.radius),
+          const Radius.circular(theme_constants.radius),
         ),
       ),
     );
@@ -84,16 +84,16 @@ class VoiceScribe extends StatelessWidget {
               backgroundColor: mainColorScheme.surface,
               foregroundColor: mainColorScheme.onSurface,
               backwardsCompatibility: false,
-              elevation: themeConstants.elevation,
+              elevation: theme_constants.elevation,
             ),
             bottomAppBarTheme: BottomAppBarTheme(
               color: mainColorScheme.surface,
-              elevation: themeConstants.elevation,
+              elevation: theme_constants.elevation,
             ),
             bottomSheetTheme: const BottomSheetThemeData(
               shape: const RoundedRectangleBorder(
                 borderRadius: const BorderRadius.vertical(
-                  top: const Radius.circular(themeConstants.radius),
+                  top: const Radius.circular(theme_constants.radius),
                 ),
               ),
             ),
@@ -101,27 +101,27 @@ class VoiceScribe extends StatelessWidget {
               margin: EdgeInsets.zero,
               shape: const RoundedRectangleBorder(
                 borderRadius: const BorderRadius.all(
-                  const Radius.circular(themeConstants.radius),
+                  const Radius.circular(theme_constants.radius),
                 ),
               ),
-              elevation: themeConstants.elevation,
+              elevation: theme_constants.elevation,
             ),
             dialogTheme: DialogTheme(
-              elevation: themeConstants.high_elevation,
+              elevation: theme_constants.high_elevation,
               contentTextStyle: mainTextTheme.subtitle1,
               shape: const RoundedRectangleBorder(
                 borderRadius: const BorderRadius.all(
-                  const Radius.circular(themeConstants.radius),
+                  const Radius.circular(theme_constants.radius),
                 ),
               ),
             ),
             dividerTheme: const DividerThemeData(
-              space: themeConstants.zero,
+              space: theme_constants.zero,
             ),
             elevatedButtonTheme: ElevatedButtonThemeData(
               style: ButtonStyle(
                 elevation: MaterialStateProperty.all<double>(
-                  themeConstants.elevation,
+                  theme_constants.elevation,
                 ),
                 padding: buttonPadding,
                 shape: buttonShape,
@@ -131,11 +131,11 @@ class VoiceScribe extends StatelessWidget {
               color: mainColorScheme.onSurface,
             ),
             popupMenuTheme: PopupMenuThemeData(
-              elevation: themeConstants.high_elevation,
+              elevation: theme_constants.high_elevation,
               textStyle: mainTextTheme.subtitle1,
               shape: const RoundedRectangleBorder(
                 borderRadius: const BorderRadius.all(
-                  const Radius.circular(themeConstants.radius),
+                  const Radius.circular(theme_constants.radius),
                 ),
               ),
             ),

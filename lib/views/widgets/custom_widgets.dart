@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/theme_constants.dart' as themeConstants;
+import '../../utils/theme_constants.dart' as theme_constants;
 
 /// A themed bottom app bar.
 class ThemedBottomAppBar extends StatelessWidget {
@@ -15,10 +15,10 @@ class ThemedBottomAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: themeConstants.bottom_app_bar_height,
+      height: theme_constants.bottom_app_bar_height,
       decoration: BoxDecoration(
         color: Theme.of(context).bottomAppBarColor,
-        boxShadow: kElevationToShadow[themeConstants.elevation],
+        boxShadow: kElevationToShadow[theme_constants.elevation],
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -46,7 +46,7 @@ class CircularIconButton extends StatelessWidget {
     final ButtonStyle customStyle = mainStyle.copyWith(
       shape: MaterialStateProperty.all<CircleBorder>(const CircleBorder()),
       padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-        const EdgeInsets.all(themeConstants.padding_small),
+        const EdgeInsets.all(theme_constants.padding_small),
       ),
     );
 
@@ -54,7 +54,7 @@ class CircularIconButton extends StatelessWidget {
       style: customStyle,
       child: Icon(
         iconData,
-        size: themeConstants.big_icon_size,
+        size: theme_constants.big_icon_size,
       ),
       onPressed: onPressed,
     );
@@ -75,7 +75,7 @@ class BigIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       icon: Icon(iconData),
-      iconSize: themeConstants.big_icon_size,
+      iconSize: theme_constants.big_icon_size,
       onPressed: onPressed,
     );
   }

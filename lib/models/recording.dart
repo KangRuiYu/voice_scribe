@@ -7,7 +7,7 @@ import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 
 import '../utils/file_utils.dart' as file_utils;
-import '../utils/file_extensions.dart' as fileExtensions;
+import '../utils/file_extensions.dart' as file_extensions;
 
 const Uuid _uuid = Uuid();
 
@@ -43,13 +43,13 @@ class Recording {
   File get audioFile => file_utils.fileIn(
         parentDirectory: sourceDirectory,
         name: name,
-        extension: fileExtensions.audio,
+        extension: file_extensions.audio,
       );
 
   File get transcriptFile => file_utils.fileIn(
         parentDirectory: sourceDirectory,
         name: name,
-        extension: fileExtensions.transcript,
+        extension: file_extensions.transcript,
       );
 
   /// Location where the metadata (duration, date) of this recording is actually
@@ -57,7 +57,7 @@ class Recording {
   File get metadataFile => file_utils.fileIn(
         parentDirectory: sourceDirectory,
         name: name,
-        extension: fileExtensions.metadata,
+        extension: file_extensions.metadata,
       );
 
   /// Creates a new recording using given info instead of reading from a metadata
@@ -91,7 +91,7 @@ class Recording {
     File metadataFile = file_utils.fileIn(
       parentDirectory: sourceDirectory,
       name: path.basename(sourceDirectory.path),
-      extension: fileExtensions.metadata,
+      extension: file_extensions.metadata,
     );
 
     if (!(await metadataFile.exists())) throw MissingMetadataFile();

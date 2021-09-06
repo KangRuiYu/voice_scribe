@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/player.dart';
 import '../../utils/formatter.dart' as formatter;
-import '../../utils/theme_constants.dart' as themeConstants;
+import '../../utils/theme_constants.dart' as theme_constants;
 
 /// Displays player progress and allows playback to be repositioned.
 ///
@@ -77,9 +77,9 @@ class _PlaybackSliderState extends State<PlaybackSlider> {
   @override
   Widget build(BuildContext context) {
     final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(
-      trackHeight: themeConstants.bar_height,
+      trackHeight: theme_constants.bar_height,
       overlayShape: const RoundSliderOverlayShape(
-        overlayRadius: themeConstants.slider_thumb_size,
+        overlayRadius: theme_constants.slider_thumb_size,
       ),
     );
 
@@ -98,7 +98,7 @@ class _PlaybackSliderState extends State<PlaybackSlider> {
             onChangeEnd: onChangeEnd,
           ),
         ),
-        const SizedBox(height: themeConstants.padding_small),
+        const SizedBox(height: theme_constants.padding_small),
         _DurationProgressLabels(
           currentPosition:
               _sliding ? _selectedPosition : _lastPlayback.position,
@@ -129,14 +129,14 @@ class _DurationProgressLabels extends StatelessWidget {
       children: [
         Row(
           children: [
-            const SizedBox(width: themeConstants.slider_thumb_size),
+            const SizedBox(width: theme_constants.slider_thumb_size),
             Text(formatter.formatDuration(currentPosition), style: style),
           ],
         ),
         Row(
           children: [
             Text(formatter.formatDuration(totalDuration), style: style),
-            const SizedBox(width: themeConstants.slider_thumb_size),
+            const SizedBox(width: theme_constants.slider_thumb_size),
           ],
         ),
       ],

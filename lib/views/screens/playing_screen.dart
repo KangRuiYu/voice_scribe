@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../models/player.dart';
 import '../../models/recording.dart';
 import '../../models/transcript_reader.dart' as transcriptReader;
-import '../../utils/theme_constants.dart' as themeConstants;
+import '../../utils/theme_constants.dart' as theme_constants;
 import '../widgets/playback_slider.dart';
 import '../widgets/custom_widgets.dart';
 import '../widgets/transcript_result.dart';
@@ -106,13 +106,13 @@ class _NoTranscriptIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.all(themeConstants.padding_large),
+        padding: const EdgeInsets.all(theme_constants.padding_large),
         child: Align(
           alignment: Alignment.topLeft,
           child: Row(
             children: [
               const Icon(Icons.attach_file),
-              const SizedBox(width: themeConstants.padding_medium),
+              const SizedBox(width: theme_constants.padding_medium),
               const Text('No transcript'),
             ],
           ),
@@ -129,15 +129,15 @@ class _ControlPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(themeConstants.padding_large),
+      padding: const EdgeInsets.all(theme_constants.padding_large),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        boxShadow: kElevationToShadow[themeConstants.elevation],
+        boxShadow: kElevationToShadow[theme_constants.elevation],
       ),
       child: Column(
         children: [
           const PlaybackSlider(),
-          const SizedBox(height: themeConstants.padding_medium),
+          const SizedBox(height: theme_constants.padding_medium),
           const _ButtonRow(),
         ],
       ),
@@ -162,9 +162,9 @@ class _ButtonRow extends StatelessWidget {
           icon: const Icon(Icons.replay_5),
           onPressed: () => changePositionRelative(Duration(seconds: -5)),
         ),
-        const SizedBox(width: themeConstants.padding_medium),
+        const SizedBox(width: theme_constants.padding_medium),
         const _MainButton(),
-        const SizedBox(width: themeConstants.padding_medium),
+        const SizedBox(width: theme_constants.padding_medium),
         IconButton(
           icon: const Icon(Icons.forward_10),
           onPressed: () => changePositionRelative(Duration(seconds: 10)),

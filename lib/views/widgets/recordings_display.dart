@@ -6,7 +6,7 @@ import 'package:vosk_dart/transcript_event.dart';
 import '../../models/recording.dart';
 import '../../models/recording_transcriber.dart';
 import '../../models/recordings_manager.dart';
-import '../../utils/theme_constants.dart' as themeConstants;
+import '../../utils/theme_constants.dart' as theme_constants;
 import 'recording_action_popup_button.dart';
 import '../screens/playing_screen.dart';
 import '../../utils/formatter.dart' as formatter;
@@ -28,7 +28,7 @@ class RecordingsDisplay extends StatelessWidget {
           itemCount: recordingsManager.recordings.length + 2,
           itemBuilder: (BuildContext context, int index) {
             if (index >= recordingsManager.recordings.length) {
-              return const SizedBox(height: themeConstants.padding_large);
+              return const SizedBox(height: theme_constants.padding_large);
             } else {
               return _RecordingCard(recordingsManager.recordings[index]);
             }
@@ -85,17 +85,17 @@ class _RecordingCard extends StatelessWidget {
 
         return Card(
           margin: const EdgeInsets.only(
-            top: themeConstants.padding_tiny,
-            right: themeConstants.padding_small,
-            left: themeConstants.padding_small,
+            top: theme_constants.padding_tiny,
+            right: theme_constants.padding_small,
+            left: theme_constants.padding_small,
           ),
           child: ListTile(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(themeConstants.radius),
+              borderRadius: BorderRadius.circular(theme_constants.radius),
             ),
             contentPadding: const EdgeInsets.only(
-              left: themeConstants.padding_huge,
-              right: themeConstants.padding_small,
+              left: theme_constants.padding_huge,
+              right: theme_constants.padding_small,
             ),
             title: Text(recording.name),
             subtitle: subtitle,

@@ -1,5 +1,5 @@
 /// Provides a collection of constants for the user interface.
-/// Is intended to be used with the alias 'themeConstants'.
+/// Is intended to be used with the alias 'theme_constants'.
 
 const double zero = 0.0;
 
