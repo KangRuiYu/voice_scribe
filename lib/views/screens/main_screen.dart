@@ -17,10 +17,14 @@ class MainScreen extends StatelessWidget {
     );
   }
 
+  /// Used to initialize [RecordingsManager] using [context.watch] to avoid
+  /// unnecessary rebuilds.
+  Future<void> _initializeRecordingsManager(BuildContext context) async {
+    await context.read<RecordingsManager>().initialize();
+  }
+
   @override
   Widget build(BuildContext context) {
-    RecordingsManager recordingsManager = context.watch<RecordingsManager>();
-
     return FutureBuilder(
       future:
           context.watch<Future<void> Function()>().call(), // Call to onReady.
@@ -46,12 +50,10 @@ class MainScreen extends StatelessWidget {
               floatingActionButtonLocation:
                   FloatingActionButtonLocation.centerFloat,
               body: FutureBuilder(
-                future: recordingsManager.initialize(),
-                builder: (
-                  BuildContext _,
-                  AsyncSnapshot<RecordingsManager> snapshot,
-                ) {
-                  if (snapshot.hasData && !snapshot.hasError) {
+                future: _initializeRecordingsManager(context),
+                builder: (BuildContext _, AsyncSnapshot snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done &&
+                      !snapshot.hasError) {
                     return RecordingsDisplay();
                   } else {
                     return CenterLoadingIndicator();
