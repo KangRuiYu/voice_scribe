@@ -37,20 +37,14 @@ class MainScreen extends StatelessWidget {
                     const _ReverseSortButton(),
                   ],
                 ),
+                actions: [const _MenuButton()],
               ),
               floatingActionButton: CircularIconButton(
                 iconData: Icons.fiber_manual_record_rounded,
                 onPressed: () => _showRecordingScreen(context),
               ),
               floatingActionButtonLocation:
-                  FloatingActionButtonLocation.centerDocked,
-              bottomNavigationBar: ThemedBottomAppBar(
-                leftChild: const _MenuButton(),
-                rightChild: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () => null,
-                ),
-              ),
+                  FloatingActionButtonLocation.centerFloat,
               body: FutureBuilder(
                 future: recordingsManager.initialize(),
                 builder: (
@@ -146,7 +140,7 @@ class _MenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<void Function()>(
-      icon: const Icon(Icons.menu),
+      icon: const Icon(Icons.more_vert_rounded),
       onSelected: (void Function() selectedFunction) => selectedFunction(),
       tooltip: 'Show more application options',
       itemBuilder: (BuildContext context) => [
