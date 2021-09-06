@@ -7,7 +7,7 @@ import 'package:uuid/uuid.dart';
 /// Utility functions for getting files and directories within parent
 /// directories.
 ///
-/// Meant to be used with the import alias "fileDirGenerator".
+/// Meant to be used with the import alias "file_utils".
 
 const Uuid _uuid = Uuid();
 

@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
 import 'future_initializer.dart';
-import '../utils/file_dir_generator.dart' as fileDirGenerator;
+import '../utils/file_utils.dart' as file_utils;
 import '../utils/file_extensions.dart' as fileExtensions;
 import 'recording.dart';
 
@@ -136,7 +136,7 @@ class RecordingsManager extends ChangeNotifier
     List<Recording> result = [];
     await for (FileSystemEntity entity in recordingsDirectory.list()) {
       if (entity is Directory && !knownSourceDirectories.contains(entity)) {
-        File metadataFile = fileDirGenerator.fileIn(
+        File metadataFile = file_utils.fileIn(
           parentDirectory: entity,
           name: path.basename(entity.path),
           extension: fileExtensions.metadata,
@@ -161,7 +161,7 @@ class RecordingsManager extends ChangeNotifier
 
   /// Returns the import file associated with the given [recording].
   File _importFile(Recording recording) {
-    return fileDirGenerator.fileIn(
+    return file_utils.fileIn(
       parentDirectory: importsDirectory,
       name: recording.id,
       extension: fileExtensions.import,

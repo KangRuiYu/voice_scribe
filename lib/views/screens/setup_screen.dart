@@ -9,7 +9,7 @@ import '../../models/model_downloader.dart';
 import '../../models/requirement_manager.dart';
 import '../../models/voice_scribe_state.dart';
 import '../../utils/app_dir.dart';
-import '../../utils/file_dir_generator.dart' as file_dir_generator;
+import '../../utils/file_utils.dart' as file_dir_generator;
 import '../../utils/file_extensions.dart' as file_extensions;
 import '../../utils/model_manager.dart' as model_manager;
 import '../../utils/theme_constants.dart' as theme_constants;

@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 
-import '../utils/file_dir_generator.dart' as fileDirGenerator;
+import '../utils/file_utils.dart' as file_utils;
 import '../utils/file_extensions.dart' as fileExtensions;
 
 const Uuid _uuid = Uuid();
@@ -40,13 +40,13 @@ class Recording {
   /// Name of the recording (Corresponds to the name of the asset directory).
   String get name => path.basenameWithoutExtension(sourceDirectory.path);
 
-  File get audioFile => fileDirGenerator.fileIn(
+  File get audioFile => file_utils.fileIn(
         parentDirectory: sourceDirectory,
         name: name,
         extension: fileExtensions.audio,
       );
 
-  File get transcriptFile => fileDirGenerator.fileIn(
+  File get transcriptFile => file_utils.fileIn(
         parentDirectory: sourceDirectory,
         name: name,
         extension: fileExtensions.transcript,
@@ -54,7 +54,7 @@ class Recording {
 
   /// Location where the metadata (duration, date) of this recording is actually
   /// stored.
-  File get metadataFile => fileDirGenerator.fileIn(
+  File get metadataFile => file_utils.fileIn(
         parentDirectory: sourceDirectory,
         name: name,
         extension: fileExtensions.metadata,
@@ -88,7 +88,7 @@ class Recording {
   /// If no metadata file exists, then a [MissingMetadataFile] exception is
   /// thrown.
   static Future<Recording> existing(Directory sourceDirectory) async {
-    File metadataFile = fileDirGenerator.fileIn(
+    File metadataFile = file_utils.fileIn(
       parentDirectory: sourceDirectory,
       name: path.basename(sourceDirectory.path),
       extension: fileExtensions.metadata,

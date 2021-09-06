@@ -14,7 +14,7 @@ import '../../models/recordings_manager.dart';
 import '../../models/stream_transcriber.dart';
 import '../../models/transcript_event_provider.dart';
 import '../../utils/app_dir.dart';
-import '../../utils/file_dir_generator.dart' as fileDirGenerator;
+import '../../utils/file_utils.dart' as file_utils;
 import '../../utils/file_extensions.dart' as fileExtensions;
 import '../../utils/formatter.dart' as formatter;
 import '../../utils/theme_constants.dart' as themeConstants;
@@ -36,12 +36,12 @@ class RecordingScreen extends StatelessWidget {
     if (recorder.active) return;
 
     Uuid uuid = Uuid();
-    File tempRecordingFile = fileDirGenerator.fileIn(
+    File tempRecordingFile = file_utils.fileIn(
       parentDirectory: appDirs.tempDirectory,
       name: uuid.v1(),
       extension: fileExtensions.temp,
     );
-    File tempTranscriptFile = fileDirGenerator.fileIn(
+    File tempTranscriptFile = file_utils.fileIn(
       parentDirectory: appDirs.tempDirectory,
       name: uuid.v1(),
       extension: fileExtensions.temp,
@@ -86,7 +86,7 @@ class RecordingScreen extends StatelessWidget {
     // Dynamically created save function.
     final Future<void> Function() onSave = () async {
       // Get/Create source directory.
-      Directory recordingSourceDir = fileDirGenerator.directoryIn(
+      Directory recordingSourceDir = file_utils.directoryIn(
         parentDirectory: appDirs.recordingsDirectory,
         name: nameController.text.isNotEmpty
             ? nameController.text

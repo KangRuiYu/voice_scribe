@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
-import 'file_dir_generator.dart' as fileDirGenerator;
+import 'file_utils.dart' as file_utils;
 
 /// Handles retrieving paths to model files.
 
@@ -26,7 +26,7 @@ Future<String> firstAvailableModel() async {
 /// If none are available, an empty string is returned.
 Future<String> firstModelIn(Directory modelDirectory) async {
   for (String modelName in supportedModels) {
-    Directory model = fileDirGenerator.directoryIn(
+    Directory model = file_utils.directoryIn(
       parentDirectory: modelDirectory,
       name: modelName,
     );

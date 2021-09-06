@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart' as pathProvider;
 
-import 'file_dir_generator.dart' as fileDirGenerator;
+import 'file_utils.dart' as file_utils;
 
 /// Provides tools for managing and retrieve common application directories.
 
@@ -43,7 +43,7 @@ class AppDirs {
 /// The directory returned may not exist.
 Directory defaultRecordingsDir() {
   if (Platform.isAndroid) {
-    return fileDirGenerator.directoryIn(
+    return file_utils.directoryIn(
       parentDirectory: Directory('/storage/emulated/0/'),
       name: default_recording_dir_name,
     );
@@ -56,7 +56,7 @@ Directory defaultRecordingsDir() {
 ///
 /// The directory returned may not exist.
 Future<Directory> defaultModelDir() async {
-  return fileDirGenerator.directoryIn(
+  return file_utils.directoryIn(
     parentDirectory: await pathProvider.getExternalStorageDirectory(),
     name: default_model_dir_name,
   );
@@ -66,7 +66,7 @@ Future<Directory> defaultModelDir() async {
 ///
 /// The directory returned may not exist.
 Future<Directory> defaultImportsDir() async {
-  return fileDirGenerator.directoryIn(
+  return file_utils.directoryIn(
     parentDirectory: await pathProvider.getExternalStorageDirectory(),
     name: default_import_dir_name,
   );
@@ -76,7 +76,7 @@ Future<Directory> defaultImportsDir() async {
 ///
 /// The directory returned may not exist.
 Future<Directory> defaultTempDir() async {
-  return fileDirGenerator.directoryIn(
+  return file_utils.directoryIn(
     parentDirectory: await pathProvider.getExternalStorageDirectory(),
     name: default_temp_dir_name,
   );
