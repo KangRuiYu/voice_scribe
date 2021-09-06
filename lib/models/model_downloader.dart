@@ -9,15 +9,26 @@ import 'package:path/path.dart' as path;
 
 enum DownloadState { none, downloading, unzipping, finished }
 
+/// Downloads and unzips transcription model located in Firebase and notifies
+/// any listeners on the current progress.
 class ModelDownloader extends ChangeNotifier {
   DownloadState get state => _state;
   DownloadState _state = DownloadState.none;
 
+  /// Ranges from 0 to 1.
   double get progress => _progress;
   double _progress = 0.0;
 
+  /// Used by the [cancel] method.
   DownloadTask _downloadTask;
 
+  /// Downloads model with [modelName] and saving it into [savePath].
+  ///
+  /// Model will first be downloaded to the given [downloadPath] then unzipped
+  /// into [unzipPath].
+  /// Any left over files will be removed.
+  /// If there is a task in progress (ie. downloading or unzipping), then a
+  /// [DownloadInProgress] exception is thrown.
   Future<void> download({
     @required String modelName,
     @required String downloadPath,
@@ -48,12 +59,19 @@ class ModelDownloader extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Cancels any ongoing download task.
+  ///
+  /// Updates the [state] to none and notifies listeners, regardless of whether
+  /// or not there is an ongoing task.
   Future<void> cancel() async {
     await _downloadTask?.cancel();
     _state = DownloadState.none;
     notifyListeners();
   }
 
+  /// Downloads file with [filePath] in Firebase Storage to [outputPath].
+  ///
+  /// Will notify listeners of progress for every snapshot.
   Future<void> _fireStorageDownload(String filePath, String outputPath) async {
     File outputFile = await File(outputPath).create(recursive: true);
     Reference model = FirebaseStorage.instance.ref(filePath);
@@ -74,6 +92,9 @@ class ModelDownloader extends ChangeNotifier {
     _snapshotSub.cancel();
   }
 
+  /// Unzips the file with [zipFilePath] into [outputPath].
+  ///
+  /// Notifies listeners of progress for each file that is unzipped.
   Future<void> _unzipFile(String zipFilePath, String outputPath) async {
     Archive archive = ZipDecoder().decodeBytes(
       await File(zipFilePath).readAsBytes(),
