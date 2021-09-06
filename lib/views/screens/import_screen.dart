@@ -61,13 +61,13 @@ class ImportScreen extends StatelessWidget {
                 ChangeNotifierProvider(create: (_) => Selector()),
               ],
               child: Scaffold(
-                appBar: AppBar(title: const _SelectedCountLabel()),
+                appBar: AppBar(
+                  title: const _SelectedCountLabel(),
+                  actions: [const _SelectOptionsButton()],
+                ),
                 floatingActionButton: const _ImportButton(),
                 floatingActionButtonLocation:
-                    FloatingActionButtonLocation.centerDocked,
-                bottomNavigationBar: const ThemedBottomAppBar(
-                  rightChild: const _SelectOptionsButton(),
-                ),
+                    FloatingActionButtonLocation.centerFloat,
                 body: const _RecordingList(),
               ),
             );
