@@ -71,13 +71,17 @@ class RecordingsManager extends ChangeNotifier
     sort(); // NotifyListeners is called here.
   }
 
-  /// Adds new [recording] to the list of known recordings.
+  /// Inserts new [recording] to the list of known recordings in the current
+  /// sorting order.
   ///
   /// Creates a new import file for it.
   Future<void> add(Recording recording) async {
     _recordings.add(recording);
     await _createImportFile(recording);
-    notifyListeners();
+    sort(
+      sortFunction: _currentSortOrder,
+      reversed: _sortReversed,
+    ); // NotifyListeners is called here.
   }
 
   /// Removes [recording] from the list of known recordings.
