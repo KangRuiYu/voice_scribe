@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:logger/logger.dart' as logger;
 
 import '../../exceptions/player_exceptions.dart';
 import 'recording.dart';
 
 class Player extends ChangeNotifier {
-  final FlutterSoundPlayer _player = FlutterSoundPlayer();
+  final FlutterSoundPlayer _player = FlutterSoundPlayer(
+    logLevel: logger.Level.info,
+  );
   Recording _recording; // The recording being played
   bool _finished = false; // If the recording has finished playing
 
