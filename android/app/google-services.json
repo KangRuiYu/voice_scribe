@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "4529016172",
+    "project_id": "voice-scribe",
+    "storage_bucket": "voice-scribe.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:4529016172:android:f7b6255284f0add41df749",
+        "android_client_info": {
+          "package_name": "com.kadevy.voice_scribe"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "4529016172-seegu68dg7mlks1ouo7jrde0ht703sb9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAxKsyJRNp1E7f5i81Jijp_oaBLlVYLv0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "4529016172-seegu68dg7mlks1ouo7jrde0ht703sb9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
