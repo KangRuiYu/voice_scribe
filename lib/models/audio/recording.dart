@@ -4,12 +4,9 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
-import 'package:uuid/uuid.dart';
 
 import 'package:voice_scribe/constants/file_extensions.dart' as file_extensions;
 import 'package:voice_scribe/utils/file_utils.dart' as file_utils;
-
-const Uuid _uuid = Uuid();
 
 const _current_version = '0.3';
 
@@ -78,7 +75,7 @@ class Recording {
     this.id,
   }) {
     this.date ??= DateTime.now();
-    this.id ??= _uuid.v1();
+    this.id ??= file_utils.uniqueID();
   }
 
   /// Factory function that creates a recording pointing at the given

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/public/flutter_sound_recorder.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 import 'package:vosk_dart/transcript_event.dart';
 import 'package:tuple/tuple.dart';
 
@@ -35,15 +34,14 @@ class RecordingScreen extends StatelessWidget {
   }) async {
     if (recorder.active) return;
 
-    Uuid uuid = Uuid();
     File tempRecordingFile = file_utils.fileIn(
       parentDirectory: appDirs.tempDirectory,
-      name: uuid.v1(),
+      name: file_utils.uniqueID(),
       extension: file_extensions.temp,
     );
     File tempTranscriptFile = file_utils.fileIn(
       parentDirectory: appDirs.tempDirectory,
-      name: uuid.v1(),
+      name: file_utils.uniqueID(),
       extension: file_extensions.temp,
     );
 

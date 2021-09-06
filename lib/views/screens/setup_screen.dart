@@ -146,12 +146,12 @@ class _ModelCard extends StatelessWidget {
     final String modelName = model_utils.supportedModels[0] + '.zip';
     final File downloadFile = file_dir_generator.fileIn(
       parentDirectory: appDirs.tempDirectory,
-      name: file_dir_generator.uniqueName(),
+      name: file_dir_generator.uniqueID(),
       extension: file_extensions.temp,
     );
     final Directory unzipDir = file_dir_generator.directoryIn(
       parentDirectory: appDirs.tempDirectory,
-      name: file_dir_generator.uniqueName(),
+      name: file_dir_generator.uniqueID(),
     );
     final Directory saveDir = file_dir_generator.directoryIn(
       parentDirectory: appDirs.modelsDirectory,

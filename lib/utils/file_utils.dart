@@ -35,6 +35,6 @@ File fileIn({
 }
 
 /// Used to generate random unique names.
-String uniqueName() {
+String uniqueID() {
   return _uuid.v1();
 }
