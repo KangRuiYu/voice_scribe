@@ -9,7 +9,7 @@ import 'package:vosk_dart/vosk_dart.dart';
 
 import '../exceptions/transcriber_exceptions.dart';
 import 'future_initializer.dart';
-import '../utils/model_manager.dart' as modelManager;
+import '../utils/model_utils.dart' as model_utils;
 
 /// Used to transcribe the audio data coming from a stream.
 ///
@@ -33,12 +33,17 @@ class StreamTranscriber with FutureInitializer<StreamTranscriber> {
   /// Internal Vosk instance that does the heavy work.
   final VoskInstance _voskInstance = VoskInstance();
 
+  /// Will be used to get the first available model for transcription.
+  final Directory _modelDirectory;
+
   /// The subscription to audio data that is fed to Vosk.
   StreamSubscription<Food> _audioSub;
 
   BytesBuilder _internalBuffer = BytesBuilder();
 
   File _transcript = File('');
+
+  StreamTranscriber(this._modelDirectory);
 
   /// Starts a new [_transcript] file.
   ///
@@ -102,8 +107,8 @@ class StreamTranscriber with FutureInitializer<StreamTranscriber> {
   Future<StreamTranscriber> onInitialize(Map<String, dynamic> args) async {
     await _voskInstance.allocateSingleThread();
 
-    String modelPath = await modelManager.firstAvailableModel();
-    if (modelPath == null) throw NoAvailableModel();
+    String modelPath = await model_utils.firstModelIn(_modelDirectory);
+    if (modelPath.isEmpty) throw NoAvailableModel();
     await _voskInstance.openModel(modelPath);
 
     return this;

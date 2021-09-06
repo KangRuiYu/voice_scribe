@@ -11,7 +11,7 @@ import '../../models/voice_scribe_state.dart';
 import '../../utils/app_dir.dart';
 import '../../utils/file_utils.dart' as file_dir_generator;
 import '../../utils/file_extensions.dart' as file_extensions;
-import '../../utils/model_manager.dart' as model_manager;
+import '../../utils/model_utils.dart' as model_utils;
 import '../../utils/theme_constants.dart' as theme_constants;
 
 const String _storage_permission_description =
@@ -139,7 +139,7 @@ class _ModelCard extends StatelessWidget {
   Future<void> _downloadModel(BuildContext context) async {
     AppDirs appDirs = context.read<AppDirs>();
 
-    final String modelName = model_manager.supportedModels[0] + '.zip';
+    final String modelName = model_utils.supportedModels[0] + '.zip';
     final File downloadFile = file_dir_generator.fileIn(
       parentDirectory: appDirs.tempDirectory,
       name: file_dir_generator.uniqueName(),
@@ -151,7 +151,7 @@ class _ModelCard extends StatelessWidget {
     );
     final Directory saveDir = file_dir_generator.directoryIn(
       parentDirectory: appDirs.modelsDirectory,
-      name: model_manager.supportedModels[0],
+      name: model_utils.supportedModels[0],
     );
 
     await modelDownloader.download(

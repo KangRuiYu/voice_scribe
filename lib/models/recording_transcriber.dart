@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:vosk_dart/transcript_event.dart';
@@ -7,7 +8,7 @@ import 'package:vosk_dart/vosk_dart.dart';
 
 import '../exceptions/transcriber_exceptions.dart';
 import 'recording.dart';
-import '../utils/model_manager.dart' as modelManager;
+import '../utils/model_utils.dart' as model_utils;
 
 /// Different states for a recording in [RecordingTranscriber].
 enum RecordingState { processing, queued, notQueued }
@@ -30,6 +31,9 @@ class RecordingTranscriber extends ChangeNotifier {
   /// Vosk instance that does the transcribing.
   final VoskInstance _voskInstance = VoskInstance();
 
+  /// Will be used to search for the first available transcription model to use.
+  final Directory _modelDirectory;
+
   /// Recordings that will be transcribed.
   final Queue<Recording> _queue = Queue<Recording>();
 
@@ -39,7 +43,7 @@ class RecordingTranscriber extends ChangeNotifier {
   /// state can be updated.
   StreamSubscription<dynamic> _progressSub;
 
-  RecordingTranscriber() {
+  RecordingTranscriber(this._modelDirectory) {
     _progressSub = _voskInstance.eventStream.listen(_onProgress);
   }
 
@@ -128,8 +132,8 @@ class RecordingTranscriber extends ChangeNotifier {
       await _voskInstance.allocateSingleThread();
     }
     if (!_voskInstance.modelOpened) {
-      String modelPath = await modelManager.firstAvailableModel();
-      if (modelPath == null) throw NoAvailableModel();
+      String modelPath = await model_utils.firstModelIn(_modelDirectory);
+      if (modelPath.isEmpty) throw NoAvailableModel();
       await _voskInstance.openModel(modelPath);
     }
   }

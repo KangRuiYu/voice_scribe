@@ -5,7 +5,7 @@ import 'recording_transcriber.dart';
 import 'recordings_manager.dart';
 import 'stream_transcriber.dart';
 import '../utils/app_dir.dart';
-import '../utils/model_manager.dart' as model_manager;
+import '../utils/model_utils.dart' as model_utils;
 
 const String storage_requirement = 'Storage Permissions';
 const String microphone_requirement = 'Microphone Permissions';
@@ -63,12 +63,12 @@ class VoiceScribeState {
       ),
       model_requirement: Requirement<String>(
         updateFunction: () =>
-            model_manager.firstModelIn(_appDirs.modelsDirectory),
+            model_utils.firstModelIn(_appDirs.modelsDirectory),
         testFunction: (String modelPath) => modelPath.isNotEmpty,
       ),
     });
-    _recordingTranscriber = RecordingTranscriber();
-    _streamTranscriber = StreamTranscriber();
+    _recordingTranscriber = RecordingTranscriber(_appDirs.modelsDirectory);
+    _streamTranscriber = StreamTranscriber(_appDirs.modelsDirectory);
 
     await _requirementsManager.updateAll();
     await _deleteTemporaryDirectory();
