@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sound/public/flutter_sound_player.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/player.dart';
+import '../../models/audio/player.dart';
 import '../../utils/formatter.dart' as formatter;
-import '../../utils/theme_constants.dart' as theme_constants;
+import '../../constants/theme_constants.dart' as theme_constants;
 
 /// Displays player progress and allows playback to be repositioned.
 ///

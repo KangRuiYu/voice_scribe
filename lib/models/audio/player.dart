@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 
-import '../exceptions/player_exceptions.dart';
+import '../../exceptions/player_exceptions.dart';
 import 'recording.dart';
 
 class Player extends ChangeNotifier {

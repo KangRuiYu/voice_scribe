@@ -3,10 +3,10 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/recording.dart';
+import '../../models/audio/recording.dart';
 import '../../models/recordings_manager.dart';
 import '../../utils/formatter.dart';
-import '../../utils/theme_constants.dart' as theme_constants;
+import '../../constants/theme_constants.dart' as theme_constants;
 import '../widgets/custom_widgets.dart';
 
 /// Keeps track of selected recordings while notifying any listeners.

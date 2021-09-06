@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 
-import '../utils/file_utils.dart' as file_utils;
-import '../utils/file_extensions.dart' as file_extensions;
+import '../../utils/file_utils.dart' as file_utils;
+import '../../constants/file_extensions.dart' as file_extensions;
 
 const Uuid _uuid = Uuid();
 

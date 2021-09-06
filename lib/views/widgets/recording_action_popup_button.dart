@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/recording.dart';
-import '../../models/recording_transcriber.dart';
+import '../../models/audio/recording.dart';
+import '../../models/transcript/recording_transcriber.dart';
 import '../../models/recordings_manager.dart';
 import 'confirmation_popup.dart';
 

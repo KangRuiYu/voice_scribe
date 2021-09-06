@@ -8,11 +8,11 @@ import 'main_screen.dart';
 import '../../models/model_downloader.dart';
 import '../../models/requirement_manager.dart';
 import '../../models/voice_scribe_state.dart';
-import '../../utils/app_dir.dart';
+import '../../models/app_dir.dart';
 import '../../utils/file_utils.dart' as file_dir_generator;
-import '../../utils/file_extensions.dart' as file_extensions;
+import '../../constants/file_extensions.dart' as file_extensions;
 import '../../utils/model_utils.dart' as model_utils;
-import '../../utils/theme_constants.dart' as theme_constants;
+import '../../constants/theme_constants.dart' as theme_constants;
 
 const String _storage_permission_description =
     'Used to read and write recordings onto your phone\'s storage.';

@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:voice_scribe/models/app_life_cycle_observer.dart';
 
 import 'models/voice_scribe_state.dart';
-import 'utils/theme_constants.dart' as theme_constants;
+import 'constants/theme_constants.dart' as theme_constants;
 import 'views/screens/main_screen.dart';
 import 'views/screens/setup_screen.dart';
 

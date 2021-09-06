@@ -8,16 +8,16 @@ import 'package:uuid/uuid.dart';
 import 'package:vosk_dart/transcript_event.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../models/recorder.dart';
-import '../../models/recording.dart';
+import '../../models/audio/recorder.dart';
+import '../../models/audio/recording.dart';
 import '../../models/recordings_manager.dart';
-import '../../models/stream_transcriber.dart';
-import '../../models/transcript_event_provider.dart';
-import '../../utils/app_dir.dart';
+import '../../models/transcript/stream_transcriber.dart';
+import '../../models/transcript/transcript_event_provider.dart';
+import '../../models/app_dir.dart';
 import '../../utils/file_utils.dart' as file_utils;
-import '../../utils/file_extensions.dart' as file_extensions;
+import '../../constants/file_extensions.dart' as file_extensions;
 import '../../utils/formatter.dart' as formatter;
-import '../../utils/theme_constants.dart' as theme_constants;
+import '../../constants/theme_constants.dart' as theme_constants;
 import '../widgets/custom_widgets.dart';
 import '../widgets/transcript_result.dart';
 

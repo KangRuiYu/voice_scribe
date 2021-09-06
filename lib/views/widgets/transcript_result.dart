@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../utils/formatter.dart' as formatter;
-import '../../utils/theme_constants.dart' as theme_constants;
+import '../../constants/theme_constants.dart' as theme_constants;
 
 /// Widget displaying contents of a single transcription result.
 class TranscriptResult extends StatelessWidget {

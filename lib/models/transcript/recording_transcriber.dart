@@ -6,9 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:vosk_dart/transcript_event.dart';
 import 'package:vosk_dart/vosk_dart.dart';
 
-import '../exceptions/transcriber_exceptions.dart';
-import 'recording.dart';
-import '../utils/model_utils.dart' as model_utils;
+import '../../exceptions/transcriber_exceptions.dart';
+import '../audio/recording.dart';
+import '../../utils/model_utils.dart' as model_utils;
 
 /// Different states for a recording in [RecordingTranscriber].
 enum RecordingState { processing, queued, notQueued }

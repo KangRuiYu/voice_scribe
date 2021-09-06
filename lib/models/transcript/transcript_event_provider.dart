@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
-import 'package:voice_scribe/models/future_initializer.dart';
+import 'package:voice_scribe/models/mixins/future_initializer.dart';
 import 'package:vosk_dart/transcript_event.dart';
 
 /// Keeps track of [TranscriptEvents] from an event stream and notifies

@@ -5,10 +5,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
-import 'future_initializer.dart';
+import 'mixins/future_initializer.dart';
 import '../utils/file_utils.dart' as file_utils;
-import '../utils/file_extensions.dart' as file_extensions;
-import 'recording.dart';
+import '../constants/file_extensions.dart' as file_extensions;
+import 'audio/recording.dart';
 
 /// Manages and provides access to a list of known recordings.
 class RecordingsManager extends ChangeNotifier

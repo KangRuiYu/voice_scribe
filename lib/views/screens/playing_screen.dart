@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/player.dart';
-import '../../models/recording.dart';
-import '../../models/transcript_reader.dart' as transcriptReader;
-import '../../utils/theme_constants.dart' as theme_constants;
+import '../../models/audio/player.dart';
+import '../../models/audio/recording.dart';
+import '../../models/transcript/transcript_reader.dart' as transcriptReader;
+import '../../constants/theme_constants.dart' as theme_constants;
 import '../widgets/playback_slider.dart';
 import '../widgets/custom_widgets.dart';
 import '../widgets/transcript_result.dart';

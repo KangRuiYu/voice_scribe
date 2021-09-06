@@ -6,7 +6,7 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'package:logger/logger.dart' as logger;
 import 'package:permission_handler/permission_handler.dart';
 
-import '../exceptions/recorder_exceptions.dart';
+import '../../exceptions/recorder_exceptions.dart';
 import 'wav_writer.dart';
 
 class Recorder extends ChangeNotifier {

@@ -7,9 +7,9 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'package:vosk_dart/transcript_event.dart';
 import 'package:vosk_dart/vosk_dart.dart';
 
-import '../exceptions/transcriber_exceptions.dart';
-import 'future_initializer.dart';
-import '../utils/model_utils.dart' as model_utils;
+import '../../exceptions/transcriber_exceptions.dart';
+import '../mixins/future_initializer.dart';
+import '../../utils/model_utils.dart' as model_utils;
 
 /// Used to transcribe the audio data coming from a stream.
 ///

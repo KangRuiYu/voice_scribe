@@ -1,10 +1,10 @@
 import 'package:permission_handler/permission_handler.dart';
 import 'package:voice_scribe/models/requirement_manager.dart';
 
-import 'recording_transcriber.dart';
+import 'transcript/recording_transcriber.dart';
 import 'recordings_manager.dart';
-import 'stream_transcriber.dart';
-import '../utils/app_dir.dart';
+import 'transcript/stream_transcriber.dart';
+import 'app_dir.dart';
 import '../utils/model_utils.dart' as model_utils;
 
 const String storage_requirement = 'Storage Permissions';
