@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/audio/recording.dart';
-import '../../models/transcript/recording_transcriber.dart';
-import '../../models/recordings_manager.dart';
-import 'confirmation_popup.dart';
+import 'package:voice_scribe/models/audio/recording.dart';
+import 'package:voice_scribe/models/recordings_manager.dart';
+import 'package:voice_scribe/models/transcript/recording_transcriber.dart';
+import 'package:voice_scribe/views/widgets/confirmation_popup.dart';
 
 /// Button showing a list of actions for [recording].
 class RecordingActionPopupButton extends StatelessWidget {

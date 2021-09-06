@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:logger/logger.dart' as logger;
 
-import '../../exceptions/player_exceptions.dart';
-import 'recording.dart';
+import 'package:voice_scribe/exceptions/player_exceptions.dart';
+import 'package:voice_scribe/models/audio/recording.dart';
 
 class Player extends ChangeNotifier {
   final FlutterSoundPlayer _player = FlutterSoundPlayer(

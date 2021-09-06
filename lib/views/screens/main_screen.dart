@@ -2,11 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'import_screen.dart';
-import '../../models/recordings_manager.dart';
-import 'recording_screen.dart';
-import '../widgets/custom_widgets.dart';
-import '../widgets/recordings_display.dart';
+import 'package:voice_scribe/models/recordings_manager.dart';
+import 'package:voice_scribe/views/screens/import_screen.dart';
+import 'package:voice_scribe/views/screens/recording_screen.dart';
+import 'package:voice_scribe/views/widgets/custom_widgets.dart';
+import 'package:voice_scribe/views/widgets/recordings_display.dart';
 
 /// The starting screen of the application.
 class MainScreen extends StatelessWidget {

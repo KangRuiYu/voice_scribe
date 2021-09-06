@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../constants/theme_constants.dart' as theme_constants;
+import 'package:voice_scribe/constants/theme_constants.dart' as theme_constants;
 
 /// A themed bottom app bar.
 class ThemedBottomAppBar extends StatelessWidget {

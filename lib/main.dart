@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:voice_scribe/models/app_life_cycle_observer.dart';
 
-import 'models/voice_scribe_state.dart';
-import 'constants/theme_constants.dart' as theme_constants;
-import 'views/screens/main_screen.dart';
-import 'views/screens/setup_screen.dart';
+import 'package:voice_scribe/constants/theme_constants.dart' as theme_constants;
+import 'package:voice_scribe/models/app_life_cycle_observer.dart';
+import 'package:voice_scribe/models/voice_scribe_state.dart';
+import 'package:voice_scribe/views/screens/main_screen.dart';
+import 'package:voice_scribe/views/screens/setup_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart' as pathProvider;
 
-import '../utils/file_utils.dart' as file_utils;
+import 'package:voice_scribe/utils/file_utils.dart' as file_utils;
 
 /// Provides tools for managing and retrieve common application directories.
 

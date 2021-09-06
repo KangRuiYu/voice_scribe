@@ -1,11 +1,11 @@
 import 'package:permission_handler/permission_handler.dart';
-import 'package:voice_scribe/models/requirement_manager.dart';
 
-import 'transcript/recording_transcriber.dart';
-import 'recordings_manager.dart';
-import 'transcript/stream_transcriber.dart';
-import 'app_dir.dart';
-import '../utils/model_utils.dart' as model_utils;
+import 'package:voice_scribe/models/app_dir.dart';
+import 'package:voice_scribe/models/recordings_manager.dart';
+import 'package:voice_scribe/models/requirement_manager.dart';
+import 'package:voice_scribe/models/transcript/recording_transcriber.dart';
+import 'package:voice_scribe/models/transcript/stream_transcriber.dart';
+import 'package:voice_scribe/utils/model_utils.dart' as model_utils;
 
 const String storage_requirement = 'Storage Permissions';
 const String microphone_requirement = 'Microphone Permissions';

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/audio/player.dart';
-import '../../models/audio/recording.dart';
-import '../../models/transcript/transcript_reader.dart' as transcriptReader;
-import '../../constants/theme_constants.dart' as theme_constants;
-import '../widgets/playback_slider.dart';
-import '../widgets/custom_widgets.dart';
-import '../widgets/transcript_result.dart';
+import 'package:voice_scribe/constants/theme_constants.dart' as theme_constants;
+import 'package:voice_scribe/models/audio/player.dart';
+import 'package:voice_scribe/models/audio/recording.dart';
+import 'package:voice_scribe/models/transcript/transcript_reader.dart'
+    as transcriptReader;
+import 'package:voice_scribe/views/widgets/playback_slider.dart';
+import 'package:voice_scribe/views/widgets/custom_widgets.dart';
+import 'package:voice_scribe/views/widgets/transcript_result.dart';
 
 class PlayingScreen extends StatelessWidget {
   final Recording recording;

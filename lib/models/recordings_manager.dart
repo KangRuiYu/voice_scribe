@@ -5,10 +5,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
-import 'mixins/future_initializer.dart';
-import '../utils/file_utils.dart' as file_utils;
-import '../constants/file_extensions.dart' as file_extensions;
-import 'audio/recording.dart';
+import 'package:voice_scribe/constants/file_extensions.dart' as file_extensions;
+import 'package:voice_scribe/models/audio/recording.dart';
+import 'package:voice_scribe/models/mixins/future_initializer.dart';
+import 'package:voice_scribe/utils/file_utils.dart' as file_utils;
 
 /// Manages and provides access to a list of known recordings.
 class RecordingsManager extends ChangeNotifier

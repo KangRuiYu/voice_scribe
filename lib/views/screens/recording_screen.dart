@@ -8,18 +8,18 @@ import 'package:uuid/uuid.dart';
 import 'package:vosk_dart/transcript_event.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../models/audio/recorder.dart';
-import '../../models/audio/recording.dart';
-import '../../models/recordings_manager.dart';
-import '../../models/transcript/stream_transcriber.dart';
-import '../../models/transcript/transcript_event_provider.dart';
-import '../../models/app_dir.dart';
-import '../../utils/file_utils.dart' as file_utils;
-import '../../constants/file_extensions.dart' as file_extensions;
-import '../../utils/formatter.dart' as formatter;
-import '../../constants/theme_constants.dart' as theme_constants;
-import '../widgets/custom_widgets.dart';
-import '../widgets/transcript_result.dart';
+import 'package:voice_scribe/constants/file_extensions.dart' as file_extensions;
+import 'package:voice_scribe/constants/theme_constants.dart' as theme_constants;
+import 'package:voice_scribe/models/app_dir.dart';
+import 'package:voice_scribe/models/audio/recorder.dart';
+import 'package:voice_scribe/models/audio/recording.dart';
+import 'package:voice_scribe/models/recordings_manager.dart';
+import 'package:voice_scribe/models/transcript/stream_transcriber.dart';
+import 'package:voice_scribe/models/transcript/transcript_event_provider.dart';
+import 'package:voice_scribe/utils/file_utils.dart' as file_utils;
+import 'package:voice_scribe/utils/formatter.dart' as formatter;
+import 'package:voice_scribe/views/widgets/custom_widgets.dart';
+import 'package:voice_scribe/views/widgets/transcript_result.dart';
 
 class RecordingScreen extends StatelessWidget {
   final Recorder recorder = Recorder();

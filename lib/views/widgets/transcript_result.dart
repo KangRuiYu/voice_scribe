@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/formatter.dart' as formatter;
-import '../../constants/theme_constants.dart' as theme_constants;
+import 'package:voice_scribe/constants/theme_constants.dart' as theme_constants;
+import 'package:voice_scribe/utils/formatter.dart' as formatter;
 
 /// Widget displaying contents of a single transcription result.
 class TranscriptResult extends StatelessWidget {

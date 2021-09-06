@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-import 'main_screen.dart';
-import '../../models/model_downloader.dart';
-import '../../models/requirement_manager.dart';
-import '../../models/voice_scribe_state.dart';
-import '../../models/app_dir.dart';
-import '../../utils/file_utils.dart' as file_dir_generator;
-import '../../constants/file_extensions.dart' as file_extensions;
-import '../../utils/model_utils.dart' as model_utils;
-import '../../constants/theme_constants.dart' as theme_constants;
+import 'package:voice_scribe/constants/file_extensions.dart' as file_extensions;
+import 'package:voice_scribe/constants/theme_constants.dart' as theme_constants;
+import 'package:voice_scribe/models/app_dir.dart';
+import 'package:voice_scribe/models/model_downloader.dart';
+import 'package:voice_scribe/models/requirement_manager.dart';
+import 'package:voice_scribe/models/voice_scribe_state.dart';
+import 'package:voice_scribe/utils/file_utils.dart' as file_dir_generator;
+import 'package:voice_scribe/utils/model_utils.dart' as model_utils;
+import 'package:voice_scribe/views/screens/main_screen.dart';
 
 const String _storage_permission_description =
     'Used to read and write recordings onto your phone\'s storage.';
