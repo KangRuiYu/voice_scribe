@@ -132,14 +132,15 @@ class RecordingsManager extends ChangeNotifier
   ///
   /// Will not work properly if [load] is not called beforehand.
   Future<List<Recording>> unknownRecordingFiles() async {
-    Set<Directory> knownSourceDirectories = {};
+    Set<String> knownSourceDirectoryPaths = {};
     for (Recording recording in _recordings) {
-      knownSourceDirectories.add(recording.sourceDirectory);
+      knownSourceDirectoryPaths.add(recording.sourceDirectory.path);
     }
 
     List<Recording> result = [];
     await for (FileSystemEntity entity in recordingsDirectory.list()) {
-      if (entity is Directory && !knownSourceDirectories.contains(entity)) {
+      if (entity is Directory &&
+          !knownSourceDirectoryPaths.contains(entity.path)) {
         File metadataFile = file_utils.fileIn(
           parentDirectory: entity,
           name: path.basename(entity.path),
