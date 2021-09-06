@@ -5,9 +5,11 @@ import 'recording_transcriber.dart';
 import 'recordings_manager.dart';
 import 'stream_transcriber.dart';
 import '../utils/app_dir.dart';
+import '../utils/model_manager.dart' as model_manager;
 
 const String storage_requirement = 'Storage Permissions';
 const String microphone_requirement = 'Microphone Permissions';
+const String model_requirement = 'Model Availability';
 
 /// The state of a running app instance.
 class VoiceScribeState {
@@ -59,6 +61,11 @@ class VoiceScribeState {
         updateFunction: () => Permission.microphone.status,
         testFunction: (PermissionStatus p) => p == PermissionStatus.granted,
       ),
+      model_requirement: Requirement<String>(
+        updateFunction: () =>
+            model_manager.firstModelIn(_appDirs.modelsDirectory),
+        testFunction: (String modelPath) => modelPath.isNotEmpty,
+      ),
     });
     _recordingTranscriber = RecordingTranscriber();
     _streamTranscriber = StreamTranscriber();
@@ -102,7 +109,7 @@ class VoiceScribeState {
 
   Future<void> _deleteTemporaryDirectory() async {
     if (await appDirs?.tempDirectory?.exists()) {
-      await appDirs?.tempDirectory?.delete();
+      await appDirs?.tempDirectory?.delete(recursive: true);
     }
   }
 }

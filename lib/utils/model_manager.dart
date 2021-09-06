@@ -7,13 +7,13 @@ import 'file_dir_generator.dart' as fileDirGenerator;
 
 /// Handles retrieving paths to model files.
 
-const List<String> _supportedModels = ['vosk-model-small-en-us-0.15'];
+const List<String> supportedModels = ['vosk-model-small-en-us-0.15'];
 const String _modelDirectoryName = 'models';
 
 /// Returns the path of the first model that exists. If none are available,
 /// null is returned instead.
 Future<String> firstAvailableModel() async {
-  for (String modelName in _supportedModels) {
+  for (String modelName in supportedModels) {
     String modelPath = await _getModelPath(modelName);
     if (Directory(modelPath).existsSync()) {
       return modelPath;
@@ -25,7 +25,7 @@ Future<String> firstAvailableModel() async {
 /// Returns the path of the first model that exists in the given [modelDirectory].
 /// If none are available, an empty string is returned.
 Future<String> firstModelIn(Directory modelDirectory) async {
-  for (String modelName in _supportedModels) {
+  for (String modelName in supportedModels) {
     Directory model = fileDirGenerator.directoryIn(
       parentDirectory: modelDirectory,
       name: modelName,
