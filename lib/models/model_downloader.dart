@@ -49,7 +49,7 @@ class ModelDownloader extends ChangeNotifier {
   }
 
   Future<void> cancel() async {
-    await _downloadTask.cancel();
+    await _downloadTask?.cancel();
     _state = DownloadState.none;
     notifyListeners();
   }
