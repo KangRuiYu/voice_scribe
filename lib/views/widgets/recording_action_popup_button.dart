@@ -12,6 +12,25 @@ class RecordingActionPopupButton extends StatelessWidget {
 
   const RecordingActionPopupButton(this.recording);
 
+  void _showRenamePopup(BuildContext context) {
+    final TextEditingController renameController = TextEditingController();
+    renameController.text = recording.name;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => ConfirmationPopup(
+        title: const Text('Rename'),
+        content: [TextField(controller: renameController)],
+        onConfirm: () async {
+          await recording.rename(renameController.text);
+          await context.read<RecordingsManager>().update(recording);
+        },
+        confirmationButtonLabel: 'Rename',
+        cancelButtonLabel: 'Cancel',
+      ),
+    );
+  }
+
   void _showRemoveFilePopup(BuildContext context) {
     showDialog(
       context: context,
@@ -58,8 +77,8 @@ class RecordingActionPopupButton extends StatelessWidget {
       itemBuilder: (BuildContext context) {
         return [
           PopupMenuItem(
-            value: () => _showRemoveFilePopup(context),
-            child: const Text('Edit'),
+            value: () => _showRenamePopup(context),
+            child: const Text('Rename'),
           ),
           PopupMenuItem(
             value: () => recording.transcriptFile.existsSync()

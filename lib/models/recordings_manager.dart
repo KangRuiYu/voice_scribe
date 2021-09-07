@@ -88,6 +88,20 @@ class RecordingsManager extends ChangeNotifier
     ); // NotifyListeners is called here.
   }
 
+  /// Updates the state of the manager and import files based on any changes
+  /// that may have occurred in [recording].
+  ///
+  /// Typically used after the [recording] has been moved or renamed.
+  /// If the recording is not in the current records, nothing happens.
+  Future<void> update(Recording recording) async {
+    if (_recordings.contains(recording) == false) {
+      return;
+    }
+
+    await _createImportFile(recording);
+    sort(sortFunction: _currentSortOrder, reversed: _sortReversed);
+  }
+
   /// Removes [recording] from the list of known recordings.
   ///
   /// Removes the import file for it.

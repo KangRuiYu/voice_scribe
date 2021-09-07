@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:voice_scribe/constants/file_extensions.dart' as file_extensions;
@@ -99,6 +100,30 @@ class Recording {
       version: metadata['version'],
       id: metadata['id'],
     );
+  }
+
+  /// Renames all inner files and the source directory itself to [newName].
+  Future<void> rename(String newName) async {
+    List<bool> fileExistsResults = await Future.wait([
+      audioFile.exists(),
+      transcriptFile.exists(),
+      metadataFile.exists(),
+    ]);
+
+    List<Future> fileRenameTasks = [];
+
+    if (fileExistsResults[0]) {
+      fileRenameTasks.add(audioFile.relativeRename(newName));
+    }
+    if (fileExistsResults[1]) {
+      fileRenameTasks.add(transcriptFile.relativeRename(newName));
+    }
+    if (fileExistsResults[2]) {
+      fileRenameTasks.add(metadataFile.relativeRename(newName));
+    }
+
+    await Future.wait(fileRenameTasks);
+    sourceDirectory = await sourceDirectory.relativeRename(newName);
   }
 
   /// Writes/Overwrites a metadata file containing the current metadata
