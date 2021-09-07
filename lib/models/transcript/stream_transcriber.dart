@@ -7,6 +7,7 @@ import 'package:flutter_sound_lite/flutter_sound.dart';
 import 'package:vosk_dart/transcript_event.dart';
 import 'package:vosk_dart/vosk_dart.dart';
 
+import 'package:voice_scribe/constants/audio_constants.dart' as audio_constants;
 import 'package:voice_scribe/exceptions/transcriber_exceptions.dart';
 import 'package:voice_scribe/models/mixins/future_initializer.dart';
 import 'package:voice_scribe/utils/model_utils.dart' as model_utils;
@@ -56,7 +57,10 @@ class StreamTranscriber with FutureInitializer<StreamTranscriber> {
     if (active) return;
 
     _transcript = File(tempLocation);
-    await _voskInstance.startNewTranscript(_transcript.path);
+    await _voskInstance.startNewTranscript(
+      _transcript.path,
+      audio_constants.sample_rate,
+    );
 
     _audioSub = audioStream.listen(_onAudioData);
   }

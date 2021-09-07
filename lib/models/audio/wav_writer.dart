@@ -18,6 +18,7 @@ class WavWriter {
   WavWriter({
     String outputPath,
     Stream<FoodData> audioStream,
+    int sampleRate,
   }) {
     _outputFile = File(outputPath);
     _outputFileSink = _outputFile.openWrite();
@@ -28,8 +29,10 @@ class WavWriter {
           if (_addedHeader) {
             _outputFileSink.add(food.data);
           } else {
-            var newBuffer =
-                await helper.pcmToWaveBuffer(inputBuffer: food.data);
+            var newBuffer = await helper.pcmToWaveBuffer(
+              inputBuffer: food.data,
+              sampleRate: sampleRate,
+            );
             _outputFileSink.add(
               newBuffer,
             );

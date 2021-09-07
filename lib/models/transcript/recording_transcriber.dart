@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vosk_dart/transcript_event.dart';
 import 'package:vosk_dart/vosk_dart.dart';
 
+import 'package:voice_scribe/constants/audio_constants.dart' as audio_constants;
 import 'package:voice_scribe/exceptions/transcriber_exceptions.dart';
 import 'package:voice_scribe/models/audio/recording.dart';
 import 'package:voice_scribe/utils/model_utils.dart' as model_utils;
@@ -119,6 +120,7 @@ class RecordingTranscriber extends ChangeNotifier {
 
     await _voskInstance.startNewTranscript(
       _currentRecording.transcriptFile.path,
+      audio_constants.sample_rate,
     );
     await _voskInstance.feedFile(_currentRecording.audioFile.path);
   }

@@ -6,6 +6,7 @@ import 'package:flutter_sound_lite/flutter_sound.dart';
 import 'package:logger/logger.dart' as logger;
 import 'package:permission_handler/permission_handler.dart';
 
+import 'package:voice_scribe/constants/audio_constants.dart' as audio_constants;
 import 'package:voice_scribe/exceptions/recorder_exceptions.dart';
 import 'package:voice_scribe/models/audio/wav_writer.dart';
 
@@ -61,6 +62,7 @@ class Recorder extends ChangeNotifier {
     _wavWriter = WavWriter(
       outputPath: tempLocation,
       audioStream: _audioData.stream,
+      sampleRate: audio_constants.sample_rate,
     );
 
     await _recorder.setSubscriptionDuration(Duration(milliseconds: 100));
@@ -68,8 +70,8 @@ class Recorder extends ChangeNotifier {
     await _recorder.startRecorder(
       codec: Codec.pcm16,
       toStream: _audioData.sink,
-      sampleRate: 16000,
-      bitRate: 64000,
+      sampleRate: audio_constants.sample_rate,
+      bitRate: audio_constants.bit_rate,
     );
 
     notifyListeners();

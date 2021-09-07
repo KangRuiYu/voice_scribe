@@ -89,7 +89,7 @@ class VoskInstance {
   /// to a file that already exists.
   /// Throws a [TranscriptInProgress] exception when called when a transcript
   /// is currently being processed.
-  Future<void> startNewTranscript(String transcriptPath) async {
+  Future<void> startNewTranscript(String transcriptPath, int sampleRate) async {
     if (!_threadAllocated) throw NoOpenThread();
     if (!_modelOpened) throw NoOpenModel();
     if (File(transcriptPath).existsSync()) throw TranscriptExists();
@@ -99,7 +99,7 @@ class VoskInstance {
       'startNewTranscript',
       {
         'transcriptPath': transcriptPath,
-        'sampleRate': 16000,
+        'sampleRate': sampleRate,
       },
     );
 
