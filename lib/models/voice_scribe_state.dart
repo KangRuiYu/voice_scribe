@@ -1,4 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:voice_scribe/models/app_dir.dart';
@@ -73,6 +75,12 @@ class VoiceScribeState {
 
     await _requirementsManager.updateAll();
     await _deleteTemporaryDirectory();
+
+    // Add missing vosk native license.
+    String voskLicense = await rootBundle.loadString('licenses/vosk_api.txt');
+    LicenseRegistry.addLicense(
+      () => Stream.value(LicenseEntryWithLineBreaks(['vosk_api'], voskLicense)),
+    );
   }
 
   /// Should be called when certain requirements have been met during

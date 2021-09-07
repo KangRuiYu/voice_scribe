@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:voice_scribe/constants/app_constants.dart' as app_constants;
+import 'package:voice_scribe/constants/theme_constants.dart' as theme_constants;
 import 'package:voice_scribe/models/recordings_manager.dart';
 import 'package:voice_scribe/views/screens/import_screen.dart';
 import 'package:voice_scribe/views/screens/recording_screen.dart';
@@ -155,8 +158,23 @@ class _MenuButton extends StatelessWidget {
           child: Text('Import Files'),
         ),
         PopupMenuItem(
-          value: () => null,
-          child: Text('Settings'),
+          value: () => showLicensePage(
+            context: context,
+            applicationName: app_constants.name,
+            applicationVersion: app_constants.version,
+            applicationLegalese: app_constants.description,
+            applicationIcon: Padding(
+              padding: const EdgeInsets.all(theme_constants.padding_small),
+              child: CircleAvatar(
+                radius: theme_constants.big_icon_size,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(100),
+                  child: Image.asset('assets/icon.png'),
+                ),
+              ),
+            ),
+          ),
+          child: Text('About'),
         ),
       ],
     );
