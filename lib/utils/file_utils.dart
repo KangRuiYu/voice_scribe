@@ -42,7 +42,7 @@ extension FileRelativeRename on File {
   /// be reused.
   Future<File> relativeRename(String newName, [String extension = '']) {
     if (extension.isEmpty) {
-      extension = path.extension(newName);
+      extension = path.extension(this.path);
     }
     String newPath = path.join(this.parent.path, '$newName$extension');
     return this.rename(newPath);
