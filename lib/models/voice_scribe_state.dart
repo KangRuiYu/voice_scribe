@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:voice_scribe/models/app_dir.dart';
@@ -101,10 +102,16 @@ class VoiceScribeState {
   /// Closes any resources if they exist.
   /// Can be safely called even when [onBoot] and [onReady] are called.
   Future<void> onExit() async {
-    await Future.wait([
+    List<Future> tasks = [
       _deleteTemporaryDirectory(),
       streamTranscriber?.terminate(),
-    ]);
+    ];
+
+    for (FirebaseApp firebaseApp in Firebase.apps) {
+      tasks.add(firebaseApp.delete());
+    }
+
+    await Future.wait(tasks);
   }
 
   Future<void> _deleteTemporaryDirectory() async {
