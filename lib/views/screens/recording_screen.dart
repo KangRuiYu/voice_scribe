@@ -34,15 +34,13 @@ class RecordingScreen extends StatelessWidget {
   }) async {
     if (recorder.active) return;
 
-    File tempRecordingFile = file_utils.fileIn(
-      parentDirectory: appDirs.tempDirectory,
-      name: file_utils.uniqueID(),
-      extension: file_extensions.temp,
+    File tempRecordingFile = appDirs.tempDirectory.file(
+      file_utils.uniqueID(),
+      file_extensions.temp,
     );
-    File tempTranscriptFile = file_utils.fileIn(
-      parentDirectory: appDirs.tempDirectory,
-      name: file_utils.uniqueID(),
-      extension: file_extensions.temp,
+    File tempTranscriptFile = appDirs.tempDirectory.file(
+      file_utils.uniqueID(),
+      file_extensions.temp,
     );
 
     await recorder.initialize();
@@ -84,9 +82,8 @@ class RecordingScreen extends StatelessWidget {
     // Dynamically created save function.
     final Future<void> Function() onSave = () async {
       // Get/Create source directory.
-      Directory recordingSourceDir = file_utils.directoryIn(
-        parentDirectory: appDirs.recordingsDirectory,
-        name: nameController.text.isNotEmpty
+      Directory recordingSourceDir = appDirs.recordingsDirectory.dir(
+        nameController.text.isNotEmpty
             ? nameController.text
             : _generateTimeString(),
       );

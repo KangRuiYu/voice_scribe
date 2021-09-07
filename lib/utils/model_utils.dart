@@ -12,10 +12,7 @@ const List<String> supportedModels = ['vosk-model-small-en-us-0.15'];
 /// If none are available, an empty string is returned.
 Future<String> firstModelIn(Directory modelDirectory) async {
   for (String modelName in supportedModels) {
-    Directory model = file_utils.directoryIn(
-      parentDirectory: modelDirectory,
-      name: modelName,
-    );
+    Directory model = modelDirectory.dir(modelName);
 
     if (await model.exists()) {
       return model.path;

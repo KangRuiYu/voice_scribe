@@ -1,40 +1,65 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 
-/// Utility functions for getting files and directories within parent
-/// directories.
+/// Provides utility functions and extensions for working with [File]s and
+/// [Directory]s.
 ///
 /// Meant to be used with the import alias "file_utils".
 
 const Uuid _uuid = Uuid();
 
-/// Utility function constructing directory in given [parentDirectory].
-Directory directoryIn({
-  @required Directory parentDirectory,
-  @required String name,
-}) {
-  return Directory(path.join(parentDirectory.path, name));
-}
-
-/// Utility function constructing file with given [extension] and [parentDirectory].
-///
-/// Can optionally include or omit dot separator in [extension].
-File fileIn({
-  @required Directory parentDirectory,
-  @required String name,
-  String extension = '',
-}) {
-  if (!extension.startsWith('.')) {
-    // Add dot separator to extension if not present.
-    extension = '.' + extension;
+extension RelativeGenerator on Directory {
+  /// Gets the path to the [FileSystemEntity] with the given [entityName] in
+  /// this directory.
+  String pathIn(String entityName) {
+    return path.join(this.path, entityName);
   }
-  return File(path.join(parentDirectory.path, '$name$extension'));
+
+  /// Gets the [Directory] with [dirName] in this directory.
+  Directory dir(String dirName) {
+    return Directory(this.pathIn(dirName));
+  }
+
+  /// Gets the [File] with [fileName] and [extension] in this directory.
+  ///
+  /// [extension] is optional. If given, the dot separator may be omitted or
+  /// included.
+  File file(String fileName, [String extension = '']) {
+    // Add dot separator to extension if not present.
+    if (extension.isNotEmpty && !extension.startsWith('.')) {
+      extension = '.' + extension;
+    }
+    return File(this.pathIn('$fileName$extension'));
+  }
 }
 
-/// Used to generate random unique names.
+extension FileRelativeRename on File {
+  /// Renames the file relative to its parent directory.
+  ///
+  /// The extension may be omitted. In that case, the current extension will
+  /// be reused.
+  Future<File> relativeRename(String newName, [String extension = '']) {
+    if (extension.isEmpty) {
+      extension = path.extension(newName);
+    }
+    String newPath = path.join(this.parent.path, '$newName$extension');
+    return this.rename(newPath);
+  }
+}
+
+extension DirectoryRelativeRename on Directory {
+  /// Renames the directory relative to its parent directory.
+  Future<Directory> relativeRename(String newName) {
+    String newPath = path.join(this.parent.path, newName);
+    return this.rename(newPath);
+  }
+}
+
+/// Generates a unique ID.
+///
+/// Often times used to create unique names for temporary files.
 String uniqueID() {
   return _uuid.v1();
 }

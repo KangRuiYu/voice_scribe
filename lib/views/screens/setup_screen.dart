@@ -144,18 +144,15 @@ class _ModelCard extends StatelessWidget {
     AppDirs appDirs = context.read<AppDirs>();
 
     final String modelName = model_utils.supportedModels[0] + '.zip';
-    final File downloadFile = file_dir_generator.fileIn(
-      parentDirectory: appDirs.tempDirectory,
-      name: file_dir_generator.uniqueID(),
-      extension: file_extensions.temp,
+    final File downloadFile = appDirs.tempDirectory.file(
+      file_dir_generator.uniqueID(),
+      file_extensions.temp,
     );
-    final Directory unzipDir = file_dir_generator.directoryIn(
-      parentDirectory: appDirs.tempDirectory,
-      name: file_dir_generator.uniqueID(),
+    final Directory unzipDir = appDirs.tempDirectory.dir(
+      file_dir_generator.uniqueID(),
     );
-    final Directory saveDir = file_dir_generator.directoryIn(
-      parentDirectory: appDirs.modelsDirectory,
-      name: model_utils.supportedModels[0],
+    final Directory saveDir = appDirs.modelsDirectory.dir(
+      model_utils.supportedModels[0],
     );
 
     await modelDownloader.download(

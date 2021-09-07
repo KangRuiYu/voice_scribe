@@ -43,10 +43,7 @@ class AppDirs {
 /// The directory returned may not exist.
 Directory defaultRecordingsDir() {
   if (Platform.isAndroid) {
-    return file_utils.directoryIn(
-      parentDirectory: Directory('/storage/emulated/0/'),
-      name: default_recording_dir_name,
-    );
+    return Directory('/storage/emulated/0/').dir(default_recording_dir_name);
   } else {
     throw UnsupportedError('Recordings directory is only supported on Android');
   }
@@ -56,9 +53,8 @@ Directory defaultRecordingsDir() {
 ///
 /// The directory returned may not exist.
 Future<Directory> defaultModelDir() async {
-  return file_utils.directoryIn(
-    parentDirectory: await pathProvider.getExternalStorageDirectory(),
-    name: default_model_dir_name,
+  return (await pathProvider.getExternalStorageDirectory()).dir(
+    default_model_dir_name,
   );
 }
 
@@ -66,9 +62,8 @@ Future<Directory> defaultModelDir() async {
 ///
 /// The directory returned may not exist.
 Future<Directory> defaultImportsDir() async {
-  return file_utils.directoryIn(
-    parentDirectory: await pathProvider.getExternalStorageDirectory(),
-    name: default_import_dir_name,
+  return (await pathProvider.getExternalStorageDirectory()).dir(
+    default_import_dir_name,
   );
 }
 
@@ -76,8 +71,7 @@ Future<Directory> defaultImportsDir() async {
 ///
 /// The directory returned may not exist.
 Future<Directory> defaultTempDir() async {
-  return file_utils.directoryIn(
-    parentDirectory: await pathProvider.getExternalStorageDirectory(),
-    name: default_temp_dir_name,
+  return (await pathProvider.getExternalStorageDirectory()).dir(
+    default_temp_dir_name,
   );
 }

@@ -141,10 +141,9 @@ class RecordingsManager extends ChangeNotifier
     await for (FileSystemEntity entity in recordingsDirectory.list()) {
       if (entity is Directory &&
           !knownSourceDirectoryPaths.contains(entity.path)) {
-        File metadataFile = file_utils.fileIn(
-          parentDirectory: entity,
-          name: path.basename(entity.path),
-          extension: file_extensions.metadata,
+        File metadataFile = entity.file(
+          path.basename(entity.path),
+          file_extensions.metadata,
         );
 
         if (await metadataFile.exists()) {
@@ -166,10 +165,6 @@ class RecordingsManager extends ChangeNotifier
 
   /// Returns the import file associated with the given [recording].
   File _importFile(Recording recording) {
-    return file_utils.fileIn(
-      parentDirectory: importsDirectory,
-      name: recording.id,
-      extension: file_extensions.import,
-    );
+    return importsDirectory.file(recording.id, file_extensions.import);
   }
 }

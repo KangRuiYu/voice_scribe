@@ -37,24 +37,21 @@ class Recording {
   /// Name of the recording (Corresponds to the name of the asset directory).
   String get name => path.basenameWithoutExtension(sourceDirectory.path);
 
-  File get audioFile => file_utils.fileIn(
-        parentDirectory: sourceDirectory,
-        name: name,
-        extension: file_extensions.audio,
+  File get audioFile => sourceDirectory.file(
+        name,
+        file_extensions.audio,
       );
 
-  File get transcriptFile => file_utils.fileIn(
-        parentDirectory: sourceDirectory,
-        name: name,
-        extension: file_extensions.transcript,
+  File get transcriptFile => sourceDirectory.file(
+        name,
+        file_extensions.transcript,
       );
 
   /// Location where the metadata (duration, date) of this recording is actually
   /// stored.
-  File get metadataFile => file_utils.fileIn(
-        parentDirectory: sourceDirectory,
-        name: name,
-        extension: file_extensions.metadata,
+  File get metadataFile => sourceDirectory.file(
+        name,
+        file_extensions.metadata,
       );
 
   /// Creates a new recording using given info instead of reading from a metadata
@@ -85,10 +82,9 @@ class Recording {
   /// If no metadata file exists, then a [MissingMetadataFile] exception is
   /// thrown.
   static Future<Recording> existing(Directory sourceDirectory) async {
-    File metadataFile = file_utils.fileIn(
-      parentDirectory: sourceDirectory,
-      name: path.basename(sourceDirectory.path),
-      extension: file_extensions.metadata,
+    File metadataFile = sourceDirectory.file(
+      path.basename(sourceDirectory.path),
+      file_extensions.metadata,
     );
 
     if (!(await metadataFile.exists())) throw MissingMetadataFile();
