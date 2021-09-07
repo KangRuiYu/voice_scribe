@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_sound/public/flutter_sound_player.dart';
+import 'package:flutter_sound_lite/flutter_sound.dart';
 import 'package:provider/provider.dart';
 
 import 'package:voice_scribe/constants/theme_constants.dart' as theme_constants;

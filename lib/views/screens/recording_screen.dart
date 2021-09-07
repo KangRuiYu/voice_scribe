@@ -2,7 +2,7 @@ import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_sound/public/flutter_sound_recorder.dart';
+import 'package:flutter_sound_lite/flutter_sound.dart';
 import 'package:provider/provider.dart';
 import 'package:vosk_dart/transcript_event.dart';
 import 'package:tuple/tuple.dart';
