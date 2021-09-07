@@ -64,7 +64,11 @@ class RecordingsManager extends ChangeNotifier
           await entity.readAsString(encoding: utf8),
         );
 
-        _recordings.add(await Recording.existing(recordingSourceDir));
+        try {
+          _recordings.add(await Recording.existing(recordingSourceDir));
+        } on MissingMetadataFile {
+          entity.delete();
+        }
       }
     }
 
