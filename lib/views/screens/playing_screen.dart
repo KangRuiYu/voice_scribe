@@ -35,7 +35,8 @@ class PlayingScreen extends StatelessWidget {
         child: FutureBuilder(
           future: _initializePlayer(),
           builder: (BuildContext context, AsyncSnapshot<Player> snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.connectionState == ConnectionState.done &&
+                !snapshot.hasError) {
               return Scaffold(
                 appBar: AppBar(title: Text(recording.name)),
                 body: ChangeNotifierProvider.value(
