@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_sound_lite/flutter_sound.dart';
 import 'package:logger/logger.dart' as logger;
 
+import 'package:voice_scribe/constants/audio_constants.dart' as audio_constants;
 import 'package:voice_scribe/exceptions/player_exceptions.dart';
 import 'package:voice_scribe/models/audio/recording.dart';
 
@@ -41,7 +42,7 @@ class Player extends ChangeNotifier {
   Future<void> initialize() async {
     // Must initialize the Player before using
     if (_player.isOpen()) throw PlayerAlreadyInitializedException();
-    await _player.openAudioSession(withUI: true);
+    await _player.openAudioSession();
     _initializeStreams();
   }
 
@@ -65,18 +66,8 @@ class Player extends ChangeNotifier {
     _startingPosition = Duration();
     await _player.setSubscriptionDuration(Duration(milliseconds: 100));
 
-    await _player.startPlayerFromTrack(
-      _recordingToTrack(recording),
-      onPaused: (bool pause) {
-        if (pause)
-          pausePlayer();
-        else
-          resumePlayer();
-      },
-      onSkipForward: () => null,
-      onSkipBackward: () => null,
-      defaultPauseResume: false,
-      removeUIWhenStopped: true,
+    await _player.startPlayer(
+      fromURI: recording.audioFile.path,
       whenFinished: () {
         _controller.add(
           PlaybackDisposition(
@@ -90,7 +81,9 @@ class Player extends ChangeNotifier {
         stopped = true;
         notifyListeners();
       },
-    );
+      codec: Codec.pcm16,
+      sampleRate: audio_constants.sample_rate,
+    ;
 
     _currentProgress = PlaybackDisposition.zero();
 
