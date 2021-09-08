@@ -14,8 +14,6 @@ import 'package:voice_scribe/utils/file_utils.dart' as file_dir_generator;
 import 'package:voice_scribe/utils/model_utils.dart' as model_utils;
 import 'package:voice_scribe/views/screens/main_screen.dart';
 
-const String _storage_permission_description =
-    'Used to read and write recordings onto your phone\'s storage.';
 const String _microphone_permission_description =
     'Used to listen and record audio from your phone\'s microphone.';
 const String _model_permission_description =
@@ -36,12 +34,6 @@ class SetupScreen extends StatelessWidget {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              _PermissionCard(
-                permissionName: storage_requirement,
-                reason: _storage_permission_description,
-                permission: Permission.storage,
-                requirementsManager: requirementsManager,
-              ),
               _PermissionCard(
                 permissionName: microphone_requirement,
                 reason: _microphone_permission_description,

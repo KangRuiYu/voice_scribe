@@ -8,7 +8,7 @@ import 'package:voice_scribe/utils/file_utils.dart' as file_utils;
 /// Provides tools for managing and retrieve common application directories.
 
 // Default application directory names.
-const String default_recording_dir_name = 'Voice Scribe Recordings';
+const String default_recording_dir_name = 'recordings';
 const String default_model_dir_name = 'models';
 const String default_import_dir_name = '.imports';
 const String default_temp_dir_name = '.temp';
@@ -41,12 +41,10 @@ class AppDirs {
 /// Where recording source folders are stored by default.
 ///
 /// The directory returned may not exist.
-Directory defaultRecordingsDir() {
-  if (Platform.isAndroid) {
-    return Directory('/storage/emulated/0/').dir(default_recording_dir_name);
-  } else {
-    throw UnsupportedError('Recordings directory is only supported on Android');
-  }
+Future<Directory> defaultRecordingsDir() async {
+  return (await pathProvider.getExternalStorageDirectory()).dir(
+    default_recording_dir_name,
+  );
 }
 
 /// Where models are stored by default.

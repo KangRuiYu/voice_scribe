@@ -10,7 +10,6 @@ import 'package:voice_scribe/models/transcript/recording_transcriber.dart';
 import 'package:voice_scribe/models/transcript/stream_transcriber.dart';
 import 'package:voice_scribe/utils/model_utils.dart' as model_utils;
 
-const String storage_requirement = 'Storage Permissions';
 const String microphone_requirement = 'Microphone Permissions';
 const String model_requirement = 'Model Availability';
 
@@ -46,7 +45,7 @@ class VoiceScribeState {
     _onBootCalled = true;
 
     _appDirs = AppDirs(
-      recordingsDirectory: defaultRecordingsDir(),
+      recordingsDirectory: await defaultRecordingsDir(),
       modelsDirectory: await defaultModelDir(),
       importsDirectory: await defaultImportsDir(),
       tempDirectory: await defaultTempDir(),
@@ -56,10 +55,6 @@ class VoiceScribeState {
       importsDirectory: appDirs.importsDirectory,
     );
     _requirementsManager = RequirementsManager({
-      storage_requirement: Requirement<PermissionStatus>(
-        updateFunction: () => Permission.storage.status,
-        testFunction: (PermissionStatus p) => p == PermissionStatus.granted,
-      ),
       microphone_requirement: Requirement<PermissionStatus>(
         updateFunction: () => Permission.microphone.status,
         testFunction: (PermissionStatus p) => p == PermissionStatus.granted,
