@@ -1,3 +1,5 @@
+<img src="https://github.com/KangRuiYu/voice_scribe/blob/aa04a8135edbc159d65bb11829c596333075ec05/assets/icon.png" width="128"> 
+
 # Voice Scribe
 
 Audio recording and playback app that transcribes speech in real time.
