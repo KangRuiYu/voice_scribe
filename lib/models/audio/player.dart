@@ -83,7 +83,7 @@ class Player extends ChangeNotifier {
       },
       codec: Codec.pcm16,
       sampleRate: audio_constants.sample_rate,
-    ;
+    );
 
     _currentProgress = PlaybackDisposition.zero();
 
