@@ -162,7 +162,7 @@ class _MenuButton extends StatelessWidget {
             context: context,
             applicationName: app_constants.name,
             applicationVersion: app_constants.version,
-            applicationLegalese: app_constants.description,
+            applicationLegalese: app_constants.copyright,
             applicationIcon: Padding(
               padding: const EdgeInsets.all(theme_constants.padding_small),
               child: CircleAvatar(
