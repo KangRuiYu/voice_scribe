@@ -7,6 +7,7 @@ Audio recording and playback app that transcribes speech in real time.
 ## Installing (Android)
 
 Pre-built .apk files are available in the [releases page](https://github.com/KangRuiYu/voice_scribe/releases/new).
+Only Android devices running Android 5 or newer are supported.
 
 1. Download the .apk file from the latest release.
 2. (Optional) Check the file hash against the one available to verify integrity.
