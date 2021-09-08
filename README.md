@@ -2,7 +2,11 @@
 
 # Voice Scribe
 
-Audio recording and playback app that transcribes speech in real time.
+## About
+
+Audio recording and playback app that transcribes speech in real time. All transcription is done offline and on device. This means that transcription speed and performance may vary depending on your device's hardware. The only time when a network connection is made is to download the transcription model on first launch. Currently only Android devices are supported.
+
+Voice Scribe makes use of the [Vosk API](https://github.com/alphacep/vosk-api) for transcription.
 
 ## Installing (Android)
 
