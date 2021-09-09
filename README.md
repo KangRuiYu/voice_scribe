@@ -4,9 +4,11 @@
 
 ## Demo
 
-<img src="https://user-images.githubusercontent.com/48875810/132606729-7db6f3b5-085e-47ce-bf43-026fa3290a21.gif" width="320">
+<img src="https://user-images.githubusercontent.com/48875810/132606729-7db6f3b5-085e-47ce-bf43-026fa3290a21.gif" width="296">
 
 https://user-images.githubusercontent.com/48875810/132607368-e7362195-63eb-4d3f-8f1c-4b1edf2be8b9.mov
+
+The audio heard when recording was edited in for convenience so that the transcribed audio could be heard during the process.
 
 Audio used in demo **(2:40)**: [Lec 1 | MIT 9.00SC Introduction to Psychology, Spring 2011](https://www.youtube.com/watch?v=2fbrl6WoIyo&t=320s)
 
