@@ -2,6 +2,16 @@
 
 # Voice Scribe
 
+## Demo
+
+<img src="https://user-images.githubusercontent.com/48875810/132606729-7db6f3b5-085e-47ce-bf43-026fa3290a21.gif" width="320">
+
+https://user-images.githubusercontent.com/48875810/132607368-e7362195-63eb-4d3f-8f1c-4b1edf2be8b9.mov
+
+Audio used in demo **(2:40)**: [Lec 1 | MIT 9.00SC Introduction to Psychology, Spring 2011](https://www.youtube.com/watch?v=2fbrl6WoIyo&t=320s)
+
+Audio license: [Creative Commons BY-NC-SA](https://ocw.mit.edu/terms/)
+
 ## About
 
 Audio recording and playback app that transcribes speech in real time. All transcription is done offline and on device. This means that transcription speed and performance may vary depending on your device's hardware. The only time when a network connection is made is to download the transcription model on first launch. Currently only Android devices are supported.
